@@ -4,9 +4,9 @@ Building blocks for LoRA compression and efficient execution.
 
 LoRAForge is being developed as a reusable library from the
 [probe research repository](https://github.com/lishenghui/probe).
-The initial foundation provides packaging, contribution guidance, and CPU CI.
-Compression operators and serving integrations are planned; this snapshot does
-not yet implement them or claim GPU compatibility.
+The library provides GPU FlashTSQR and tensor-level spectral LoRA compression.
+It is in early development. Adapter file I/O and serving integrations are planned;
+see [the migration plan](docs/migration.md).
 
 ## Install from source
 
@@ -22,6 +22,27 @@ python -c "import loraforge; print(loraforge.__version__)"
 The foundation has no runtime dependencies. Importing `loraforge` does not load
 PyTorch, compile kernels, or initialize a GPU. Install from this repository;
 no PyPI release is advertised at this stage.
+
+## Tensor compression
+
+Install a PyTorch build and compiler matching your CUDA/ROCm environment first,
+then install the optional dependencies with `python -m pip install ".[gpu]"`.
+Native sources ship in the wheel and compile lazily on the first GPU operation.
+No GPU is needed to build or install the Python wheel.
+
+```python
+from loraforge.compression import truncate_lora
+
+# a: [batch, rank, in_features], b: [batch, out_features, rank], on the same GPU
+result = truncate_lora(a, b, keep=8)
+# result.a / result.b have compact rank-8 shapes; inputs remain unmodified.
+print(result.info.qr.path, result.info.eigh_backend)
+```
+
+For a complete synthetic example, see
+[`examples/compress_tensors.py`](examples/compress_tensors.py).
+[FlashTSQR contracts and validation](docs/flashtsqr.md) describe devices, dtypes,
+stream ownership, numerical limits, and tested environments.
 
 ## Development
 

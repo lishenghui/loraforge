@@ -1,9 +1,10 @@
 # Architecture
 
 LoRAForge will provide LoRA compression, adapter formats, and efficient execution
-components. The foundation currently exposes only `loraforge.__version__`.
-The following boundaries guide future implementation; empty placeholder modules
-are deliberately omitted until they contain a working capability.
+components. The current API exposes `loraforge.ops.qr_factor` and
+`loraforge.compression.refactor_lora` / `truncate_lora`.
+The following boundaries guide implementation; empty placeholder modules
+are omitted until they contain a working capability.
 
 ## Package boundaries
 
@@ -15,7 +16,7 @@ are deliberately omitted until they contain a working capability.
 | `src/loraforge/runtime/` | Compact layouts, slot ownership, loading and execution metadata |
 | `src/loraforge/integrations/` | Thin, optional SGLang and vLLM adapters |
 | `src/loraforge/cli/` | User commands built on public library interfaces |
-| `csrc/` | Native CUDA/HIP implementations and bindings |
+| `src/loraforge/ops/csrc/` | Native CUDA/HIP implementations and bindings, shipped for lazy compilation |
 | `tests/` | Public behavior, numerics, lifecycle, and compatibility checks |
 | `benchmarks/` | Reproducible performance programs with documented protocols |
 | `examples/` | Small, complete user workflows |

@@ -23,6 +23,7 @@ classifiers = [
 
 [project.optional-dependencies]
 dev = ["build>=1", "pytest>=8", "ruff>=0.9"]
+gpu = ["torch>=2.7", "ninja>=1.11"]
 
 [project.urls]
 Repository = "https://github.com/lishenghui/loraforge"
@@ -35,11 +36,12 @@ version = {attr = "loraforge._version.__version__"}
 where = ["src"]
 
 [tool.setuptools.package-data]
-loraforge = ["py.typed"]
+loraforge = ["py.typed", "ops/csrc/*.cpp", "ops/csrc/*.cu"]
 
 [tool.pytest.ini_options]
 testpaths = ["tests"]
 addopts = "--import-mode=importlib -ra"
+markers = ["gpu: requires an allocated CUDA/ROCm GPU and a matching compiler"]
 
 [tool.ruff]
 target-version = "py310"
