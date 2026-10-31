@@ -53,6 +53,16 @@ the original default `torch.linalg.eigh` core. No production generic QR path or
 unreported fallback is introduced. Source repositories and paper content are unchanged.
 Validation scope and commands are in [flashtsqr.md](flashtsqr.md).
 
+### PEFT file workflow
+
+The PEFT file layer (`src/loraforge/adapters/`), its example and reload tests
+were written for this repository on 2026-11-01. They implement the documented
+PEFT 0.18.0 file/scaling contract without copying PEFT implementation code or
+importing experiment scripts. References and the supported surface are recorded
+in [peft.md](peft.md). Actual compression reuses the maintained FlashTSQR tensor
+API at baseline `15734fdd7e983b2e2a97bda1861115fb600f9423`; no native kernels
+or numerical algorithms change in this file-workflow step.
+
 ### Future entries
 
 Each import must add:

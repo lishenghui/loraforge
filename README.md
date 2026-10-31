@@ -5,8 +5,9 @@ Building blocks for LoRA compression and efficient execution.
 LoRAForge is being developed as a reusable library from the
 [probe research repository](https://github.com/lishenghui/probe).
 The library provides GPU FlashTSQR and tensor-level spectral LoRA compression.
-It is in early development. Adapter file I/O and serving integrations are planned;
-see [the migration plan](docs/migration.md).
+It includes standard PEFT adapter I/O and compact export, and is in early
+development. Serving integrations remain planned; see
+[the migration plan](docs/migration.md).
 
 ## Install from source
 
@@ -43,6 +44,19 @@ For a complete synthetic example, see
 [`examples/compress_tensors.py`](examples/compress_tensors.py).
 [FlashTSQR contracts and validation](docs/flashtsqr.md) describe devices, dtypes,
 stream ownership, numerical limits, and tested environments.
+
+## Adapter files
+
+For local adapter files, see [the PEFT workflow](docs/peft.md):
+
+```python
+from loraforge.adapters import compress_peft_adapter
+
+result = compress_peft_adapter("original", "compressed", keep=8, device="cuda:0")
+```
+
+Output uses a new directory and preserves per-layer effective scaling. Install
+`.[adapters,gpu]` in your configured GPU environment for this workflow.
 
 ## Development
 

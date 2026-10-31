@@ -3,6 +3,8 @@
 LoRAForge will provide LoRA compression, adapter formats, and efficient execution
 components. The current API exposes `loraforge.ops.qr_factor` and
 `loraforge.compression.refactor_lora` / `truncate_lora`.
+`loraforge.adapters` provides local PEFT I/O, compact export and the file
+compression workflow; its configuration rules live in an internal module.
 The following boundaries guide implementation; empty placeholder modules
 are omitted until they contain a working capability.
 
