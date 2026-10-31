@@ -1,0 +1,42 @@
+name: CPU checks
+
+on:
+  push:
+  pull_request:
+
+permissions:
+  contents: read
+
+jobs:
+  package:
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        python: ["3.10", "3.11", "3.12", "3.13"]
+    steps:
+      - uses: actions/checkout@v7
+      - uses: actions/setup-python@v7
+        with:
+          python-version: ${{ matrix.python }}
+          cache: pip
+      - name: Install development tools
+        run: python -m pip install ".[dev]"
+      - name: Lint and format
+        run: |
+          python -m ruff check .
+          python -m ruff format --check .
+      - name: Build source archive and wheel
+        run: python -m build
+      - name: Test installed wheel
+        run: |
+          python -m venv /tmp/loraforge-wheel
+          /tmp/loraforge-wheel/bin/python -m pip install pytest dist/*.whl
+          /tmp/loraforge-wheel/bin/python -m pytest
+      - name: Test wheel rebuilt from source archive
+        run: |
+          mkdir /tmp/loraforge-sdist
+          python -m pip wheel --no-deps --wheel-dir /tmp/loraforge-sdist dist/*.tar.gz
+          python -m venv /tmp/loraforge-source
+          /tmp/loraforge-source/bin/python -m pip install pytest /tmp/loraforge-sdist/*.whl
+          /tmp/loraforge-source/bin/python -m pytest

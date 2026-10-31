@@ -1,0 +1,58 @@
+# Contributing
+
+Keep each change focused on one usable capability, with a small example and
+tests for its public behavior. Start API or backend changes with an issue or PR
+explaining the input/output contract and supported environment.
+
+## Set up
+
+```bash
+python -m venv .venv
+source .venv/bin/activate
+python -m pip install -e ".[dev]"
+```
+
+## Check a change
+
+```bash
+python -m ruff check .
+python -m ruff format --check .
+python -m pytest
+python -m build
+```
+
+CI also installs the wheel into a fresh environment and tests it there, then
+repeats this with a wheel rebuilt from the source archive. The `src` layout
+ensures repository-root imports cannot hide missing installation files.
+
+To reproduce the wheel check locally after building:
+
+```bash
+python -m venv /tmp/loraforge-wheel-check
+/tmp/loraforge-wheel-check/bin/python -m pip install pytest dist/*.whl
+/tmp/loraforge-wheel-check/bin/python -m pytest
+```
+
+The current checks need no GPU. GPU functionality must include numerical and
+lifecycle tests on its target hardware before being described as supported.
+Report the hardware, Python/PyTorch/framework versions, dtype, shape, and exact
+commands for hardware validation. Do not infer support for untested devices.
+
+## Code and API conventions
+
+- Keep imports lightweight. Compile and initialize devices only when explicitly
+  requested by an operation.
+- Pass devices and configuration explicitly; avoid cluster paths and global
+  environment changes. Optional integrations must not become core dependencies.
+- Keep tensor operations independent of serving-framework internals. Put
+  framework-specific conversion and registration in the integration layer.
+- Use meaningful names and type annotations for new public interfaces. Document
+  shapes, scaling, ownership, stream behavior, and numerical tolerances where
+  relevant.
+- Preserve applicable licenses and authorship when moving existing code. Add a
+  record to [provenance](docs/provenance.md) in the same PR as an import.
+- Benchmark against a named baseline with correctness checks and reproducible
+  inputs. Separate operator timings from end-to-end serving measurements.
+
+Use short-lived branches and ordinary PRs. Include the problem, resulting
+behavior, validation, and any remaining hardware limitations in the PR body.
