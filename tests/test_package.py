@@ -7,6 +7,7 @@ import sys
 from importlib import metadata, resources
 
 import loraforge
+import loraforge.adapters
 import loraforge.compression
 import loraforge.ops
 
@@ -29,11 +30,12 @@ import sys
 
 class RejectGPUImports(importlib.abc.MetaPathFinder):
     def find_spec(self, fullname, path=None, target=None):
-        if fullname.split('.')[0] in {'torch', 'triton', 'sglang', 'vllm'}:
+        if fullname.split('.')[0] in {'torch', 'triton', 'sglang', 'vllm', 'peft', 'transformers', 'safetensors'}:
             raise AssertionError(f'Unexpected dependency on import: {fullname}')
 
 sys.meta_path.insert(0, RejectGPUImports())
 import loraforge
+import loraforge.adapters
 import loraforge.ops
 import loraforge.compression
 print(json.dumps({'version': loraforge.__version__}))

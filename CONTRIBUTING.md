@@ -40,6 +40,18 @@ commands for hardware validation. Do not infer support for untested devices.
 For the FlashTSQR numerical suite and current coverage, see
 [docs/flashtsqr.md](docs/flashtsqr.md).
 
+For CPU PEFT file/reload tests, install `.[adapters,test-adapters]` in an
+environment with the appropriate PyTorch build, then run:
+
+```bash
+HF_HUB_OFFLINE=1 TRANSFORMERS_OFFLINE=1 python -m pytest \
+  tests/test_peft_adapters.py tests/test_package.py -m "not gpu"
+```
+
+The tests create small models locally and download no model checkpoints. On an
+allocated GPU, `python -m pytest tests/test_peft_adapters.py -m gpu -v` checks
+the actual FlashTSQR-to-file-to-PEFT path, including grouped modules.
+
 ## Code and API conventions
 
 - Keep imports lightweight. Compile and initialize devices only when explicitly
