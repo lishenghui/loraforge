@@ -567,4 +567,3 @@ torch::Tensor tsqr_applyQ(torch::Tensor v, const std::vector<torch::Tensor>& sta
     wy_apply(C, h.Vleaf.view({(int64_t)M * P, rows, N}), h.Tleaf, N);
     return C.view({M, (int64_t)P * rows, rank}).narrow(1, 0, m).contiguous();
 }
-
