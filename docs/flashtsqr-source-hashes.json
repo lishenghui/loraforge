@@ -1,0 +1,10 @@
+{
+  "repository": "https://github.com/lishenghui/probe",
+  "commit": "5fd6ae060d106066b306959f9a34b726a281ef4c",
+  "source_sha256": {
+    "tsqr_full.cu": "6df61a490110f69ce20ce57d08ec05482f60ba82d87b36e1646e4134255a807a",
+    "tsqr_wide.cu": "1402bb2e7bdf7742e71ce641efac10a5d405e13898be327b691aecc7862b063c",
+    "jacobi_eigh.cu": "84f7e1cb3d5ace49459a94b8602839eb33c3ff7a149a3fb9cee0f4a6ce824854"
+  },
+  "wrapper_sha256": "0f1c3546c451f172473b241a2b0580b206fd24149184c2ab7031971614e4a8e9"
+}

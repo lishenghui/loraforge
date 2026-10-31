@@ -20,7 +20,9 @@ Start with `FlashTSQR/flashtsqr.py` and the kernels it actually invokes, rather
 than copying the FlashTSQR experiment tree. Replace the global factorization
 state with owned handles, preserve input-device semantics, and return execution
 metadata with results. Keep the mathematical method and performance changes
-separately reviewable. No numerical implementation has been imported yet.
+separately reviewable. The initial extraction provides owned handles,
+current-stream execution, tensor refactoring and compact truncation; see
+[the API contracts](flashtsqr.md) and [the import ledger](provenance.md).
 
 ## Import procedure
 

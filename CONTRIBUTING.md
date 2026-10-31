@@ -33,10 +33,12 @@ python -m venv /tmp/loraforge-wheel-check
 /tmp/loraforge-wheel-check/bin/python -m pytest
 ```
 
-The current checks need no GPU. GPU functionality must include numerical and
+The CPU CI checks need no GPU. GPU functionality must include numerical and
 lifecycle tests on its target hardware before being described as supported.
 Report the hardware, Python/PyTorch/framework versions, dtype, shape, and exact
 commands for hardware validation. Do not infer support for untested devices.
+For the FlashTSQR numerical suite and current coverage, see
+[docs/flashtsqr.md](docs/flashtsqr.md).
 
 ## Code and API conventions
 

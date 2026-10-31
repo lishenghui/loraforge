@@ -7,11 +7,16 @@ import sys
 from importlib import metadata, resources
 
 import loraforge
+import loraforge.compression
+import loraforge.ops
 
 
 def test_distribution_metadata_and_package_data():
     assert loraforge.__version__ == metadata.version("loraforge")
     assert resources.files("loraforge").joinpath("py.typed").is_file()
+    native = resources.files("loraforge.ops").joinpath("csrc")
+    for name in ("bindings.cpp", "tsqr_full.cu", "tsqr_wide.cu", "jacobi_eigh.cu"):
+        assert native.joinpath(name).is_file()
 
 
 def test_import_without_gpu_or_framework_dependencies(tmp_path):
@@ -29,6 +34,8 @@ class RejectGPUImports(importlib.abc.MetaPathFinder):
 
 sys.meta_path.insert(0, RejectGPUImports())
 import loraforge
+import loraforge.ops
+import loraforge.compression
 print(json.dumps({'version': loraforge.__version__}))
 """
     result = subprocess.run(
