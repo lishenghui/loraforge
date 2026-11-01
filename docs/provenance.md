@@ -63,6 +63,12 @@ in [peft.md](peft.md). Actual compression reuses the maintained FlashTSQR tensor
 API at baseline `15734fdd7e983b2e2a97bda1861115fb600f9423`; no native kernels
 or numerical algorithms change in this file-workflow step.
 
+The rsLoRA extension at baseline `3082b452dd59d9749ac659ee4b76dcd8b6c47b42`
+adds PEFT's `alpha/sqrt(r)` convention to the file layer, preserves the flag on
+export, and records the scaling type in each manifest module. It is new project
+code based on the same referenced PEFT contract; no kernels or upstream source
+files are copied or changed.
+
 ### Future entries
 
 Each import must add:

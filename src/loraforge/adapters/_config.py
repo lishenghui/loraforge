@@ -1,10 +1,10 @@
 # SPDX-License-Identifier: Apache-2.0
-"""Supported standard-LoRA configuration and PEFT pattern semantics."""
+"""Supported linear-LoRA configuration and PEFT pattern semantics."""
 
 import math
 import re
 
-_FLAGS = {"fan_in_fan_out", "use_rslora", "use_dora", "use_qalora", "lora_bias"}
+_FLAGS = {"fan_in_fan_out", "use_dora", "use_qalora", "lora_bias"}
 _EMPTY = {
     "modules_to_save",
     "layer_replication",
@@ -26,6 +26,7 @@ _STANDARD = {
     "inference_mode",
     "r",
     "lora_alpha",
+    "use_rslora",
     "lora_dropout",
     "bias",
     "target_modules",
@@ -68,6 +69,8 @@ def _config(config: dict) -> None:
     for field in _FLAGS:
         if config.get(field, False) is not False:
             raise ValueError(f"unsupported LoRA configuration: {field}")
+    if not isinstance(config.get("use_rslora", False), bool):
+        raise ValueError("use_rslora must be a boolean")
     for field in _EMPTY:
         if config.get(field) not in (None, [], {}):
             raise ValueError(f"unsupported LoRA configuration: {field}")

@@ -1,6 +1,6 @@
 # PEFT adapter files
 
-LoRAForge reads local standard linear-LoRA adapters, compresses them using our
+LoRAForge reads local linear LoRA and rsLoRA adapters, compresses them using our
 FlashTSQR tensor API, and writes a new PEFT adapter with a versioned manifest.
 Reading and exporting need PyTorch and safetensors, but do not import PEFT,
 Transformers, initialize a GPU, or execute model code. Real PEFT loading is
@@ -64,9 +64,17 @@ the FlashTSQR backend that actually ran.
 
 ## Scaling and storage
 
-For ordinary LoRA, the update is `(alpha / r) * B @ A`. For each module, export
-sets `new_alpha = (source_alpha / source_rank) * retained_rank`, preserving its
-effective scale within floating-point precision. Alpha can be fractional. Exact
+The reader detects the source `use_rslora` flag automatically. Both variants
+compress the raw `B @ A` factors using the same numerical implementation; export
+preserves the source flag and its effective scale within floating-point precision:
+
+| Variant | Effective scale | Exported alpha for retained rank k |
+| --- | --- | --- |
+| LoRA | `alpha / r` | `source_alpha * k / source_rank` |
+| rsLoRA | `alpha / sqrt(r)` | `source_alpha * sqrt(k / source_rank)` |
+
+For example, rsLoRA rank 64 to 16 halves alpha, keeping the multiplier on the
+compressed factors equal to the original multiplier. Alpha can be fractional. Exact
 anchored module patterns avoid suffix collisions when ranks/alphas differ by
 layer. The output target regex selects exactly the modules present in the file.
 The original base-model identifier, revision, and applicable metadata are retained.
@@ -97,7 +105,7 @@ Output contains `adapter_config.json`, `adapter_model.safetensors`, and
 | `operation` | `export` or `compression` |
 | `compression` | Requested method, EVD selection and batch size; null for plain export |
 | `source` | Source directory name and file hashes/byte counts, including any previous manifest |
-| `modules` | Canonical name, source/retained rank, alpha/scale, dtypes, tensor bytes and actual execution metadata |
+| `modules` | Canonical name, source/retained rank, alpha/scale, scaling type, dtypes, tensor bytes and actual execution metadata |
 | `output.files` | Config/weight filenames, SHA-256 hashes and measured file bytes |
 | `output.tensor_bytes` | Total output tensor payload bytes |
 | `output.source_tensor_bytes` | Total original tensor payload bytes for comparison |
@@ -107,6 +115,12 @@ present, rejects unknown versions, and rechecks the source files for changes
 during loading. Export checks that the source snapshot still matches its files.
 Hashes provide consistency checking, not signature-based authentication.
 
+Each new module record has `use_rslora` and `scaling_type` (`alpha_over_rank`
+or `alpha_over_sqrt_rank`). These fields are additive in manifest version 1;
+earlier ordinary-LoRA exports omit them. The loader obtains the operative mode
+from the hash-checked PEFT configuration. Export rejects a snapshot whose module
+scaling mode disagrees with its configuration.
+
 ## Supported surface
 
 Input is one `adapter_model.safetensors` plus `adapter_config.json`, using saved
@@ -114,7 +128,7 @@ keys `base_model.model.<module>.lora_A.weight` and `lora_B.weight`. Factors must
 be matching 2D float32/float16/bfloat16 pairs with ranks consistent with the
 configuration, including ordered rank/alpha patterns.
 
-This first file API rejects DoRA, rsLoRA, QALoRA, aLoRA, convolution/embedding
+This file API rejects DoRA, QALoRA, aLoRA, convolution/embedding
 layouts, named in-memory adapter keys, bias weights, modules-to-save,
 parameter-targeted adapters, layer replication, special initialization schemes,
 unknown config fields, and extra tensors. Sharded checkpoints and pickle `.bin`
@@ -126,6 +140,8 @@ The format and scaling contracts were checked against PEFT 0.18.0's
 [checkpoint documentation](https://huggingface.co/docs/peft/developer_guides/checkpoint),
 [LoRA configuration](https://github.com/huggingface/peft/blob/v0.18.0/src/peft/tuners/lora/config.py),
 and [pattern semantics](https://github.com/huggingface/peft/blob/v0.18.0/src/peft/utils/other.py).
+The two scaling conventions follow PEFT's
+[LoRA layer implementation](https://github.com/huggingface/peft/blob/v0.18.0/src/peft/tuners/lora/layer.py).
 CPU CI uses PEFT 0.18.0 and Transformers 4.x with PyTorch 2.7.1. Other PEFT
 versions are not broadly certified by those checks.
 
@@ -151,3 +167,11 @@ the CPU serializer test and does not alter the files or GPU computation.
 These tests establish format and numerical correctness for synthetic linear
 models, not task-level accuracy retention or end-to-end performance. This step
 does not extend the tensor API's NVIDIA CUDA validation scope.
+
+The rsLoRA extension passed 35 CPU file/reload checks on the same local CPU
+environment and on LUMI's login node, including ordinary-LoRA regressions,
+heterogeneous rank/alpha patterns, and FP32/FP16/BF16 export. LUMI job `23377615`
+then passed both rsLoRA GPU file-compression cases (heterogeneous and grouped
+modules) on one MI250X GCD, with the same PyTorch/PEFT/Transformers versions as
+job `23375283`. Tests confirm the retained flag, square-root alpha adjustment,
+PEFT's effective scales, and forward outputs after reload. Kernels are unchanged.

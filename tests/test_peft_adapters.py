@@ -3,6 +3,7 @@
 
 import copy
 import json
+import math
 
 import pytest
 
@@ -28,7 +29,7 @@ class TinyModel(torch.nn.Module):
         return self.proj(x) + self.block["proj"](x)
 
 
-def make_source(tmp_path, *, dtype=torch.float32, patterns=None):
+def make_source(tmp_path, *, dtype=torch.float32, patterns=None, use_rslora=False):
     torch.manual_seed(123)
     base = TinyModel().to(dtype)
     original_base = copy.deepcopy(base)
@@ -38,6 +39,7 @@ def make_source(tmp_path, *, dtype=torch.float32, patterns=None):
         target_modules=["proj"],
         rank_pattern=patterns or {"block.proj": 6},
         alpha_pattern={"block.proj": 7},
+        use_rslora=use_rslora,
     )
     model = peft.get_peft_model(base, config).to(dtype).eval()
     generator = torch.Generator().manual_seed(456)
@@ -80,8 +82,9 @@ def reference_factors(adapter, ranks):
     return results
 
 
-def test_load_and_identity_export_matches_peft(source, tmp_path):
-    directory, model, base = source
+@pytest.mark.parametrize("use_rslora", [False, True], ids=["lora", "rslora"])
+def test_load_and_identity_export_matches_peft(tmp_path, use_rslora):
+    directory, model, base = make_source(tmp_path, use_rslora=use_rslora)
     adapter = load_peft_adapter(directory)
     assert {m.name: m.rank for m in adapter.modules} == {"proj": 8, "block.proj": 6}
     before = {p.name: p.read_bytes() for p in directory.iterdir() if p.is_file()}
@@ -98,16 +101,34 @@ def test_load_and_identity_export_matches_peft(source, tmp_path):
     manifest = exported.manifest
     assert manifest["schema_version"] == 1 and manifest["operation"] == "export"
     assert all(m["execution"] is None for m in manifest["modules"])
+    assert (
+        json.loads((exported.directory / CONFIG).read_text())["use_rslora"]
+        is use_rslora
+    )
+    for record in manifest["modules"]:
+        assert record["use_rslora"] is use_rslora
+        assert record["scaling_type"] == (
+            "alpha_over_sqrt_rank" if use_rslora else "alpha_over_rank"
+        )
     loaded = load_peft_adapter(exported.directory)
-    assert {m.name: m.scaling for m in loaded.modules} == {
-        m.name: m.scaling for m in adapter.modules
-    }
+    for module in loaded.modules:
+        layer = model.base_model.model.get_submodule(module.name)
+        assert module.use_rslora is use_rslora
+        assert module.scaling == pytest.approx(layer.scaling["default"], rel=1e-14)
 
 
 @pytest.mark.parametrize("dtype", [torch.float32, torch.float16, torch.bfloat16])
-def test_heterogeneous_compact_export_preserves_scaling(tmp_path, dtype):
-    directory, _, base = make_source(tmp_path, dtype=dtype)
+@pytest.mark.parametrize("use_rslora", [False, True], ids=["lora", "rslora"])
+def test_heterogeneous_compact_export_preserves_scaling(tmp_path, dtype, use_rslora):
+    directory, original, base = make_source(
+        tmp_path, dtype=dtype, use_rslora=use_rslora
+    )
     adapter = load_peft_adapter(directory)
+    for module in adapter.modules:
+        expected = original.base_model.model.get_submodule(module.name).scaling[
+            "default"
+        ]
+        assert module.scaling == pytest.approx(expected, rel=1e-14)
     factors = reference_factors(adapter, {"proj": 3, "block.proj": 2})
     exported = save_peft_adapter(adapter, tmp_path / "compact", factors=factors)
     base_weights = {
@@ -150,11 +171,12 @@ def test_heterogeneous_compact_export_preserves_scaling(tmp_path, dtype):
     ).stat().st_size
     for module in saved.modules:
         assert module.a.dtype == module.b.dtype == dtype
-        assert module.scaling == next(
-            m.scaling for m in adapter.modules if m.name == module.name
+        assert module.scaling == pytest.approx(
+            next(m.scaling for m in adapter.modules if m.name == module.name), rel=1e-14
         )
+        assert module.use_rslora is use_rslora
     assert reloaded.base_model.model.proj.lora_alpha["default"] == pytest.approx(
-        11 * 3 / 8
+        11 * (math.sqrt(3 / 8) if use_rslora else 3 / 8)
     )
 
 
@@ -191,7 +213,9 @@ def test_execution_metadata_matches_serialized_manifest(source, tmp_path):
     "changes",
     [
         {"use_dora": True},
-        {"use_rslora": True},
+        {"use_rslora": "true"},
+        {"use_rslora": 1},
+        {"use_rslora": None},
         {"fan_in_fan_out": True},
         {"bias": "all"},
         {"lora_bias": True},
@@ -310,9 +334,12 @@ def test_publication_failure_keeps_external_file(source, tmp_path, monkeypatch):
 @pytest.mark.gpu
 @pytest.mark.skipif(not torch.cuda.is_available(), reason="allocated GPU required")
 @pytest.mark.parametrize("batched", [False, True])
-def test_gpu_file_compression_roundtrip(tmp_path, batched):
+@pytest.mark.parametrize("use_rslora", [False, True], ids=["lora", "rslora"])
+def test_gpu_file_compression_roundtrip(tmp_path, batched, use_rslora):
     directory, _, base = make_source(
-        tmp_path, patterns={"proj": 8} if batched else None
+        tmp_path,
+        patterns={"proj": 8} if batched else None,
+        use_rslora=use_rslora,
     )
     original = load_peft_adapter(directory)
     plan = {"proj": 3, "block.proj": 3 if batched else 2}
@@ -354,3 +381,10 @@ def test_gpu_file_compression_roundtrip(tmp_path, batched):
         assert record["execution"]["qr"]["backend"] == "FlashTSQR"
         assert record["execution"]["retained_rank"] == plan[record["name"]]
         assert record["output_tensor_bytes"] < record["source_tensor_bytes"]
+        assert record["use_rslora"] is use_rslora
+        layer = loaded.base_model.model.get_submodule(record["name"])
+        source_layer = next(m for m in original.modules if m.name == record["name"])
+        expected_scale = source_layer.alpha / (
+            math.sqrt(source_layer.rank) if use_rslora else source_layer.rank
+        )
+        assert layer.scaling["default"] == pytest.approx(expected_scale, rel=1e-14)

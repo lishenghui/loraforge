@@ -1,5 +1,5 @@
 # SPDX-License-Identifier: Apache-2.0
-"""Portable PEFT files and manifests for ordinary, unmerged linear LoRA.
+"""Portable PEFT files and manifests for unmerged linear LoRA and rsLoRA.
 
 This module implements the file contract independently; it does not import PEFT
 or Transformers, execute model code, or download models. See docs/peft.md for
@@ -11,6 +11,7 @@ from __future__ import annotations
 import copy
 import hashlib
 import json
+import math
 import os
 import re
 import shutil
@@ -43,6 +44,7 @@ class AdapterModule:
     a: Tensor
     b: Tensor
     alpha: float
+    use_rslora: bool = False
 
     @property
     def rank(self) -> int:
@@ -50,7 +52,8 @@ class AdapterModule:
 
     @property
     def scaling(self) -> float:
-        return self.alpha / self.rank
+        denominator = math.sqrt(self.rank) if self.use_rslora else self.rank
+        return self.alpha / denominator
 
 
 @dataclass(frozen=True)
@@ -181,7 +184,15 @@ def load_peft_adapter(directory: str | Path) -> PeftAdapter:
             raise ValueError(
                 f"tensor module disagrees with target/exclude configuration: {name}"
             )
-        modules.append(AdapterModule(name, a.clone(), b.clone(), float(alpha)))
+        modules.append(
+            AdapterModule(
+                name,
+                a.clone(),
+                b.clone(),
+                float(alpha),
+                use_rslora=config.get("use_rslora", False),
+            )
+        )
     if any(_hash(source / name) != digest for name, digest in hashes.items()):
         raise ValueError("source adapter changed while it was being read")
     return PeftAdapter(source, config, tuple(modules), hashes)
@@ -227,6 +238,8 @@ def _export(
     tensors, records = {}, []
     ranks, alphas = {}, {}
     for module in adapter.modules:
+        if module.use_rslora != config.get("use_rslora", False):
+            raise ValueError("module scaling mode disagrees with adapter configuration")
         a, b = factors[module.name] if factors is not None else (module.a, module.b)
         if not isinstance(a, torch.Tensor) or not isinstance(b, torch.Tensor):
             raise TypeError("output factors must be torch.Tensor instances")
@@ -259,7 +272,8 @@ def _export(
             raise ValueError(
                 f"output factors are nonfinite after dtype conversion: {module.name}"
             )
-        alpha = module.scaling * rank
+        denominator = math.sqrt(rank) if module.use_rslora else rank
+        alpha = module.scaling * denominator
         _finite(alpha, "exported alpha")
         pattern = "^" + re.escape(module.name)
         ranks[pattern], alphas[pattern] = rank, alpha
@@ -273,6 +287,10 @@ def _export(
                 "source_alpha": module.alpha,
                 "output_alpha": alpha,
                 "scaling": module.scaling,
+                "use_rslora": module.use_rslora,
+                "scaling_type": "alpha_over_sqrt_rank"
+                if module.use_rslora
+                else "alpha_over_rank",
                 "source_dtype": str(module.a.dtype),
                 "output_dtype": str(dtype),
                 "source_tensor_bytes": sum(
@@ -369,7 +387,10 @@ def save_peft_adapter(
     factors: Mapping[str, tuple[Tensor, Tensor]] | None = None,
     output_dtype: OutputDtype = "source",
 ) -> AdapterExport:
-    """Export to a new directory, preserving each module's effective alpha/r.
+    """Export to a new directory, preserving each module's effective scale.
+
+    Ordinary LoRA uses alpha/r; rsLoRA uses alpha/sqrt(r). Export preserves the
+    source use_rslora flag and updates alpha for the retained rank accordingly.
 
     Optional replacement factors must cover exactly all modules and use positive
     ranks no larger than the originals. This is a file export, not a compression

@@ -67,9 +67,9 @@ threshold is part of the new API's numerical contract, not a performance change.
 Results contain `a`, `b`, the full descending `singular_values` spectrum, and
 `info`. `keep=0` produces zero-size rank dimensions. Compact results have physical
 rank `keep`; explicit padding preserves nominal shapes but saves no tensor bytes.
-These operations represent `b @ a`. They do not change or absorb an external
-PEFT alpha/r scaling; callers retain that scaling. File/config rewriting belongs
-to the next migration step.
+These operations represent `b @ a`. They do not change or absorb external
+adapter scaling; callers retain that scaling. Use
+[the adapter file API](peft.md) for configuration-preserving LoRA/rsLoRA export.
 
 `eigh_backend="auto"` preserves the original selection: CUDA uses
 `torch.linalg.eigh`; ROCm uses our FP64 Jacobi kernel when its core fits the
