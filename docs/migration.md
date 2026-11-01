@@ -14,7 +14,7 @@ Avoid maintaining two independently edited copies.
 | 5 | Serving operators, runtime, SGLang integration | Route changes, slot reuse, graph replay, and end-to-end numerical validation |
 | 6 | vLLM integration and broader hardware support | Independently tested framework/hardware combinations |
 
-Step 3's standard linear-LoRA file workflow is described in [peft.md](peft.md).
+Step 3's linear LoRA/rsLoRA file workflow is described in [peft.md](peft.md).
 It exports positive ranks, preserves per-module scaling, and records a versioned
 manifest; broader PEFT variants remain outside the initial supported surface.
 
