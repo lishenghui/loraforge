@@ -10,6 +10,7 @@ import loraforge
 import loraforge.adapters
 import loraforge.compression
 import loraforge.ops
+import loraforge.runtime
 
 
 def test_distribution_metadata_and_package_data():
@@ -37,6 +38,7 @@ sys.meta_path.insert(0, RejectGPUImports())
 import loraforge
 import loraforge.adapters
 import loraforge.ops
+import loraforge.runtime
 import loraforge.compression
 print(json.dumps({'version': loraforge.__version__}))
 """

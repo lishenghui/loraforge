@@ -90,3 +90,38 @@ exhaustive enumeration of feasible choices, nonmonotonic losses, zero costs,
 infeasible budgets, deterministic ordering and existing adapter regressions.
 Wheel/sdist builds and an isolated installed-wheel example passed. No GPU
 computation or numerical backend changed in this extension.
+
+## Runtime ownership extraction — 2026-11-03
+
+Stage 5 now has a working synchronous CPU component: `runtime.AdapterSlots`
+loads validated PEFT factors into compact owned storage, enforces an optional
+resident tensor-byte limit, and uses pool/generation handles to reject stale
+references after slot reuse. Failed loads preserve the old occupant. Resolve
+returns independent copies and eviction releases residency. See [runtime](runtime.md).
+GPU layouts/transfers, async lifetime, serving operators, SGLang/vLLM integration
+and graph replay remain pending; this component makes no GPU execution claim.
+
+Validation: 75 CPU tests passed, including 16 slot tests covering compact PEFT
+export loading, LoRA/rsLoRA scaling, stale/foreign handles, reload integrity
+failures, byte-limit failures, detached ownership, invalid indices and concurrent
+independent slots. Ruff checks, wheel/sdist builds, and a separate installed-wheel
+runtime import without PyTorch passed. This step uses no GPU allocation.
+
+## Compact GPU residency and leases — 2026-11-03
+
+`runtime.GPUAdapterSlots` adds pinned staging, nonblocking compact H2D loading,
+ready-event waits across streams and read leases that block active-slot reuse.
+Consumer stream recording protects queued operations after eviction. Replacement
+publishes new allocations and generations rather than overwriting old buffers.
+See [runtime contracts](runtime.md) for residency accounting and caller duties.
+
+Local validation: 78 CPU tests passed; lint/format checks, wheel and source
+archive builds, wheel-from-source rebuild and an isolated installed-wheel import
+without PyTorch passed. LUMI single-GCD job `23424086` completed successfully:
+7 GPU cases passed across FP32/FP16/BF16 and LoRA/rsLoRA on MI250X (`gfx90a`),
+Python 3.12.11, PyTorch 2.7.1+rocm6.2.4. Pytest took 16.35 seconds; Slurm
+elapsed time was 57 seconds. Command: `python -m pytest tests/test_runtime_gpu.py
+-m gpu -v`. Checks cover cross-stream values, lease protection, slot replacement,
+eviction/lifetime, byte-limit rejection and exception release.
+Fixed-address pools, graph replay, serving kernels, SGLang/vLLM and NVIDIA CUDA
+validation remain pending.

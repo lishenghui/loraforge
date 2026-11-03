@@ -58,6 +58,13 @@ result = compress_peft_adapter("original", "compressed", keep=8, device="cuda:0"
 Output uses a new directory and preserves per-layer effective scaling. Install
 `.[adapters,gpu]` in your configured GPU environment for this workflow.
 
+## Adapter residency
+
+`loraforge.runtime.AdapterSlots` loads compact PEFT factors into owned CPU slots
+with byte limits and generation-checked handles. See [runtime contracts](docs/runtime.md).
+`GPUAdapterSlots` adds compact GPU residency with event-ordered loading and
+scoped stream leases. Serving integration and graph replay remain planned.
+
 ## Development
 
 See [CONTRIBUTING.md](CONTRIBUTING.md) for setup and checks,
