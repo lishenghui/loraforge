@@ -465,7 +465,37 @@ these synthetic outputs. At the retained 880-block launch, native/Fleet B-only
 speedups were 1.264/1.450/1.741x for ranks 16/32/64 at batch 1,
 1.236/1.402/1.652x at batch 2, and 1.128/1.223/1.236x at batch 8.
 Grids 220/440/880 were close; this sweep does not justify a per-shape tuning
-table. The full-model follow-up, job **23439944**, uses `--fleet-expand gate`
-and uniformly raises the quality output allowance to 256 tokens. Its actual
-service benefit and output-quality results are pending; the B-only ratios
-must not be reported as model speedups.
+table. The full-model follow-up, job **23439944**, used `--fleet-expand gate`
+and uniformly raised the quality output allowance to 256 tokens. It completed
+in **15m27s**; CPU analysis verified both complete modes, matching forced
+continuations, full trace sets and actual graph execution. Gate expansion was
+captured and executed, with 32 shadow buffers adding **224 MiB** and 13 load
+events spanning ranks 0/16/32/64.
+
+Nine LoRA HTTP workloads measured **1.1169x–1.1233x** speedup versus native;
+the base-only control was 1.0030x. Candidate latencies were 0.19%–0.91% lower
+than the previous HIP-A/native-B pilot, but that comparison crosses jobs and
+is not a controlled estimate of incremental benefit. Fixed mode order and
+three trials remain limitations. The B-only ratios must not be reported as
+model speedups; this small measured increment does not justify promoting the
+additional storage and numerical changes without further evidence.
+
+At the new 256-token allowance, native scored **15/32 (46.875%)** and the
+candidate **14/32 (43.75%)**, with one paired loss and no gain. Invalid answers
+were 3/5, all truncated at the limit. In validation case 994, native returned
+the correct final answer after 123 tokens; the candidate repeated its
+explanation and reached 256 tokens without a final answer. Both had lacked a
+valid final answer at the earlier 96-token cap. The approximate conservative
+95% degradation interval is **[-13.11, +18.52] percentage points**. This does
+not establish general degradation or non-inferiority, and without an
+HIP-A/native-B run at the same allowance the loss cannot be attributed to the
+new B optimization alone.
+
+Identical-prefix adapter decode still had **1/120 top-1 flips**, mean KL
+0.00043767, maximum KL 0.00546859 and maximum total variation 0.0441468.
+Base-only decode and prefill remained exact. These short-prefix measurements
+do not exclude the observed longer free-generation divergence. The next
+useful experiment is a matched HIP-A/native-B versus gate-B comparison and
+real serving kernel profiling, rather than more launch-grid tuning. Strict
+compatibility remains failed for the fast candidate; no production promotion
+or automatic merge follows from this pilot.

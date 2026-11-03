@@ -198,3 +198,16 @@ policy. Full/wide two-device QR guards, second-GPU LoRA reconstruction and
 per-device GPU residency tests all executed and passed; the compression example
 also succeeded. See [the NVIDIA guide](nvidia.md) for commands and scope.
 Dual-H100 and distributed execution remain unverified.
+
+## Isolated SGLang speed candidates
+
+The HIP-A/native-B service pilot (23438767) measured 1.1101x–1.1185x
+end-to-end speedup on one MI250X GCD. Selective gate/up HIP-B follow-up
+23439944 completed in 15m27s and measured 1.1169x–1.1233x. Cross-job
+incremental latency savings were below 1%, while gate shadows added 224 MiB.
+With a uniformly increased 256-token quality allowance, the 32-case medical
+pilot scored 15/32 native versus 14/32 candidate; one candidate answer looped
+until truncation. The small sample and changed allowance do not isolate the
+effect of the B optimization. These remain explicit benchmark experiments,
+not enabled library policies or quality certifications. Full measurements,
+numerical differences and limitations are in [sglang.md](sglang.md).
