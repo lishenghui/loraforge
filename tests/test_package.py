@@ -29,6 +29,7 @@ def test_distribution_metadata_and_package_data():
         "tsqr_wide.cu",
         "jacobi_eigh.cu",
         "rowexpand.cu",
+        "lora_rows.cu",
     ):
         assert native.joinpath(name).is_file()
 

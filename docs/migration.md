@@ -403,3 +403,17 @@ discovery, lint/format, builds and isolated wheel/source-archive checks passed.
 See [the vLLM contract](vllm.md) for numeric tolerances and provenance. Full-model
 serving acceptance, native loader eviction, other GPUs and throughput remain
 separate validation tasks; no performance or token/logprob parity claim is made.
+
+## Figure 12 retained-rank operator extraction — 2026-11-03
+
+Branch `migrate/row-expand`, based on the vLLM decode extraction, adds standalone
+BF16 `row_shrink` and `row_expand` tensor operators from probe's CUDA/HIP
+`fast_decode.cu`. Source identity and intentional wrapper/launch changes are
+recorded in provenance. The library contains no copied experiment tree.
+
+CPU and packaging checks pass. H100 validation job `7545404` is queued; numerical
+GPU support is not yet established. See [row operators](row-operators.md) for
+contracts, commands, references and the pending hardware gate. Compact B
+ownership, vLLM rank-aware loading/eviction, framework custom-op registration,
+four-decode-step scheduling and the full Figure 12 benchmark remain pending.
+The existing padded vLLM integration is unchanged.

@@ -673,3 +673,28 @@ This code intentionally lives separately from SGLang's packed-slice operators;
 the two layouts and intermediate rounding contracts differ. No code on the
 concurrently developed SGLang branch is modified. See [vllm.md](vllm.md) for
 activation, validation scope and numerical limitations.
+
+### Retained-rank row operators
+
+Source: Shenghui Li's `lishenghui/probe` commit
+`5fd6ae060d106066b306959f9a34b726a281ef4c`,
+`tools/llm_fleet/sglang_plugin/probe_sglang_gemv/fast_decode.cu`.
+The original SHA256 is in [row-source-hashes.json](row-source-hashes.json).
+The project-owned kernels are extracted under Apache-2.0 with source/authorship
+notices into `ops/csrc/lora_rows.cu`; `ops/lora_rows.py` and
+`ops/_row_extension.py` are new framework-independent validation/build wrappers.
+No SGLang/vLLM implementation, tuning table or experiment tree is imported.
+
+The selected source already includes the CUDA/HIP warp-width split, current-stream
+launches, base-route guards and launch error checks. It differs from the frozen
+2026-10-28 MI250X experiment snapshot; it is not represented as byte-identical
+Figure 12 code. The extraction preserves the packed effective-rank layout,
+vector B loads, shared Z staging, BF16 rounding and segmented persistent work
+schedule. Kernels are formatted/renamed; host wrappers add same-device checks.
+The Python interface additionally checks structures, alignment, inference-only
+use and output aliasing. Device metadata values remain a documented caller
+contract, without per-call host synchronization. The launch default uses twice
+the detected SM/CU count rather than the source's AMD-specific 880-block default.
+No environment-variable compiler mutations, global workspaces, pointer registries
+or framework hooks are retained. H100 tests and limits are documented in
+[row-operators.md](row-operators.md).
