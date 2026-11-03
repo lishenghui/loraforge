@@ -46,6 +46,9 @@ For a complete synthetic example, see
 [FlashTSQR contracts and validation](docs/flashtsqr.md) describe devices, dtypes,
 stream ownership, numerical limits, and tested environments.
 
+For NVIDIA CUDA installation and hardware validation, see
+[the NVIDIA guide](docs/nvidia.md).
+
 ## Adapter files
 
 For local adapter files, see [the PEFT workflow](docs/peft.md):

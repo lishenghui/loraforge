@@ -9,6 +9,22 @@
 // FlashTSQR wide-input path: leaf and merge Householder tiles in global memory.
 // One workgroup owns a tile; only a reflector vector and dot scratch use LDS.
 // This removes the O(N^2) LDS bound. No generic QR backend is called.
+// CUDA defaults to 48 KiB per block. Larger dynamic scratch needs opt-in;
+// ROCm exposes its workgroup limit directly and has no CUDA opt-in API.
+template <typename K> static void allow_wide_smem(K kernel, size_t bytes) {
+ auto* props=at::cuda::getCurrentDeviceProperties();
+#if defined(USE_ROCM) || defined(__HIP_PLATFORM_AMD__)
+ const size_t limit=props->sharedMemPerBlock;
+#else
+ const size_t limit=props->sharedMemPerBlockOptin;
+#endif
+ TORCH_CHECK(bytes<=limit,"wide scratch needs ",bytes," B shared memory, device allows ",limit," B");
+#if !(defined(USE_ROCM) || defined(__HIP_PLATFORM_AMD__))
+ // Always use the same ceiling so concurrent calls cannot lower the attribute
+ // between another caller's validation and launch.
+ C10_CUDA_CHECK(cudaFuncSetAttribute(kernel,cudaFuncAttributeMaxDynamicSharedMemorySize,(int)limit));
+#endif
+}
 __device__ float reduce_sum(float v,float* s){
  int t=threadIdx.x;s[t]=v;__syncthreads();
  for(int d=blockDim.x/2;d;d/=2){if(t<d)s[t]+=s[t+d];__syncthreads();}
@@ -46,8 +62,9 @@ std::vector<torch::Tensor> wide_factor(torch::Tensor x){
  TORCH_CHECK(x.is_cuda()&&x.scalar_type()==torch::kFloat32&&x.dim()==3&&x.size(1)>=x.size(2));
  c10::cuda::CUDAGuard guard(x.device());
  x=x.contiguous().clone();int rows=x.size(1),n=x.size(2);auto v=torch::empty_like(x);auto tau=torch::empty({x.size(0),n},x.options());
- TORCH_CHECK((rows+n+256)*4<=65536,"wide factor scratch exceeds LDS");
- factor_kernel<<<x.size(0),256,(rows+n+256)*4,at::cuda::getCurrentCUDAStream()>>>(x.data_ptr<float>(),v.data_ptr<float>(),tau.data_ptr<float>(),rows,n);C10_CUDA_KERNEL_LAUNCH_CHECK();
+ const size_t scratch=((size_t)rows+n+256)*sizeof(float);
+ allow_wide_smem(factor_kernel,scratch);
+ factor_kernel<<<x.size(0),256,scratch,at::cuda::getCurrentCUDAStream()>>>(x.data_ptr<float>(),v.data_ptr<float>(),tau.data_ptr<float>(),rows,n);C10_CUDA_KERNEL_LAUNCH_CHECK();
  return {x.narrow(1,0,n).contiguous(),v,tau};
 }
 torch::Tensor wide_apply(torch::Tensor v,torch::Tensor tau,torch::Tensor c){
@@ -56,6 +73,8 @@ torch::Tensor wide_apply(torch::Tensor v,torch::Tensor tau,torch::Tensor c){
  TORCH_CHECK(tau.scalar_type()==torch::kFloat32,"expected fp32 tau");
  c10::cuda::CUDAGuard guard(c.device());
  v=v.contiguous();tau=tau.contiguous();c=c.contiguous().clone();int rows=v.size(1),n=v.size(2),k=c.size(2);
- TORCH_CHECK(c.size(0)==v.size(0)&&c.size(1)==rows&&(rows+k)*4<=65536);
- apply_kernel<<<v.size(0),256,(rows+k)*4,at::cuda::getCurrentCUDAStream()>>>(v.data_ptr<float>(),tau.data_ptr<float>(),c.data_ptr<float>(),rows,n,k);C10_CUDA_KERNEL_LAUNCH_CHECK();return c;
+ TORCH_CHECK(c.size(0)==v.size(0)&&c.size(1)==rows,"wide apply shape mismatch");
+ const size_t scratch=((size_t)rows+k)*sizeof(float);
+ allow_wide_smem(apply_kernel,scratch);
+ apply_kernel<<<v.size(0),256,scratch,at::cuda::getCurrentCUDAStream()>>>(v.data_ptr<float>(),tau.data_ptr<float>(),c.data_ptr<float>(),rows,n,k);C10_CUDA_KERNEL_LAUNCH_CHECK();return c;
 }

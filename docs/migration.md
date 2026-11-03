@@ -170,3 +170,25 @@ reduction-order difference crossing a BF16 rounding midpoint; native matches
 the rounded FP64 reference for that element. Both custom operator paths need
 numerical parity work; replacing either alone is insufficient. No numerical
 fix or full-model success is claimed. PR #6 remains a draft.
+## NVIDIA CUDA validation — 2026-11-03
+
+Fixed the wide FlashTSQR kernels to check the actual per-block device shared
+memory limit and explicitly opt in to larger CUDA dynamic scratch. Full-path
+opt-in errors are now checked as well. The new regression reproduced an H100
+invalid-argument launch before the fix and passes afterward; excessive scratch
+is rejected without invalidating the factorization handle.
+
+Pelle Slurm job `7542015` on one H100 NVL completed with 123 passed, 1 skipped
+(two visible GPUs required), followed by the tensor compression example.
+This validates the rank-160 full/WY path, compact tensor/file compression and
+GPU residency on this NVIDIA environment. See [the NVIDIA guide](nvidia.md)
+for versions, commands, precision settings and remaining validation limits.
+Lint/format, CPU tests and isolated wheel/source-archive checks passed.
+Serving integration, graph replay and other hardware combinations remain pending.
+
+Pelle job `7542157` subsequently validated two L40S GPUs: 126 tests passed and
+one rank-160 full/WY case skipped because L40S shared memory does not fit its
+policy. Full/wide two-device QR guards, second-GPU LoRA reconstruction and
+per-device GPU residency tests all executed and passed; the compression example
+also succeeded. See [the NVIDIA guide](nvidia.md) for commands and scope.
+Dual-H100 and distributed execution remain unverified.

@@ -98,3 +98,28 @@ def test_failure_budget_and_exception_release(tmp_path):
     assert pool.tensor_bytes == 0
     with pytest.raises(ValueError, match="stale"):
         pool.evict(handle)
+
+
+@pytest.mark.skipif(torch.cuda.device_count() < 2, reason="two visible GPUs required")
+@pytest.mark.parametrize("index", [0, 1])
+def test_residency_device_guard(tmp_path, index):
+    path, a, b = source(tmp_path, "adapter")
+    previous = torch.cuda.current_device()
+    other = 1 - index
+    device = torch.device("cuda", index)
+    try:
+        torch.cuda.set_device(other)
+        pool = GPUAdapterSlots(1, device=str(device))
+        handle = pool.load(path, 0)
+        assert torch.cuda.current_device() == other
+        with pool.borrow(handle) as modules:
+            (module,) = modules
+            assert module.a.device == module.b.device == device
+            result = (module.b @ module.a) * module.scaling
+        assert torch.cuda.current_device() == other
+        pool.evict(handle)
+        pool.collect()
+        assert torch.cuda.current_device() == other
+        torch.testing.assert_close(result.cpu(), (b @ a) * 2)
+    finally:
+        torch.cuda.set_device(previous)
