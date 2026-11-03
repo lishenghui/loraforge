@@ -2,8 +2,9 @@
 """Pilot: full-model HTTP timing, labeled quality, and forced-prefix numerics.
 
 Run only on an allocated GPU. Prepare tokenized inputs and analyze logits on CPU.
-An explicit external HIP library is required; this does not enable a production
-backend or weaken validate_sglang_serving.py's strict compatibility contract.
+External candidates require an explicit HIP library; --fleet-expand full uses
+the installed retained-rank backend. Neither option weakens the separate strict
+compatibility contract in validate_sglang_serving.py.
 """
 
 from __future__ import annotations
@@ -27,7 +28,14 @@ if os.environ.get("FLEET_EXPERIMENT_MODE") in ("native", "fleet"):
     from sglang_fleet_experiment_hook import install, observe_graph_execution
 
     observe_graph_execution(Path(os.environ["FLEET_EXPERIMENT_OUTPUT"]))
-    if os.environ["FLEET_EXPERIMENT_MODE"] == "fleet":
+    if (
+        os.environ["FLEET_EXPERIMENT_MODE"] == "fleet"
+        and os.environ.get("FLEET_EXPERIMENT_EXPAND") == "full"
+    ):
+        from sglang_fleet_experiment_hook import observe_packaged_fleet
+
+        observe_packaged_fleet(Path(os.environ["FLEET_EXPERIMENT_OUTPUT"]))
+    elif os.environ["FLEET_EXPERIMENT_MODE"] == "fleet":
         install(
             Path(os.environ["FLEET_EXPERIMENT_LIBRARY"]),
             Path(os.environ["FLEET_EXPERIMENT_OUTPUT"]),
@@ -176,6 +184,24 @@ def run_requests(args, manifest, quality, mode, root, shared):
     return result
 
 
+def packaged_sources():
+    import loraforge
+
+    root = Path(loraforge.__file__).parent
+    names = [
+        "ops/csrc/rowexpand.cu",
+        "ops/rowexpand.py",
+        "runtime/retained.py",
+        "integrations/sglang.py",
+        "integrations/_sglang_fleet.py",
+        "integrations/_sglang_rank_aware.py",
+        "integrations/data/mi250x_fleet_dispatch.json",
+    ]
+    return {
+        name: hashlib.sha256((root / name).read_bytes()).hexdigest() for name in names
+    }
+
+
 def run(args, manifest):
     if args.output.exists():
         raise ValueError("use a new output directory; existing attempts are preserved")
@@ -200,7 +226,12 @@ def run(args, manifest):
         },
         manifest_sha256=hashlib.sha256(args.manifest.read_bytes()).hexdigest(),
         quality_sha256=hashlib.sha256(args.quality.read_bytes()).hexdigest(),
-        library_sha256=hashlib.sha256(args.fleet_library.read_bytes()).hexdigest(),
+        library_sha256=hashlib.sha256(args.fleet_library.read_bytes()).hexdigest()
+        if args.fleet_library
+        else None,
+        packaged_source_sha256=packaged_sources()
+        if args.fleet_expand == "full"
+        else None,
         trials=args.trials,
         fleet_expand=args.fleet_expand,
         timing_tokens=args.timing_tokens,
@@ -226,7 +257,10 @@ def run(args, manifest):
             FLEET_EXPERIMENT_LIBRARY=str(args.fleet_library),
             FLEET_EXPERIMENT_OUTPUT=str(root),
             LORAFORGE_SGLANG="1" if mode == "fleet" else "0",
-            LORAFORGE_SGLANG_POLICY="rank-aware",
+            LORAFORGE_SGLANG_POLICY="fleet"
+            if args.fleet_expand == "full"
+            else "rank-aware",
+            LORAFORGE_SGLANG_MANIFEST=str(args.manifest),
             SGLANG_PLUGINS="loraforge",
         )
         command = [
@@ -298,7 +332,25 @@ def analyze(args):
     ):
         raise ValueError("workloads differ or forced continuations did not match")
     evidence = [json.loads(p.read_text()) for p in (root / "fleet").glob("hip-*.json")]
-    if not any(e["supported"] and e["capture"] for e in evidence):
+    protocol = json.loads((root / "protocol.json").read_text())
+    if protocol.get("fleet_expand") == "full":
+        snapshots = [
+            json.loads(p.read_text()) for p in (root / "fleet").glob("fleet-*.json")
+        ]
+        if not any(
+            s["capture"]
+            and s["decode"]
+            and s["snapshot"]["python_capture_eager_calls"].get("rowexpand_decode", 0)
+            for s in snapshots
+        ):
+            raise ValueError("missing packaged RowExpand decode capture evidence")
+        if not any(
+            not s["decode"]
+            and s["snapshot"]["python_capture_eager_calls"].get("rowexpand_prefill", 0)
+            for s in snapshots
+        ):
+            raise ValueError("missing packaged RowExpand prefill evidence")
+    elif not any(e["supported"] and e["capture"] for e in evidence):
         raise ValueError("missing HIP graph capture evidence")
     for mode in ("native", "fleet"):
         execution = [
@@ -407,7 +459,9 @@ def main():
     parser.add_argument("--manifest", type=Path)
     parser.add_argument("--quality", type=Path)
     parser.add_argument("--fleet-library", type=Path)
-    parser.add_argument("--fleet-expand", choices=("native", "gate"), default="native")
+    parser.add_argument(
+        "--fleet-expand", choices=("native", "gate", "full"), default="native"
+    )
     parser.add_argument("--output", type=Path, required=True)
     parser.add_argument("--port", type=int, default=31000)
     parser.add_argument("--startup-timeout", type=int, default=900)
@@ -438,7 +492,10 @@ def main():
                     "positive trials/token counts and at least two trace tokens required"
                 )
             args.quality = args.quality.resolve()
-            args.fleet_library = args.fleet_library.resolve()
+            if args.fleet_expand != "full" and args.fleet_library is None:
+                parser.error("external candidates require --fleet-library")
+            if args.fleet_library is not None:
+                args.fleet_library = args.fleet_library.resolve()
             run(args, manifest)
 
 

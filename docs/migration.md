@@ -211,3 +211,14 @@ until truncation. The small sample and changed allowance do not isolate the
 effect of the B optimization. These remain explicit benchmark experiments,
 not enabled library policies or quality certifications. Full measurements,
 numerical differences and limitations are in [sglang.md](sglang.md).
+
+## Complete retained-rank path extraction
+
+The optional `fleet` SGLang policy now packages RowExpand and direct shrink,
+per-module rank/A packing, checkpoint-compact B regions, the frozen MI250X
+decode dispatch, low-rank prefill, unsupported-rank fallback, loader updates,
+and graph metadata. The optional Qwen stable-prefill hook and a compact-PEFT to
+SGLang export bridge are also extracted. See [RowExpand](rowexpand.md) for the
+component checklist and limits. Job 23440720 passed 33 GPU checks, including
+21 exact old/new kernel comparisons. Full-model verification of this packaged
+path is still pending; the earlier partial-path speedups do not validate it.

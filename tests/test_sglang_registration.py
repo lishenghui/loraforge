@@ -56,7 +56,7 @@ def test_enabled_entrypoint(monkeypatch):
     assert calls == [True]
 
 
-@pytest.mark.parametrize("policy", ["compatible", "rank-aware"])
+@pytest.mark.parametrize("policy", ["compatible", "rank-aware", "fleet"])
 def test_decode_policy_selection(monkeypatch, policy):
     monkeypatch.setenv("LORAFORGE_SGLANG_POLICY", policy)
     assert sglang._decode_policy() == policy

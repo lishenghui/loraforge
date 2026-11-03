@@ -209,3 +209,41 @@ replacement. The explicitly supplied compiled HIP library remains external;
 its hash is recorded by the service pilot. No native source is copied into
 the installed package by this experiment. GPU/serving validation is recorded
 separately in the SGLang guide.
+
+### Complete Fleet / RowExpand extraction
+
+The opt-in `fleet` SGLang policy extracts the measured retained-rank path from
+probe commit `5fd6ae060d106066b306959f9a34b726a281ef4c`, under
+`tools/llm_fleet/sglang_plugin/probe_sglang_gemv/`. Attribution: Shenghui Li,
+Apache-2.0. The source ledger is:
+
+| Source | SHA-256 | Destination |
+| --- | --- | --- |
+| `fast_decode.cu` | `e26ca56e16945362cb9c96a2be6f01de78920e42eee63908161deeb226a87260` | `ops/csrc/rowexpand.cu` |
+| `fast.py` | `bd6a953ac82782dcdfafb05e4c4351ccc7f32109e0bf4cc19599b78312dfb1bc` | `runtime/retained.py`, `integrations/_sglang_fleet.py` |
+| `mi250x_qwen50_fleet_dispatch.json` | `245318e64963720c2ba13034598a1aa815c7320aee52438519082b67bb5b63da` | `integrations/data/mi250x_fleet_dispatch.json` (byte-identical) |
+| `stable_prefill.py` | `5cb43562ab9e53648ad024b31ed7bc9f8d68c2ce6cbb40b3b866f0b507e8d6a0` | `integrations/_sglang_stable_prefill.py` |
+
+Native arithmetic and the frozen profile are retained: table-selected decode A,
+all supported decode B ranks, prefill B only through rank 16, rank-aware native
+fallback elsewhere. The B fields in the historical tuning table do not override
+this measured profile. The native padded pool remains resident; compact B
+regions belong to known checkpoints, with per-slot device ranks and offsets.
+Fused A slices are repacked after native loading using effective module ranks.
+
+Intentional maintenance changes: package and lazily compile the extension;
+separate runtime layout from framework integration; use weak pointer registries
+and pool-owned entries; make the adapter catalog explicit; validate padded
+headers and nonzero tails before execution; reject unknown reloads before native
+mutation; add same-device/shape/dtype/stride guards and autograd rejection;
+separate launch statements for PyTorch HIPify parsing; replace probe environment
+names and remove implicit stable-prefill enablement. Qwen stable prefill remains
+an explicit, narrowly guarded hook; it is not enabled for Llama or by default.
+The frozen dispatch is currently gated to gfx90a. This does not claim CUDA Fleet
+validation, mixed-attention extensions, speculative/MoE/TP support or performance
+portability. Other exploratory probe backends are not part of this measured path.
+
+`adapters/sglang.py` is new integration glue: it explicitly pads compact PEFT
+exports, folds per-module scaling into BF16 B and publishes true module ranks.
+This is a recorded format/scaling conversion, not another compression algorithm.
+The conversion can introduce BF16 rounding and requires corresponding validation.

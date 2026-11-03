@@ -499,3 +499,12 @@ useful experiment is a matched HIP-A/native-B versus gate-B comparison and
 real serving kernel profiling, rather than more launch-grid tuning. Strict
 compatibility remains failed for the fast candidate; no production promotion
 or automatic merge follows from this pilot.
+
+## Complete Fleet migration
+
+`LORAFORGE_SGLANG_POLICY=fleet` now selects the packaged retained-rank runtime,
+including all-projection RowExpand, low-rank prefill, compact B and the frozen
+MI250X dispatch. This is distinct from the partial experimental hooks above.
+See [the component checklist and validation status](rowexpand.md). Benchmark
+`--fleet-expand full` selects this installed path without an external probe
+library, records its source hashes and requires custom prefill/decode evidence.

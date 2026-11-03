@@ -41,7 +41,7 @@ version = {attr = "loraforge._version.__version__"}
 where = ["src"]
 
 [tool.setuptools.package-data]
-loraforge = ["py.typed", "ops/csrc/*.cpp", "ops/csrc/*.cu"]
+loraforge = ["py.typed", "ops/csrc/*.cpp", "ops/csrc/*.cu", "integrations/data/*.json"]
 
 [tool.pytest.ini_options]
 testpaths = ["tests"]

@@ -1,0 +1,414 @@
+{
+  "decode": {
+    "qkv_proj": {
+      "1": {
+        "nblocks": 220,
+        "threads": 128,
+        "reference": "Layer0 real weights, synthetic activations; geometric weighted speed across hg/mixed/low regimes; validate end-to-end.",
+        "b": "all",
+        "a": "hip",
+        "estimated_pair_speedup": 1.8779102533474432
+      },
+      "4": {
+        "nblocks": 440,
+        "threads": 256,
+        "reference": "Layer0 real weights, synthetic activations; geometric weighted speed across hg/mixed/low regimes; validate end-to-end.",
+        "b": "all",
+        "a": "hip",
+        "estimated_pair_speedup": 1.8964983985067885
+      },
+      "16": {
+        "nblocks": 440,
+        "threads": 256,
+        "reference": "Layer0 real weights, synthetic activations; geometric weighted speed across hg/mixed/low regimes; validate end-to-end.",
+        "b": "native",
+        "a": "hip",
+        "estimated_pair_speedup": 1.1932369212087008
+      },
+      "32": {
+        "nblocks": 220,
+        "threads": 256,
+        "reference": "Layer0 real weights, synthetic activations; geometric weighted speed across hg/mixed/low regimes; validate end-to-end.",
+        "b": "native",
+        "a": "native",
+        "estimated_pair_speedup": 1.0264796619277288
+      },
+      "64": {
+        "nblocks": 440,
+        "threads": 256,
+        "reference": "Layer0 real weights, synthetic activations; geometric weighted speed across hg/mixed/low regimes; validate end-to-end.",
+        "b": "native",
+        "a": "native",
+        "estimated_pair_speedup": 1.2228941663888655
+      },
+      "128": {
+        "nblocks": 440,
+        "threads": 256,
+        "reference": "Layer0 real weights, synthetic activations; geometric weighted speed across hg/mixed/low regimes; validate end-to-end.",
+        "b": "all",
+        "a": "native",
+        "estimated_pair_speedup": 1.3407119085613597
+      },
+      "256": {
+        "nblocks": 880,
+        "threads": 256,
+        "reference": "Layer0 real weights, synthetic activations; geometric weighted speed across hg/mixed/low regimes; validate end-to-end.",
+        "b": "all",
+        "a": "native",
+        "estimated_pair_speedup": 1.4612171060051873
+      }
+    },
+    "gate_up_proj": {
+      "1": {
+        "nblocks": 220,
+        "threads": 256,
+        "reference": "Layer0 real weights, synthetic activations; geometric weighted speed across hg/mixed/low regimes; validate end-to-end.",
+        "b": "all",
+        "a": "hip",
+        "estimated_pair_speedup": 2.207138990754395
+      },
+      "4": {
+        "nblocks": 880,
+        "threads": 256,
+        "reference": "Layer0 real weights, synthetic activations; geometric weighted speed across hg/mixed/low regimes; validate end-to-end.",
+        "b": "all",
+        "a": "hip",
+        "estimated_pair_speedup": 2.502585309630297
+      },
+      "16": {
+        "nblocks": 440,
+        "threads": 256,
+        "reference": "Layer0 real weights, synthetic activations; geometric weighted speed across hg/mixed/low regimes; validate end-to-end.",
+        "b": "all",
+        "a": "hip",
+        "estimated_pair_speedup": 1.6768152495174984
+      },
+      "32": {
+        "nblocks": 880,
+        "threads": 256,
+        "reference": "Layer0 real weights, synthetic activations; geometric weighted speed across hg/mixed/low regimes; validate end-to-end.",
+        "b": "all",
+        "a": "hip",
+        "estimated_pair_speedup": 1.518608341474915
+      },
+      "64": {
+        "nblocks": 440,
+        "threads": 256,
+        "reference": "Layer0 real weights, synthetic activations; geometric weighted speed across hg/mixed/low regimes; validate end-to-end.",
+        "b": "all",
+        "a": "native",
+        "estimated_pair_speedup": 1.5344425589596837
+      },
+      "128": {
+        "nblocks": 440,
+        "threads": 256,
+        "reference": "Layer0 real weights, synthetic activations; geometric weighted speed across hg/mixed/low regimes; validate end-to-end.",
+        "b": "all",
+        "a": "native",
+        "estimated_pair_speedup": 1.5265535486449824
+      },
+      "256": {
+        "nblocks": 880,
+        "threads": 256,
+        "reference": "Layer0 real weights, synthetic activations; geometric weighted speed across hg/mixed/low regimes; validate end-to-end.",
+        "b": "all",
+        "a": "native",
+        "estimated_pair_speedup": 1.6250886406948981
+      }
+    },
+    "o_proj": {
+      "1": {
+        "nblocks": 220,
+        "threads": 128,
+        "reference": "Layer0 real weights, synthetic activations; geometric weighted speed across hg/mixed/low regimes; validate end-to-end.",
+        "b": "all",
+        "a": "hip",
+        "estimated_pair_speedup": 2.0964983728593745
+      },
+      "4": {
+        "nblocks": 220,
+        "threads": 128,
+        "reference": "Layer0 real weights, synthetic activations; geometric weighted speed across hg/mixed/low regimes; validate end-to-end.",
+        "b": "all",
+        "a": "hip",
+        "estimated_pair_speedup": 2.0341013232417233
+      },
+      "16": {
+        "nblocks": 220,
+        "threads": 256,
+        "reference": "Layer0 real weights, synthetic activations; geometric weighted speed across hg/mixed/low regimes; validate end-to-end.",
+        "b": "native",
+        "a": "hip",
+        "estimated_pair_speedup": 1.4122643461978415
+      },
+      "32": {
+        "nblocks": 440,
+        "threads": 256,
+        "reference": "Layer0 real weights, synthetic activations; geometric weighted speed across hg/mixed/low regimes; validate end-to-end.",
+        "b": "native",
+        "a": "hip",
+        "estimated_pair_speedup": 1.1539359723282052
+      },
+      "64": {
+        "nblocks": 220,
+        "threads": 256,
+        "reference": "Layer0 real weights, synthetic activations; geometric weighted speed across hg/mixed/low regimes; validate end-to-end.",
+        "b": "native",
+        "a": "native",
+        "estimated_pair_speedup": 1.0044949759778268
+      },
+      "128": {
+        "nblocks": 220,
+        "threads": 256,
+        "reference": "Layer0 real weights, synthetic activations; geometric weighted speed across hg/mixed/low regimes; validate end-to-end.",
+        "b": "native",
+        "a": "native",
+        "estimated_pair_speedup": 1.1066108257080283
+      },
+      "256": {
+        "nblocks": 440,
+        "threads": 256,
+        "reference": "Layer0 real weights, synthetic activations; geometric weighted speed across hg/mixed/low regimes; validate end-to-end.",
+        "b": "all",
+        "a": "native",
+        "estimated_pair_speedup": 1.2525547223177946
+      }
+    },
+    "down_proj": {
+      "1": {
+        "nblocks": 440,
+        "threads": 128,
+        "reference": "Layer0 real weights, synthetic activations; geometric weighted speed across hg/mixed/low regimes; validate end-to-end.",
+        "b": "all",
+        "a": "hip",
+        "estimated_pair_speedup": 2.5068151055318024
+      },
+      "4": {
+        "nblocks": 440,
+        "threads": 128,
+        "reference": "Layer0 real weights, synthetic activations; geometric weighted speed across hg/mixed/low regimes; validate end-to-end.",
+        "b": "all",
+        "a": "hip",
+        "estimated_pair_speedup": 2.480677776887807
+      },
+      "16": {
+        "nblocks": 440,
+        "threads": 256,
+        "reference": "Layer0 real weights, synthetic activations; geometric weighted speed across hg/mixed/low regimes; validate end-to-end.",
+        "b": "native",
+        "a": "hip",
+        "estimated_pair_speedup": 1.8148075056845745
+      },
+      "32": {
+        "nblocks": 220,
+        "threads": 256,
+        "reference": "Layer0 real weights, synthetic activations; geometric weighted speed across hg/mixed/low regimes; validate end-to-end.",
+        "b": "native",
+        "a": "hip",
+        "estimated_pair_speedup": 1.4854312989077656
+      },
+      "64": {
+        "nblocks": 220,
+        "threads": 256,
+        "reference": "Layer0 real weights, synthetic activations; geometric weighted speed across hg/mixed/low regimes; validate end-to-end.",
+        "b": "native",
+        "a": "hip",
+        "estimated_pair_speedup": 1.1738011228576957
+      },
+      "128": {
+        "nblocks": 440,
+        "threads": 256,
+        "reference": "Layer0 real weights, synthetic activations; geometric weighted speed across hg/mixed/low regimes; validate end-to-end.",
+        "b": "native",
+        "a": "native",
+        "estimated_pair_speedup": 1.046759812597796
+      },
+      "256": {
+        "nblocks": 220,
+        "threads": 256,
+        "reference": "Layer0 real weights, synthetic activations; geometric weighted speed across hg/mixed/low regimes; validate end-to-end.",
+        "b": "all",
+        "a": "native",
+        "estimated_pair_speedup": 1.1530110084099539
+      }
+    }
+  },
+  "prefill": {
+    "qkv_proj": {
+      "16": {
+        "nblocks": 220,
+        "threads": 256,
+        "reference": "Layer0 real weights, synthetic activations; geometric weighted speed across hg/mixed/low regimes; validate end-to-end.",
+        "b": "native",
+        "estimated_expand_speedup": 1.0
+      },
+      "64": {
+        "nblocks": 220,
+        "threads": 256,
+        "reference": "Layer0 real weights, synthetic activations; geometric weighted speed across hg/mixed/low regimes; validate end-to-end.",
+        "b": "native",
+        "estimated_expand_speedup": 1.0
+      },
+      "256": {
+        "nblocks": 880,
+        "threads": 256,
+        "reference": "Layer0 real weights, synthetic activations; geometric weighted speed across hg/mixed/low regimes; validate end-to-end.",
+        "b": "all",
+        "estimated_expand_speedup": 1.4813530022852415
+      },
+      "1024": {
+        "nblocks": 440,
+        "threads": 256,
+        "reference": "Layer0 real weights, synthetic activations; geometric weighted speed across hg/mixed/low regimes; validate end-to-end.",
+        "b": "all",
+        "estimated_expand_speedup": 1.6645572885767497
+      },
+      "4096": {
+        "nblocks": 880,
+        "threads": 256,
+        "reference": "Layer0 real weights, synthetic activations; geometric weighted speed across hg/mixed/low regimes; validate end-to-end.",
+        "b": "all",
+        "estimated_expand_speedup": 1.6673813798170112
+      },
+      "8192": {
+        "nblocks": 880,
+        "threads": 256,
+        "reference": "Layer0 real weights, synthetic activations; geometric weighted speed across hg/mixed/low regimes; validate end-to-end.",
+        "b": "all",
+        "estimated_expand_speedup": 1.676394282335826
+      }
+    },
+    "gate_up_proj": {
+      "16": {
+        "nblocks": 440,
+        "threads": 256,
+        "reference": "Layer0 real weights, synthetic activations; geometric weighted speed across hg/mixed/low regimes; validate end-to-end.",
+        "b": "all",
+        "estimated_expand_speedup": 1.4441477442973887
+      },
+      "64": {
+        "nblocks": 440,
+        "threads": 256,
+        "reference": "Layer0 real weights, synthetic activations; geometric weighted speed across hg/mixed/low regimes; validate end-to-end.",
+        "b": "all",
+        "estimated_expand_speedup": 1.5863194183133738
+      },
+      "256": {
+        "nblocks": 880,
+        "threads": 256,
+        "reference": "Layer0 real weights, synthetic activations; geometric weighted speed across hg/mixed/low regimes; validate end-to-end.",
+        "b": "all",
+        "estimated_expand_speedup": 1.7355081530131642
+      },
+      "1024": {
+        "nblocks": 880,
+        "threads": 256,
+        "reference": "Layer0 real weights, synthetic activations; geometric weighted speed across hg/mixed/low regimes; validate end-to-end.",
+        "b": "all",
+        "estimated_expand_speedup": 1.787858106371372
+      },
+      "4096": {
+        "nblocks": 880,
+        "threads": 256,
+        "reference": "Layer0 real weights, synthetic activations; geometric weighted speed across hg/mixed/low regimes; validate end-to-end.",
+        "b": "all",
+        "estimated_expand_speedup": 1.816476131723879
+      },
+      "8192": {
+        "nblocks": 880,
+        "threads": 256,
+        "reference": "Layer0 real weights, synthetic activations; geometric weighted speed across hg/mixed/low regimes; validate end-to-end.",
+        "b": "all",
+        "estimated_expand_speedup": 1.818777599966424
+      }
+    },
+    "o_proj": {
+      "16": {
+        "nblocks": 440,
+        "threads": 256,
+        "reference": "Layer0 real weights, synthetic activations; geometric weighted speed across hg/mixed/low regimes; validate end-to-end.",
+        "b": "native",
+        "estimated_expand_speedup": 1.0
+      },
+      "64": {
+        "nblocks": 440,
+        "threads": 256,
+        "reference": "Layer0 real weights, synthetic activations; geometric weighted speed across hg/mixed/low regimes; validate end-to-end.",
+        "b": "native",
+        "estimated_expand_speedup": 1.0
+      },
+      "256": {
+        "nblocks": 880,
+        "threads": 256,
+        "reference": "Layer0 real weights, synthetic activations; geometric weighted speed across hg/mixed/low regimes; validate end-to-end.",
+        "b": "all",
+        "estimated_expand_speedup": 1.1836758520580561
+      },
+      "1024": {
+        "nblocks": 440,
+        "threads": 256,
+        "reference": "Layer0 real weights, synthetic activations; geometric weighted speed across hg/mixed/low regimes; validate end-to-end.",
+        "b": "all",
+        "estimated_expand_speedup": 1.825549025493656
+      },
+      "4096": {
+        "nblocks": 880,
+        "threads": 256,
+        "reference": "Layer0 real weights, synthetic activations; geometric weighted speed across hg/mixed/low regimes; validate end-to-end.",
+        "b": "all",
+        "estimated_expand_speedup": 1.842119165980596
+      },
+      "8192": {
+        "nblocks": 880,
+        "threads": 256,
+        "reference": "Layer0 real weights, synthetic activations; geometric weighted speed across hg/mixed/low regimes; validate end-to-end.",
+        "b": "all",
+        "estimated_expand_speedup": 1.9676016185270744
+      }
+    },
+    "down_proj": {
+      "16": {
+        "nblocks": 440,
+        "threads": 256,
+        "reference": "Layer0 real weights, synthetic activations; geometric weighted speed across hg/mixed/low regimes; validate end-to-end.",
+        "b": "native",
+        "estimated_expand_speedup": 1.0
+      },
+      "64": {
+        "nblocks": 880,
+        "threads": 256,
+        "reference": "Layer0 real weights, synthetic activations; geometric weighted speed across hg/mixed/low regimes; validate end-to-end.",
+        "b": "native",
+        "estimated_expand_speedup": 1.0
+      },
+      "256": {
+        "nblocks": 220,
+        "threads": 256,
+        "reference": "Layer0 real weights, synthetic activations; geometric weighted speed across hg/mixed/low regimes; validate end-to-end.",
+        "b": "all",
+        "estimated_expand_speedup": 1.1758225772617512
+      },
+      "1024": {
+        "nblocks": 440,
+        "threads": 256,
+        "reference": "Layer0 real weights, synthetic activations; geometric weighted speed across hg/mixed/low regimes; validate end-to-end.",
+        "b": "all",
+        "estimated_expand_speedup": 1.826495529813519
+      },
+      "4096": {
+        "nblocks": 880,
+        "threads": 256,
+        "reference": "Layer0 real weights, synthetic activations; geometric weighted speed across hg/mixed/low regimes; validate end-to-end.",
+        "b": "all",
+        "estimated_expand_speedup": 1.8419858203372699
+      },
+      "8192": {
+        "nblocks": 880,
+        "threads": 256,
+        "reference": "Layer0 real weights, synthetic activations; geometric weighted speed across hg/mixed/low regimes; validate end-to-end.",
+        "b": "all",
+        "estimated_expand_speedup": 1.9494333260340504
+      }
+    }
+  }
+}

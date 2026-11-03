@@ -15,16 +15,26 @@ def _check_version():
 
 def _decode_policy():
     policy = os.environ.get("LORAFORGE_SGLANG_POLICY", "compatible")
-    if policy not in ("compatible", "rank-aware"):
-        raise ValueError("LORAFORGE_SGLANG_POLICY must be compatible or rank-aware")
+    if policy not in ("compatible", "rank-aware", "fleet"):
+        raise ValueError(
+            "LORAFORGE_SGLANG_POLICY must be compatible, rank-aware, or fleet"
+        )
     return policy
 
 
 @lru_cache(maxsize=1)
 def get_backend():
-    """Resolve inside each worker; preserve the native CSGMV prefill path."""
+    """Resolve the explicitly selected policy inside each worker."""
     _check_version()
     policy = _decode_policy()
+    if policy == "fleet":
+        if os.environ.get("LORAFORGE_STABLE_PREFILL", "0") not in ("", "0"):
+            from ._sglang_stable_prefill import install as install_prefill
+
+            install_prefill()
+        from ._sglang_fleet import backend_from_environment
+
+        return backend_from_environment()
     import torch
     from sglang.srt.lora.backend.chunked_backend import ChunkedSgmvLoRABackend
 

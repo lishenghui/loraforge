@@ -102,3 +102,32 @@ def install(library, output, expand="native"):
         install_gate_expand(backend, module, output)
     elif expand != "native":
         raise ValueError("unknown experimental expand policy")
+
+
+def observe_packaged_fleet(output):
+    """Observe the installed Fleet policy without replacing its arithmetic."""
+    import torch
+
+    from loraforge.integrations.sglang import get_backend
+
+    backend = get_backend()
+    previous = backend._b
+    seen = set()
+
+    def expand(self, *args, **kwargs):
+        result = previous(self, *args, **kwargs)
+        capture = torch.cuda.is_current_stream_capturing()
+        key = (self._fleet_decode, capture)
+        if key not in seen:
+            seen.add(key)
+            output.mkdir(parents=True, exist_ok=True)
+            (
+                output / f"fleet-{os.getpid()}-{int(key[0])}-{int(key[1])}.json"
+            ).write_text(
+                json.dumps(
+                    dict(decode=key[0], capture=capture, snapshot=self.fleet_snapshot())
+                )
+            )
+        return result
+
+    backend._b = expand
