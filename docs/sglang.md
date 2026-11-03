@@ -137,4 +137,5 @@ within-shape repeat checks stay 1e-5. Version and input identity are checked whe
 resuming or comparing reports, and mixed outputs are saved before assertions.
 A regression test demonstrates that 0.0573 cross-shape drift is recorded while
 0.05-exceeding drift between matched native/custom batches still fails. Full
-service validation remains pending a rerun.
+service validation remains pending rerun job `23430057` in the independent
+`loraforge-serving-20261103-v2` directory. The updated CPU suite passed 91 checks.

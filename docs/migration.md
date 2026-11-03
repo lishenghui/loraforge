@@ -146,3 +146,17 @@ Wheel/sdist and wheel-from-sdist builds, isolated-wheel lazy imports/plugin
 metadata and fresh-process native SGLang plugin discovery passed.
 Full-model serving, native paging/loader integration, compact serving storage,
 prefill graphs, TP/MoE and performance benchmarking remain separate work.
+
+### Full-model protocol correction
+
+Job `23426358` reached real Llama-3.1-8B inference and passed two cycles of ten
+single-request cases. It stopped in native eager before custom execution because
+the original single-versus-two-request-batch assertion observed a 0.0572664
+logprob difference, exceeding 0.05. This is retained as a failed control run.
+Protocol version 2 reports cross-shape drift diagnostically, checks repeatability
+within single and mixed shapes, and compares backends at matching shapes with
+the unchanged 0.05 threshold. Regression checks retain rejection of above-limit
+matched-backend differences and reject stale protocols/nonfinite values. The
+updated CPU suite passed 91 checks. Rerun `23430057` uses a separate directory
+and the same cached inputs on one small-g GCD (40GB host memory, 20 minutes).
+Full-model validation is still pending; PR #6 remains a draft.
