@@ -65,8 +65,12 @@ Validation after file-workflow integration: 49 CPU tests passed in the existing
 PEFT environment, including real PEFT reload regressions and infeasible-budget
 rejection. Ruff lint/format checks passed. Wheel and sdist built, and the wheel
 was installed in a separate environment with a successful public planner check.
-LUMI GPU job `23423930` is queued for the new ordinary-LoRA/rsLoRA budget
-roundtrips and existing file-compression GPU regressions; results are pending.
+LUMI GPU job `23423930` completed successfully: all 6 tests passed, including
+ordinary-LoRA/rsLoRA budget roundtrips and four existing file-compression
+regressions. Hardware: one MI250X GCD (`gfx90a`), Python 3.12.11,
+PyTorch 2.7.1+rocm6.2.4. Command: `python -m pytest
+tests/test_peft_adapters.py -m gpu -v`. Slurm elapsed time was 2:01; pytest
+time was 67.54 seconds. NVIDIA CUDA validation remains pending.
 
 The local probe revision is `b217b17fac6cd6105cd3f04865962fb51d8a8ba3`;
 LUMI reports `419256022d76c68d482b14323b350678feee0969`. These are distinct

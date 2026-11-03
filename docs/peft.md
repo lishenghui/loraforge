@@ -203,3 +203,11 @@ The included command-line example also accepts `--budget` in place of `--keep`:
 ```bash
 python examples/compress_adapter.py original compressed --budget 128 --device cuda:0
 ```
+
+On 2026-11-03, LUMI Slurm job `23423930` passed all six file-compression
+GPU tests on one MI250X GCD (gfx90a), Python 3.12.11 and PyTorch
+2.7.1+rocm6.2.4. This includes both new budget roundtrips (LoRA and rsLoRA),
+checking exact total ranks, positive per-module ranks, manifest allocation,
+preserved scaling and dense-SVD reconstruction error. The other four cases
+cover the existing heterogeneous/grouped file workflow. No NVIDIA validation
+is claimed by this run.
