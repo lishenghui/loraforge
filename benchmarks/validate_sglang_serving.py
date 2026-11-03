@@ -10,6 +10,7 @@ from __future__ import annotations
 import argparse
 import hashlib
 import json
+import math
 import os
 import signal
 import subprocess
@@ -145,15 +146,67 @@ def normalize(response, tokens):
     }
 
 
+PROTOCOL_VERSION = 2
+
+
+def observed_difference(left, right):
+    """Describe cross-batch drift without claiming identical conditioning."""
+    equal = left["tokens"] == right["tokens"]
+    delta = None
+    if equal:
+        deltas = [
+            abs(a - b) for a, b in zip(left["logprobs"], right["logprobs"], strict=True)
+        ]
+        if not deltas or not all(math.isfinite(value) for value in deltas):
+            raise AssertionError("invalid or nonfinite output logprobs")
+        delta = max(deltas)
+    return {"tokens_equal": equal, "max_logprob_delta": delta}
+
+
 def difference(left, right, tolerance):
-    if left["tokens"] != right["tokens"]:
+    observed = observed_difference(left, right)
+    if not observed["tokens_equal"]:
         raise AssertionError("generated token IDs differ")
-    delta = max(
-        abs(a - b) for a, b in zip(left["logprobs"], right["logprobs"], strict=True)
-    )
+    delta = observed["max_logprob_delta"]
     if delta > tolerance:
         raise AssertionError(f"logprob difference {delta} exceeds {tolerance}")
     return delta
+
+
+def compare_reports(results, tolerance):
+    """Compare each workload against the same native-eager batch shape."""
+    baseline = results["native-eager"]
+    expected_protocol = baseline.get("protocol")
+    if not expected_protocol or expected_protocol.get("version") != PROTOCOL_VERSION:
+        raise AssertionError("unsupported service protocol version")
+    if expected_protocol.get("tolerance") != tolerance:
+        raise AssertionError("comparison tolerance differs from recorded protocol")
+    comparisons = {}
+    for mode, report in results.items():
+        if not report.get("passed"):
+            raise AssertionError("all service modes must pass before comparison")
+        if (
+            report.get("manifest_sha256") != baseline.get("manifest_sha256")
+            or report.get("protocol") != expected_protocol
+        ):
+            raise AssertionError("service inputs or protocols do not match")
+        if set(report["rows"]) != set(baseline["rows"]):
+            raise AssertionError("service case sets differ")
+        if len(report.get("mixed", [])) != 2:
+            raise AssertionError("two mixed-batch outputs required")
+        if mode == "native-eager":
+            continue
+        comparisons[mode] = {
+            "single": {
+                key: difference(value, report["rows"][key], tolerance)
+                for key, value in baseline["rows"].items()
+            },
+            "mixed": [
+                difference(left, right, tolerance)
+                for left, right in zip(baseline["mixed"], report["mixed"], strict=True)
+            ],
+        }
+    return comparisons
 
 
 def serve(args, manifest):
@@ -248,10 +301,18 @@ def run_mode(args, manifest, mode):
     root.mkdir(parents=True, exist_ok=True)
     report_path = root / "result.json"
     manifest_hash = hashlib.sha256(args.manifest.read_bytes()).hexdigest()
-    protocol = {"new_tokens": args.new_tokens, "tolerance": args.tolerance}
+    protocol = {
+        "version": PROTOCOL_VERSION,
+        "new_tokens": args.new_tokens,
+        "tolerance": args.tolerance,
+    }
     if report_path.exists():
         saved = json.loads(report_path.read_text())
-        if saved.get("passed") and saved.get("manifest_sha256") == manifest_hash:
+        if (
+            saved.get("passed")
+            and saved.get("manifest_sha256") == manifest_hash
+            and saved.get("protocol") == protocol
+        ):
             return saved
     root = root / f"attempt-{time.time_ns()}"
     root.mkdir()
@@ -349,13 +410,22 @@ def run_mode(args, manifest, mode):
                         save_report()
             first, second = manifest["adapters"][:2]
             mixed = generate(manifest["prompts"], [first["name"], second["name"]])
-            for index, (adapter, value) in enumerate(
-                zip((first, second), mixed, strict=True)
-            ):
-                difference(
-                    report["rows"][f"{adapter['name']}/{index}"], value, args.tolerance
-                )
             report["mixed"] = mixed
+            save_report()
+            report["mixed_vs_single_diagnostic"] = [
+                observed_difference(report["rows"][f"{adapter['name']}/{index}"], value)
+                for index, (adapter, value) in enumerate(
+                    zip((first, second), mixed, strict=True)
+                )
+            ]
+            save_report()
+            repeated_mixed = generate(
+                manifest["prompts"], [first["name"], second["name"]]
+            )
+            report["mixed_repeat"] = repeated_mixed
+            save_report()
+            for left, right in zip(mixed, repeated_mixed, strict=True):
+                difference(left, right, 1e-5)
             http(url, "/unload_lora_adapter", {"lora_name": first["name"]})
             http(
                 url,
@@ -422,23 +492,18 @@ def main():
         mode: json.loads((args.output / mode / "result.json").read_text())
         for mode in modes
     }
-    if not all(result.get("passed") for result in results.values()):
-        raise AssertionError("all service modes must pass before comparison")
-    comparisons = {}
-    for mode in modes[1:]:
-        comparisons[mode] = {
-            key: difference(value, results[mode]["rows"][key], args.tolerance)
-            for key, value in results["native-eager"]["rows"].items()
-        }
+    comparisons = compare_reports(results, args.tolerance)
     summary = {
         "passed": True,
         "modes": modes,
         "cases_per_mode": len(results[modes[0]]["rows"]),
         "max_logprob_delta": {
-            mode: max(rows.values()) for mode, rows in comparisons.items()
+            mode: max(list(rows["single"].values()) + rows["mixed"])
+            for mode, rows in comparisons.items()
         },
         "tolerance": args.tolerance,
-        "scope": "fixed prompts and real adapter paging; correctness, not task accuracy or throughput",
+        "protocol_version": PROTOCOL_VERSION,
+        "scope": "matched single/mixed batch shapes and real adapter paging; correctness, not accuracy or throughput",
     }
     dump(args.output / "summary.json", summary)
     print(json.dumps(summary, indent=2), flush=True)

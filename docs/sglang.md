@@ -98,13 +98,14 @@ separate servers: native CSGMV eager/graph and LoRAForge eager/graph. It uses
 fewer native GPU slots than adapters and observes the actual native loader and
 model runner. Instrumentation is validation-only and affects timing.
 
-Each server runs two cycles of base/adapter requests, a mixed adapter batch,
+Each server runs two cycles of base/adapter requests, two repeated mixed-adapter batches,
 and explicit HTTP unload/reload. Acceptance requires repeated generated token
 IDs and logprobs to agree, real slot reuse with rank changes, stable native
 buffer addresses, expected eager/graph execution, and actual custom decode calls
 in LoRAForge modes. The `compare` action runs on a CPU/login node after GPU work
-and requires matching token IDs against native eager with max absolute output
-logprob difference at most 0.05. This threshold is a protocol criterion, not
+and compares single requests against native-eager single requests and mixed
+batches against native-eager mixed batches. Both require matching token IDs
+and max absolute output logprob difference at most 0.05. This threshold is a protocol criterion, not
 bitwise equality or an accuracy guarantee. Partial reports and server logs are
 preserved on failure. Completed mode reports can be resumed for the same input
 manifest; use a new output directory when changing protocol options.
@@ -122,4 +123,18 @@ python benchmarks/validate_sglang_serving.py compare --manifest manifest.json --
 The first LUMI full-model run is job `23426358`, using the cached
 Llama-3.1-8B-Instruct snapshot `0e9e39f249a16976918f6564b8830bc894c89659`
 and four existing ordinary-LoRA adapters with ranks 32/16/64/32. Input hashes
-and paths are in the job directory's manifest. Results are pending.
+and paths are in the job directory's manifest. This attempt reached inference
+and completed two cycles of all ten single-request cases with matching outputs.
+It then failed the original cross-batch-size assertion: native eager single
+versus a two-request batch differed by 0.0572664 in output logprob (criterion
+0.05). No LoRAForge mode had run, so this is not evidence of a custom-backend
+mismatch. The failed attempt and logs are retained.
+
+Protocol version 2 records single-versus-mixed drift as a diagnostic, requires
+repeatability within each batch shape, and compares native/custom eager/graph
+results at matching batch shapes. The backend-comparison threshold stays 0.05;
+within-shape repeat checks stay 1e-5. Version and input identity are checked when
+resuming or comparing reports, and mixed outputs are saved before assertions.
+A regression test demonstrates that 0.0573 cross-shape drift is recorded while
+0.05-exceeding drift between matched native/custom batches still fails. Full
+service validation remains pending a rerun.
