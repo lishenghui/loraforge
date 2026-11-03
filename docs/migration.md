@@ -144,8 +144,9 @@ source revision, PyTorch 2.11.0+rocm7.2, Triton 3.6.0. Pytest took 49.11 seconds
 Slurm elapsed time was 61 seconds. Local CPU validation passed 85 tests.
 Wheel/sdist and wheel-from-sdist builds, isolated-wheel lazy imports/plugin
 metadata and fresh-process native SGLang plugin discovery passed.
-Full-model serving, native paging/loader integration, compact serving storage,
-prefill graphs, TP/MoE and performance benchmarking remain separate work.
+The later full-model validation below covers native paging and loading in a
+limited configuration. Compact serving storage, prefill graphs, TP/MoE and
+performance benchmarking remain separate work.
 
 ### Full-model protocol correction
 
@@ -167,9 +168,14 @@ comparisons were exact. Isolated diagnostic job `23430621` completed: native-A/c
 custom-A/native-B still differed by 0.0617663 and 0.0992774 respectively, with
 identical generated tokens. A saved real shrink input demonstrates an FP32
 reduction-order difference crossing a BF16 rounding midpoint; native matches
-the rounded FP64 reference for that element. Both custom operator paths need
-numerical parity work; replacing either alone is insufficient. No numerical
-fix or full-model success is claimed. PR #6 remains a draft.
+the rounded FP64 reference for that element. Replacing either operation alone
+was insufficient. BF16 now uses sequential matrix-dot reductions and explicit
+matrix-shaped store pointers. LUMI job `23431819` passed all 39 GPU checks and
+all four full-model service modes. The final CPU comparison passed with exact
+token IDs and maximum logprob difference **0.0** at matching batch shapes.
+Real rank-changing slot reuse, fixed addresses and eager/graph custom execution
+were observed. Scope and limitations are recorded in [sglang.md](sglang.md).
+
 ## NVIDIA CUDA validation — 2026-11-03
 
 Fixed the wide FlashTSQR kernels to check the actual per-block device shared

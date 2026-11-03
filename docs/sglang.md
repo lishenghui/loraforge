@@ -30,10 +30,10 @@ foreign csgmv replacements. The general entrypoint is inert without
 `LORAFORGE_SGLANG=1`. SGLang's loader logs plugin exceptions, so direct installer
 calls provide a fail-fast version/conflict check for embedded deployments.
 
-Decode uses LoRAForge GEMV for ordinary linear, fused QKV and fused gate/up
+Decode uses LoRAForge operators for ordinary linear, fused QKV and fused gate/up
 projections. Eager prefill and pruned batches retain native CSGMV execution.
-Embedding, lm_head, MoE, tensor-parallel and full-model service behavior are not
-certified by the initial tests. Prefill graph support is explicitly disabled in
+Embedding, lm_head, MoE and tensor-parallel custom operators remain outside
+this integration. Full-model coverage is limited to the configuration below. Prefill graph support is explicitly disabled in
 the subclass until separately validated. No throughput improvement is claimed.
 
 ## Fixed addresses and ownership
@@ -150,7 +150,7 @@ while the largest native/custom output logprob difference was
 outputs matched exactly, as did custom eager/graph outputs. Base-only outputs
 also matched exactly. This narrows investigation to custom adapter decode
 numerics; it does not establish the precise source of the discrepancy.
-Full-model acceptance remains incomplete and PR #6 remains a draft. An isolated
+This earlier attempt did not satisfy full-model acceptance. An isolated
 single-GCD diagnostic (`23430621`) completed three eager diagnostic variants
 with identical inputs. These are diagnostic outputs, not acceptance results:
 
@@ -174,10 +174,9 @@ is -7.286667823791504e-06. Native agrees with the FP64 result rounded to BF16
 in this sample. The native matrix-dot and custom split/tree FP32 reductions
 use different accumulation orders, producing a real BF16 rounding-boundary
 disagreement. This is evidence for decode numerical parity work, not a paging
-or graph-replay fix. No numerical implementation has been changed yet and the
-full-model acceptance gate remains failed.
+or graph-replay fix. The correction and successful validation follow below.
 
-### BF16 correction under validation
+### BF16 correction and completed validation
 
 The BF16 tensor operators now use sequential matrix-dot blocks in FP32,
 retaining BF16 intermediate and scaled-delta rounding. Shrink uses K blocks of
@@ -194,7 +193,26 @@ Local validation passed 91 CPU checks, Ruff checks and wheel/sdist builds.
 Job `23431392` stopped at the GPU regression gate: 20 passed and 19 failed
 because Triton requires the store pointer itself to have the full matrix tile
 shape. No full-model mode ran. Both BF16 stores now explicitly broadcast their
-pointer tiles to the value/mask shape. Rerun `23431819` uses an independent
-`loraforge-serving-20261103-dot-v2` directory and repeats all 39 GPU cases before
-full-model execution. Numerical validation remains pending; prior attempts are
-preserved.
+pointer tiles to the value/mask shape.
+
+Rerun `23431819` completed successfully in 15 minutes 17 seconds on one MI250X
+GCD, using the same pinned environment and cached inputs. All **39 GPU checks
+passed** in 37.64 seconds, including the three exact BF16 native comparisons.
+All four full-model modes passed. Each mode observed 12 loads, 9 slot reuses
+and 7 rank changes with fixed buffer addresses. Eager modes recorded 367 eager
+decode forwards; graph modes recorded 367 graph decode forwards. Custom
+execution/capture was observed in both LoRAForge modes.
+
+The separate CPU `compare` step passed protocol version 2: all generated token
+IDs and output logprobs matched native eager exactly in the ten single-request
+cases and both mixed-batch outputs. Maximum absolute logprob differences were
+**0.0** for native graph, LoRAForge eager and LoRAForge graph, within the
+unchanged 0.05 criterion. The within-shape repeatability gate remained 1e-5.
+Raw reports and prior failed attempts are retained in their separate directories.
+
+This validates BF16 Llama-3.1-8B-Instruct with the four rank-32/16/64/32 adapters,
+two 49-token prompts, 16 generated tokens, TP=1 and two native padded adapter
+slots. It establishes correctness for this finite test set, not universal
+bitwise equality, task accuracy or throughput. NVIDIA serving, alternate tuned
+kernel geometries, compact serving storage, prefill graphs and TP/MoE still
+require separate validation.
