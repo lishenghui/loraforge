@@ -176,3 +176,21 @@ use different accumulation orders, producing a real BF16 rounding-boundary
 disagreement. This is evidence for decode numerical parity work, not a paging
 or graph-replay fix. No numerical implementation has been changed yet and the
 full-model acceptance gate remains failed.
+
+### BF16 correction under validation
+
+The BF16 tensor operators now use sequential matrix-dot blocks in FP32,
+retaining BF16 intermediate and scaled-delta rounding. Shrink uses K blocks of
+256 with 16 output columns; expand uses rank blocks of 16 with 64 output
+columns, matching the pinned native default configuration. Routed-token tiles
+keep metadata on-device and support dynamic ranks under graph replay.
+FP32/FP16 retain the original split-K/tree kernels. This compatibility path
+has no speedup claim and does not certify alternate tuned native geometries.
+
+Three new GPU regression cases require exact native/custom BF16 equality at
+model input widths 4096/14336 and ranks 16/32/64, covering packed fused slices,
+mixed ranks, base routes, scaling and addition to a nonzero base projection.
+Local validation passed 91 CPU checks, Ruff checks and wheel/sdist builds.
+Job `23431392` runs all 39 GPU cases before the four full-model modes in a
+separate directory. GPU and full-model validation of this correction are
+pending; the earlier failed attempts remain preserved.

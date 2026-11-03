@@ -130,3 +130,76 @@ def expand_kernel(
     yp = Y + t * SY0 + nn * SY1
     base = tl.load(yp, nn < end, 0).to(tl.float32)
     tl.store(yp, delta + base, nn < end)
+
+
+@triton.jit
+def shrink_dot_kernel(
+    X, A, Y, MAP, RANKS, K: tl.constexpr, RMAX: tl.constexpr, S: tl.constexpr, SX
+):
+    """One routed token per tile, with sequential FP32 matrix-dot blocks."""
+    t, block = tl.program_id(0), tl.program_id(1)
+    g = tl.load(MAP + t)
+    rank = tl.minimum(tl.load(RANKS + g), RMAX)
+    rows = tl.arange(0, 16)
+    cols = block * 16 + tl.arange(0, 16)
+    kk = tl.arange(0, 256)
+    acc = tl.zeros((16, 16), tl.float32)
+    for start in range(tl.cdiv(K, 256)):
+        k = start * 256 + kk
+        x = tl.load(X + t * SX + k[None, :], (rows[:, None] == 0) & (k[None, :] < K), 0)
+        a = tl.load(
+            A + g * S * RMAX * K + cols[None, :] * K + k[:, None],
+            (k[:, None] < K) & (cols[None, :] < S * rank),
+            0,
+        )
+        acc += tl.dot(x, a)
+    tl.store(
+        Y + t * S * RMAX + cols[None, :],
+        acc,
+        (rows[:, None] == 0) & (cols[None, :] < S * rank),
+    )
+
+
+@triton.jit
+def expand_dot_kernel(
+    V,
+    B,
+    Y,
+    MAP,
+    RANKS,
+    SCALES,
+    OFFSETS,
+    N: tl.constexpr,
+    RMAX: tl.constexpr,
+    S: tl.constexpr,
+    SY0,
+    SY1,
+):
+    t, block, sl = tl.program_id(0), tl.program_id(1), tl.program_id(2)
+    g = tl.load(MAP + t)
+    rank = tl.minimum(tl.load(RANKS + g), RMAX)
+    if rank == 0:
+        return
+    begin, end = tl.load(OFFSETS + sl), tl.load(OFFSETS + sl + 1)
+    rows = tl.arange(0, 16)
+    cols = begin + block * 64 + tl.arange(0, 64)
+    kk = tl.arange(0, 16)
+    acc = tl.zeros((16, 64), tl.float32)
+    for start in range(tl.cdiv(rank, 16)):
+        k = start * 16 + kk
+        v = tl.load(
+            V + t * S * RMAX + sl * rank + k[None, :],
+            (rows[:, None] == 0) & (k[None, :] < rank),
+            0,
+        )
+        b = tl.load(
+            B + g * N * RMAX + cols[None, :] * RMAX + k[:, None],
+            (k[:, None] < rank) & (cols[None, :] < end),
+            0,
+        )
+        acc += tl.dot(v, b)
+    delta = (acc * tl.load(SCALES + g)).to(V.dtype.element_ty)
+    ptr = Y + t * SY0 + cols[None, :] * SY1
+    mask = (rows[:, None] == 0) & (cols[None, :] < end)
+    base = tl.load(ptr, mask, 0)
+    tl.store(ptr, delta + base, mask)

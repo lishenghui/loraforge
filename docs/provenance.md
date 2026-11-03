@@ -164,3 +164,16 @@ The inspected LUMI SGLang checkout reports version 0.5.22 and source commit
 `baa9befa381511cd4d56f83980951e5a45fffc6d`. The integration is version-gated and
 conflict-aware, opt-in per worker, and retains native eager prefill/pruned paths.
 Validation scope and commands live in [sglang.md](sglang.md).
+
+### BF16 decode numerical correction
+
+The original project-owned split-K/tree GEMV reduction failed full-model BF16
+parity despite passing operator tolerances. LoRAForge now implements separate
+BF16 routed-token matrix-dot kernels: shrink uses sequential K=256 blocks and
+16 output columns; expand uses sequential rank blocks of 16 and 64 output
+columns. Each uses FP32 accumulation and BF16 intermediate/delta rounding.
+These new kernels were implemented here against the observed SGLang 0.5.22
+default reduction contract, retaining native slot layout but no framework
+dependency. FP32/FP16 retain the extracted GEMV kernels. This is a correctness
+compatibility path; performance equivalence and tuned SGLang configurations
+are not claimed. Hardware/full-model results are tracked in sglang.md.

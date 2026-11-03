@@ -49,6 +49,7 @@ def lora_shrink(x, weights, ranks, token_map, num_slices: int = 1):
     A is [slots, slices*max_rank, input]; actual slices are packed with stride
     rank[slot]. Caller guarantees device metadata values are valid: mappings in
     [0, slots), ranks in [0, max_rank]. Rank zero represents base-model tokens.
+    BF16 uses sequential matrix-dot blocks to avoid split-K rounding drift.
     No device values are read on the host, so warmed calls support graph capture.
     """
     import torch
@@ -66,6 +67,23 @@ def lora_shrink(x, weights, ranks, token_map, num_slices: int = 1):
     tokens, width = x.shape
     out = torch.zeros((tokens, num_slices * rank), device=x.device, dtype=x.dtype)
     if not tokens:
+        return out
+    if x.dtype == torch.bfloat16:
+        from ._gemv_kernels import shrink_dot_kernel
+
+        with torch.cuda.device(x.device):
+            shrink_dot_kernel[(tokens, triton.cdiv(num_slices * rank, 16))](
+                x,
+                weights,
+                out,
+                token_map,
+                ranks,
+                width,
+                rank,
+                num_slices,
+                x.stride(0),
+                num_warps=4,
+            )
         return out
     block = 256
     splits = max(1, min(triton.cdiv(width, block), triton.cdiv(440, tokens)))
@@ -117,7 +135,8 @@ def lora_expand(
     offsets are increasing, start at zero and end at total_output; each slice
     length is <= max_slice_size. Caller guarantees these device values, metadata
     ranges and non-overlapping output storage. The scaled delta is rounded to
-    the activation dtype before base addition, matching SGLang CSGMV numerics.
+    the activation dtype before base addition. BF16 uses sequential matrix-dot
+    blocks matching the pinned SGLang default reduction geometry.
     """
     import torch
 
@@ -174,6 +193,26 @@ def lora_expand(
         if base is None
         else base
     )
+    if x.shape[0] and x.dtype == torch.bfloat16:
+        from ._gemv_kernels import expand_dot_kernel
+
+        with torch.cuda.device(x.device):
+            expand_dot_kernel[(x.shape[0], triton.cdiv(max_slice_size, 64), slices)](
+                x,
+                weights,
+                output,
+                token_map,
+                ranks,
+                scales,
+                offsets,
+                width,
+                rank,
+                slices,
+                output.stride(0),
+                output.stride(1),
+                num_warps=4,
+            )
+        return output
     if x.shape[0]:
         block = 128 if rank <= 32 else 64 if rank <= 64 else 32
         with torch.cuda.device(x.device):
