@@ -44,3 +44,34 @@ Date-named experiment directories, private datasets, model weights, absolute
 cluster paths, job launchers, paper submodules, and generated result trees stay
 in their research repositories. Benchmarks use portable inputs and publish
 hardware, versions, warmup, timing scope, tolerances, and limitations.
+
+## Local audit and progress — 2026-11-03
+
+Stages 1–3 have implementations and recorded validation. Stage 4 now includes
+`loraforge.compression.allocation.allocate_spectral_budget(spectra, budget)`:
+a CPU-only, deterministic equal-cost direction planner maximizing retained
+spectral energy. For example, `{"a": [6, 2], "b": [5, 1]}` with budget 2 yields
+`{"a": 1, "b": 1}`. The planner supports a minimum rank constraint. The PEFT workflow now accepts
+`budget=` and reserves one direction per module, measures spectra through
+FlashTSQR, and records the chosen ranks in the export manifest.
+
+Still pending in stage 4: quality-curve objectives and heterogeneous costs. Stages 5–6 remain pending:
+serving kernels, compact runtime/loading and slot lifecycle, SGLang, vLLM,
+graph replay and framework/hardware validation. Experimental cuSOLVER batched
+EVD is also intentionally absent. Research results, launchers and paper assets
+are excluded from migration rather than counted as missing library features.
+
+Validation after file-workflow integration: 49 CPU tests passed in the existing
+PEFT environment, including real PEFT reload regressions and infeasible-budget
+rejection. Ruff lint/format checks passed. Wheel and sdist built, and the wheel
+was installed in a separate environment with a successful public planner check.
+LUMI GPU job `23423930` is queued for the new ordinary-LoRA/rsLoRA budget
+roundtrips and existing file-compression GPU regressions; results are pending.
+
+The local probe revision is `b217b17fac6cd6105cd3f04865962fb51d8a8ba3`;
+LUMI reports `419256022d76c68d482b14323b350678feee0969`. These are distinct
+snapshots and no remote code was imported. GitHub SSH authentication failed, but HTTPS read access succeeded:
+LoRAForge HEAD matches the local baseline
+`5fa6242dd40116b7218bda130eb2f2150ea42a12`; probe GitHub HEAD remains the original
+migration baseline `5fd6ae060d106066b306959f9a34b726a281ef4c`.
+The planner's later local source revision is recorded explicitly in provenance.

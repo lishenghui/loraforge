@@ -402,8 +402,9 @@ def save_peft_adapter(
 def compress_peft_adapter(
     source: str | Path,
     output: str | Path,
-    keep: int | Mapping[str, int],
+    keep: int | Mapping[str, int] | None = None,
     *,
+    budget: int | None = None,
     device: str,
     output_dtype: OutputDtype = "source",
     eigh_backend: EighBackend = "auto",
@@ -411,7 +412,10 @@ def compress_peft_adapter(
 ) -> AdapterExport:
     """Load, compress through GPU FlashTSQR, and export a standard PEFT adapter.
 
-    keep is a shared positive rank or an exact module-name-to-rank mapping.
+    Provide keep (a positive rank or exact module-name mapping), or budget (an
+    integer total direction count). Budget mode reserves one rank per module
+    then maximizes unscaled spectral energy. It measures spectra with FlashTSQR
+    before a second compression pass; it does not optimize quality or bytes.
     device must explicitly select a CUDA/ROCm GPU. Same-shape, same-dtype modules
     with equal retained rank are batched up to batch_size to bound GPU memory.
     """
@@ -422,6 +426,36 @@ def compress_peft_adapter(
     adapter = load_peft_adapter(source)
     _destination(adapter, output)
     _positive_int(batch_size, "batch_size")
+    selected = torch.device(device)
+    if selected.type != "cuda":
+        raise ValueError("compression requires an explicit CUDA/ROCm GPU device")
+    if output_dtype not in ("source", "float32", "float16", "bfloat16"):
+        raise ValueError(f"unsupported output dtype: {output_dtype}")
+    if eigh_backend not in ("auto", "torch", "jacobi", "cpu"):
+        raise ValueError(f"unknown EVD backend: {eigh_backend}")
+    if (keep is None) == (budget is None):
+        raise ValueError("provide exactly one of keep or budget")
+    if budget is not None:
+        from loraforge.compression.allocation import allocate_spectral_budget
+
+        # Check feasibility before any GPU work. PEFT requires positive ranks.
+        allocate_spectral_budget(
+            {m.name: [0.0] * m.rank for m in adapter.modules}, budget, min_rank=1
+        )
+        selected = torch.device(device)
+        if selected.type != "cuda":
+            raise ValueError("compression requires an explicit CUDA/ROCm GPU device")
+        spectra = {}
+        for module in adapter.modules:
+            result = truncate_lora(
+                module.a.to(selected),
+                module.b.to(selected),
+                0,
+                eigh_backend=eigh_backend,
+            )
+            spectra[module.name] = result.singular_values.cpu().tolist()
+            del result
+        keep = allocate_spectral_budget(spectra, budget, min_rank=1)
     if isinstance(keep, Mapping):
         if set(keep) != {module.name for module in adapter.modules}:
             raise ValueError(
@@ -439,13 +473,6 @@ def compress_peft_adapter(
             raise ValueError(
                 f"FlashTSQR requires rank <= ambient dimensions: {module.name}"
             )
-    selected = torch.device(device)
-    if selected.type != "cuda":
-        raise ValueError("compression requires an explicit CUDA/ROCm GPU device")
-    if output_dtype not in ("source", "float32", "float16", "bfloat16"):
-        raise ValueError(f"unsupported output dtype: {output_dtype}")
-    if eigh_backend not in ("auto", "torch", "jacobi", "cpu"):
-        raise ValueError(f"unknown EVD backend: {eigh_backend}")
     factors, executions = {}, {}
     groups = {}
     for module in adapter.modules:
@@ -474,4 +501,11 @@ def compress_peft_adapter(
         "requested_eigh_backend": eigh_backend,
         "batch_size": batch_size,
     }
+    if budget is not None:
+        parameters["allocation"] = {
+            "objective": "unscaled-spectral-energy",
+            "direction_budget": budget,
+            "min_rank": 1,
+            "ranks": plan,
+        }
     return _export(adapter, output, factors, output_dtype, executions, parameters)

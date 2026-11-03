@@ -388,3 +388,39 @@ def test_gpu_file_compression_roundtrip(tmp_path, batched, use_rslora):
             math.sqrt(source_layer.rank) if use_rslora else source_layer.rank
         )
         assert layer.scaling["default"] == pytest.approx(expected_scale, rel=1e-14)
+
+
+@pytest.mark.parametrize("kwargs", [{}, {"keep": 2, "budget": 4}, {"budget": 1}])
+def test_budget_rejected_before_gpu_work(source, tmp_path, kwargs):
+    output = tmp_path / "invalid-budget"
+    with pytest.raises(ValueError):
+        compress_peft_adapter(source[0], output, device="cuda:0", **kwargs)
+    assert not output.exists()
+
+
+@pytest.mark.gpu
+@pytest.mark.parametrize("use_rslora", [False, True])
+def test_gpu_budget_roundtrip(tmp_path, use_rslora):
+    if not torch.cuda.is_available():
+        pytest.skip("requires allocated GPU")
+    source = make_source(tmp_path, use_rslora=use_rslora)
+    adapter = load_peft_adapter(source[0])
+    budget = len(adapter.modules) + 3
+    result = compress_peft_adapter(
+        source[0], tmp_path / "budget", budget=budget, device="cuda:0"
+    )
+    loaded = load_peft_adapter(result.directory)
+    assert sum(m.rank for m in loaded.modules) == budget
+    assert all(m.rank >= 1 for m in loaded.modules)
+    plan = result.manifest["compression"]["allocation"]
+    assert plan["direction_budget"] == budget
+    for original, compact in zip(adapter.modules, loaded.modules, strict=True):
+        assert compact.scaling == pytest.approx(original.scaling)
+        singular = torch.linalg.svdvals(original.b.float() @ original.a.float())
+        error = (
+            original.b.float() @ original.a.float()
+            - compact.b.float() @ compact.a.float()
+        ).norm()
+        assert error.item() == pytest.approx(
+            singular[compact.rank :].norm().item(), rel=0.02, abs=0.02
+        )
