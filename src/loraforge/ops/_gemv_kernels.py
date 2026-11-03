@@ -154,7 +154,7 @@ def shrink_dot_kernel(
         )
         acc += tl.dot(x, a)
     tl.store(
-        Y + t * S * RMAX + cols[None, :],
+        tl.broadcast_to(Y + t * S * RMAX + cols[None, :], (16, 16)),
         acc,
         (rows[:, None] == 0) & (cols[None, :] < S * rank),
     )
@@ -199,7 +199,7 @@ def expand_dot_kernel(
         )
         acc += tl.dot(v, b)
     delta = (acc * tl.load(SCALES + g)).to(V.dtype.element_ty)
-    ptr = Y + t * SY0 + cols[None, :] * SY1
+    ptr = tl.broadcast_to(Y + t * SY0 + cols[None, :] * SY1, (16, 64))
     mask = (rows[:, None] == 0) & (cols[None, :] < end)
     base = tl.load(ptr, mask, 0)
     tl.store(ptr, delta + base, mask)

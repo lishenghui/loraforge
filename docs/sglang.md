@@ -191,6 +191,10 @@ Three new GPU regression cases require exact native/custom BF16 equality at
 model input widths 4096/14336 and ranks 16/32/64, covering packed fused slices,
 mixed ranks, base routes, scaling and addition to a nonzero base projection.
 Local validation passed 91 CPU checks, Ruff checks and wheel/sdist builds.
-Job `23431392` runs all 39 GPU cases before the four full-model modes in a
-separate directory. GPU and full-model validation of this correction are
-pending; the earlier failed attempts remain preserved.
+Job `23431392` stopped at the GPU regression gate: 20 passed and 19 failed
+because Triton requires the store pointer itself to have the full matrix tile
+shape. No full-model mode ran. Both BF16 stores now explicitly broadcast their
+pointer tiles to the value/mask shape. Rerun `23431819` uses an independent
+`loraforge-serving-20261103-dot-v2` directory and repeats all 39 GPU cases before
+full-model execution. Numerical validation remains pending; prior attempts are
+preserved.
