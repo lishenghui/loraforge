@@ -397,3 +397,34 @@ quality-regression bound. Performance uses a fixed native-then-candidate mode
 order and few repetitions. A useful pilot should be followed by larger
 adapter-relevant held-out evaluations and repeated/reversed-order speed runs.
 There is no automatic promotion or merging based on these pilot results.
+
+#### First pilot results — job 23438767
+
+Completed on one MI250X GCD in 14m27s; separate CPU analysis verified actual
+forced token IDs, complete trace positions and native/candidate graph-execution
+evidence. In nine LoRA workloads (four adapters at batch 1/2 plus a mixed
+batch), median HTTP speedup was **1.1101x–1.1185x**, corresponding to
+**9.9%–10.6% lower request latency**. Base-only speedup was 1.0008x. For example,
+rank-32 adapter_0 at batch 1 took 1.6064s native versus 1.4371s Fleet for 64
+new tokens. Inputs were the two 49-token prompts; adapters were resident and
+warmed. This includes base-model computation but excludes startup and paging.
+Fixed mode order and three trials still require reversed-order replication.
+
+On the 32 MedMCQA validation questions, both modes scored **14/32 (43.75%)**,
+with the same set of correct answers (paired losses/gains both zero). Invalid
+final-answer formats numbered 5 native and 4 Fleet; all reached the 96-token
+output limit. These count as incorrect under the declared protocol. The
+approximate conservative 95% degradation interval is **[-13.57, +13.57]
+percentage points**, so the pilot does not certify quality non-inferiority.
+Larger evaluation should increase the output allowance uniformly, retain
+truncation counts, and cover the other adapters' relevant tasks.
+
+Of 120 adapter decode positions under identical forced prefixes, one top-1
+choice changed. Mean KL(native || Fleet) was 0.00038537, maximum KL 0.00546859,
+and maximum total variation 0.0441468. The top-1 change occurred at
+adapter_1/prompt_0, generated-token index 8, with native top-two logprob margin
+0.125. All 30 base-only decode positions and 10 prefill positions matched
+exactly (KL and total variation zero). These are measured distribution
+changes, not a task-quality score. The strict compatibility failure remains
+recorded; the candidate now has a positive service-performance pilot and an
+inconclusive, rather than certified-equivalent, quality pilot.
