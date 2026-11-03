@@ -62,14 +62,14 @@ def install_observer():
     previous_load = LoRAMemoryPool.load_lora_weight_to_buffer
 
     @wraps(previous_load)
-    def load(pool, uid, buffer_id, adapter, *args, **kwargs):
+    def load(pool, uid, buffer_id, lora_adapter, *args, **kwargs):
         before = buffers(pool)
-        result = previous_load(pool, uid, buffer_id, adapter, *args, **kwargs)
+        result = previous_load(pool, uid, buffer_id, lora_adapter, *args, **kwargs)
         loads.append(
             {
                 "uid": str(uid),
                 "slot": buffer_id,
-                "rank": int(adapter.config.r) if adapter is not None else 0,
+                "rank": int(lora_adapter.config.r) if lora_adapter is not None else 0,
                 "addresses_stable": buffers(pool) == before,
             }
         )
@@ -170,6 +170,7 @@ def serve(args, manifest):
         context_length=1024,
         attention_backend="triton",
         disable_radix_cache=True,
+        disable_prefill_cuda_graph=True,
         chunked_prefill_size=512,
         max_prefill_tokens=512,
         max_total_tokens=2048,
@@ -247,10 +248,14 @@ def run_mode(args, manifest, mode):
     root.mkdir(parents=True, exist_ok=True)
     report_path = root / "result.json"
     manifest_hash = hashlib.sha256(args.manifest.read_bytes()).hexdigest()
+    protocol = {"new_tokens": args.new_tokens, "tolerance": args.tolerance}
     if report_path.exists():
         saved = json.loads(report_path.read_text())
         if saved.get("passed") and saved.get("manifest_sha256") == manifest_hash:
             return saved
+    root = root / f"attempt-{time.time_ns()}"
+    root.mkdir()
+    attempt_report = root / "result.json"
     env = {k: v for k, v in os.environ.items() if not k.startswith("PROBE_")}
     env.update(
         LORAFORGE_SGLANG="1" if mode.startswith("loraforge") else "0",
@@ -276,10 +281,17 @@ def run_mode(args, manifest, mode):
     report = {
         "mode": mode,
         "manifest_sha256": manifest_hash,
+        "protocol": protocol,
+        "attempt": str(root),
         "rows": {},
         "passed": False,
     }
-    dump(report_path, report)
+
+    def save_report():
+        dump(report_path, report)
+        dump(attempt_report, report)
+
+    save_report()
     with (root / "server.log").open("w") as log:
         process = subprocess.Popen(
             command,
@@ -334,7 +346,7 @@ def run_mode(args, manifest, mode):
                             difference(report["rows"][key], value, 1e-5)
                         else:
                             report["rows"][key] = value
-                        dump(report_path, report)
+                        save_report()
             first, second = manifest["adapters"][:2]
             mixed = generate(manifest["prompts"], [first["name"], second["name"]])
             for index, (adapter, value) in enumerate(
@@ -363,11 +375,11 @@ def run_mode(args, manifest, mode):
                 raise AssertionError("all adapter outputs identical to the base model")
             report["audit"] = audit_summary(root, mode)
             report["passed"] = True
-            dump(report_path, report)
+            save_report()
             print(mode, "passed", report["audit"], flush=True)
         except BaseException as error:
             report["error"] = repr(error)
-            dump(report_path, report)
+            save_report()
             raise
         finally:
             if process.poll() is None:
