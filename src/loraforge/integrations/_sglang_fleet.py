@@ -266,8 +266,8 @@ def create_backend(catalog):
         def run_qkv_lora(
             self,
             x,
-            a,
-            b,
+            qkv_lora_a,
+            qkv_lora_b,
             output_offset,
             max_qkv_out_dim,
             base_output=None,
@@ -276,8 +276,8 @@ def create_backend(catalog):
             **kwargs,
         ):
             return self._b(
-                self._a(x, a, self.batch_info, n_slices),
-                b,
+                self._a(x, qkv_lora_a, self.batch_info, n_slices),
+                qkv_lora_b,
                 self.batch_info,
                 output_offset,
                 max_qkv_out_dim,
@@ -286,14 +286,21 @@ def create_backend(catalog):
             )
 
         def run_gate_up_lora(
-            self, x, a, b, output_offset, base_output=None, *args, **kwargs
+            self,
+            x,
+            gate_up_lora_a,
+            gate_up_lora_b,
+            output_offset,
+            base_output=None,
+            *args,
+            **kwargs,
         ):
             return self._b(
-                self._a(x, a, self.batch_info, 2),
-                b,
+                self._a(x, gate_up_lora_a, self.batch_info, 2),
+                gate_up_lora_b,
                 self.batch_info,
                 output_offset,
-                b.shape[-2] // 2,
+                gate_up_lora_b.shape[-2] // 2,
                 base_output,
                 kwargs.get("output_offset_cpu"),
             )

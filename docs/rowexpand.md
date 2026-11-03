@@ -77,10 +77,16 @@ prefill-graph correctness in this package.
   Twelve real SGLang cases covered four projections, decode batches 4/33 and
   prefill 67, mixed ranks with native rank-128 fallback, and decode graph replay
   while changing slot ranks through 16/0/64/3 and reversing routes.
-- Full-model job **23440815** is submitted with the packaged path, the same
-  four Llama adapters and 256-token quality allowance. Its results and Qwen
-  stable-prefill graph reproduction remain pending. Operator migration fidelity does not certify
-  task quality, performance, or all of probe's research features.
+- Full-model job **23440815** failed after 12m32s. Native completed; Fleet
+  failed during startup because fused projection methods renamed the native
+  `qkv_lora_a/b` and `gate_up_lora_a/b` keyword parameters to `a/b`. The previous
+  GPU tests called private helpers and therefore missed this framework boundary.
+  The parameter names are corrected, and all twelve integration cases now use
+  the public methods with the same keywords as actual SGLang layers.
+- Retry **23441471** runs the GPU regression first, then the same four-adapter
+  full-model protocol with a 256-token quality allowance. Full-model results and
+  Qwen stable-prefill graph reproduction remain pending. Operator migration
+  fidelity does not certify task quality or performance.
 
 The previous 1.11x–1.12x pilot used partial experimental paths. Those measurements
 must not be labeled as results of this complete migrated runtime. vLLM integration

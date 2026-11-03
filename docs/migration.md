@@ -222,3 +222,9 @@ SGLang export bridge are also extracted. See [RowExpand](rowexpand.md) for the
 component checklist and limits. Job 23440720 passed 33 GPU checks, including
 21 exact old/new kernel comparisons. Full-model verification of this packaged
 path is still pending; the earlier partial-path speedups do not validate it.
+
+Full-model job 23440815 exposed a fused-projection keyword interface mismatch
+after native completed. QKV and gate/up now preserve SGLang's parameter names;
+integration tests exercise public keyword calls rather than private helpers.
+Retry 23441471 gates the model run on those GPU regressions. The failed attempt
+is retained and does not count as a full-model pass.

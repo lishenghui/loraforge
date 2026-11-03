@@ -90,10 +90,22 @@ def test_all_projection_paths(fleet_class, monkeypatch, name, slices, decode, to
         backend.prepare_lora_batch(fb, routes, [0, 128, 128, 128], scales, decode)
 
     def compute():
-        z = backend._a(x, a, backend.batch_info, slices)
-        return backend._b(
-            z, b, backend.batch_info, offsets, 64, base.clone(), offsets_cpu
+        # Match the real SGLang layer's keyword calls, not just private helpers.
+        common = dict(
+            output_offset=offsets,
+            output_offset_cpu=offsets_cpu,
+            base_output=base.clone(),
         )
+        if slices == 3:
+            return backend.run_qkv_lora(
+                x=x, qkv_lora_a=a, qkv_lora_b=b, max_qkv_out_dim=64, **common
+            )
+        if slices == 2:
+            return backend.run_gate_up_lora(
+                x=x, gate_up_lora_a=a, gate_up_lora_b=b, **common
+            )
+        z = backend.run_lora_a_sgemm(x=x, weights=a)
+        return backend.run_lora_b_sgemm(x=z, weights=b, **common)
 
     def oracle():
         out = base.clone()
