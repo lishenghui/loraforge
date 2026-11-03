@@ -338,7 +338,9 @@ def analyze(args):
             reports[mode]["trace"][case]["tokens"][step] != a["forced_token"]
             for mode in ("native", "fleet")
         ):
-            raise ValueError("actual generated token IDs differ from forced continuation")
+            raise ValueError(
+                "actual generated token IDs differ from forced continuation"
+            )
         x, y = a["logits"].double(), b["logits"].double()
         if (
             x.shape != y.shape
