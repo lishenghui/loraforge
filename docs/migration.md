@@ -163,6 +163,10 @@ Rerun `23430057` completed all four modes with real rank-changing slot reuse,
 stable addresses and eager/graph execution. Final matched-shape comparison
 failed: token IDs all matched, but native/custom logprob drift reached
 0.08525431156158447 > 0.05. Native eager/graph, custom eager/graph and base-only
-comparisons were exact. Isolated diagnostic job `23430621` investigates the
-custom shrink/expand numerics; no root cause or full-model success is claimed.
-PR #6 remains a draft.
+comparisons were exact. Isolated diagnostic job `23430621` completed: native-A/custom-B and
+custom-A/native-B still differed by 0.0617663 and 0.0992774 respectively, with
+identical generated tokens. A saved real shrink input demonstrates an FP32
+reduction-order difference crossing a BF16 rounding midpoint; native matches
+the rounded FP64 reference for that element. Both custom operator paths need
+numerical parity work; replacing either alone is insufficient. No numerical
+fix or full-model success is claimed. PR #6 remains a draft.

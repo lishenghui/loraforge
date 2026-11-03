@@ -151,6 +151,28 @@ outputs matched exactly, as did custom eager/graph outputs. Base-only outputs
 also matched exactly. This narrows investigation to custom adapter decode
 numerics; it does not establish the precise source of the discrepancy.
 Full-model acceptance remains incomplete and PR #6 remains a draft. An isolated
-single-GCD diagnostic (`23430621`) compares shrink/expand on identical real
-activations and separately substitutes native shrink or native expand. Its
-hybrid outputs are diagnostic only, not acceptance results.
+single-GCD diagnostic (`23430621`) completed three eager diagnostic variants
+with identical inputs. These are diagnostic outputs, not acceptance results:
+
+| Decode A / B implementation | Maximum logprob difference vs native |
+| --- | --- |
+| custom / custom (original validation) | 0.08525431156158447 |
+| native / custom | 0.06176626682281494 |
+| custom / native | 0.09927737712860107 |
+
+All generated token IDs matched. Replacing either operation alone does not
+restore the 0.05 criterion; both custom operator paths contribute to end-to-end
+numerical differences. On identical real activations, the first 128 sampled
+shrink calls differed in one of 7,168 live elements by 2.9802322387695312e-08;
+the paired 128 expand calls matched in all 1,376,256 elements. This bounded
+sample does not establish expand equality for later calls.
+
+The saved shrink input (rank 32, two slices, input width 4096) has a live element
+with FP64 reference -7.2882194217527285e-06. Native rounds to
+-7.3015689849853516e-06, custom to -7.271766662597656e-06; their BF16 midpoint
+is -7.286667823791504e-06. Native agrees with the FP64 result rounded to BF16
+in this sample. The native matrix-dot and custom split/tree FP32 reductions
+use different accumulation orders, producing a real BF16 rounding-boundary
+disagreement. This is evidence for decode numerical parity work, not a paging
+or graph-replay fix. No numerical implementation has been changed yet and the
+full-model acceptance gate remains failed.
