@@ -288,13 +288,24 @@ native path, and unsupported noncontiguous shrink inputs retain the tensor
 operator. Prefill and framework globals are unchanged. See provenance for the
 pinned upstream-derived source and license.
 
-Validation job `23436482` is pending for the rank-aware candidate: GPU checks,
-capacity-64/actual-rank-16/32/64 operator timings, and four-mode full-model
-verification. The offline benchmark also loads a separately CPU-built public
+Validation job `23436482` completed: 42 GPU checks passed, and the four-mode
+full-model comparison passed with identical token IDs and maximum logprob
+delta 0.0. Each mode exercised 12 loads, 9 slot reuses and 7 rank changes.
+With capacity 64 and actual ranks 16/32/64, graph operator latency relative
+to native was 1.0023x/1.0037x/1.0014x for batch 1/2/8 (sum of 12 case
+medians per batch). This recovers native-level operator performance; it is
+not an end-to-end throughput measurement.
+
+The offline benchmark also loads a separately CPU-built public
 Fleet V3 HIP library, including A-only/B-only hybrid comparisons with native.
 Its compact B layout is prepared outside timing, as a resident shadow layout;
 that is a layout-plus-kernel comparison. This does not migrate Fleet's loader,
 per-layer compact pools or global hooks into the library. The isolated source
 only adds line breaks before kernel launches to avoid the current HIP
 translator's same-line parsing error. HIP paths are diagnostic candidates,
-not validated serving defaults. Local CPU checks passed 94 cases.
+not validated serving defaults. The HIP-A/native-B hybrid's graph operator
+speedup over native was 1.785x/1.772x/1.679x for batch 1/2/8. Synthetic
+output drift was zero, which does not establish full-model numerical parity.
+Isolated full-model validation job `23436657` for this hybrid is pending;
+its observer patch is outside the production library. Local CPU checks
+passed 94 cases.
