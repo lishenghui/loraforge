@@ -216,3 +216,52 @@ slots. It establishes correctness for this finite test set, not universal
 bitwise equality, task accuracy or throughput. NVIDIA serving, alternate tuned
 kernel geometries, compact serving storage, prefill graphs and TP/MoE still
 require separate validation.
+
+## BF16 operator latency — 2026-11-03
+
+LUMI job `23434324` completed in 58 seconds on one MI250X GCD using the same
+SGLang 0.5.22 / PyTorch 2.11 ROCm 7.2 / Triton 3.6 environment. This is an
+operator microbenchmark, not full-model throughput. Compare native CSGMV,
+pre-correction GEMV (`00b4ed9`) and the validated BF16 compatibility kernels.
+
+`benchmarks/benchmark_sglang_decode.py` uses synthetic BF16 tensors at Llama 8B
+QKV, O, gate/up and down-projection dimensions, ranks 16/32/64 and batches
+1/2/8. All tokens use the same adapter, with weights and routing already
+resident. A+B computation includes cloning a nonzero base output. Compilation
+and warmup are excluded. Five trials of 50 iterations interleave backends in
+seeded randomized order; inputs/weights are repeatedly reused (warm cache).
+CUDA-event intervals in eager mode include host submission gaps. Graph mode
+replays a captured A+B pair. No paging or base-model computation is timed.
+
+For each batch, ratios below divide sums of per-case median event latencies
+across its 12 projection/rank combinations. They are not model-weighted
+throughput estimates. Larger ratios mean higher latency:
+
+| Batch | Graph compatible/native | Graph compatible/legacy | Eager compatible/native | Eager compatible/legacy |
+| --- | --- | --- | --- | --- |
+| 1 | 1.014x | 1.766x | 1.071x | 0.771x |
+| 2 | 1.091x | 1.627x | 1.069x | 0.770x |
+| 8 | 1.500x | 1.263x | 1.066x | 0.763x |
+
+At rank 32, batch 8, gate/up graph replay measured 33.26 us native,
+66.55 us legacy and 72.82 us compatible. Across all graph cases, compatible
+latency ranged from 0.987x to 2.729x native. Across case/backend combinations,
+the median five-trial relative range was 0.26% for graph and 4.51% for eager;
+maximum ranges were 2.42% and 9.51%, respectively. These describe within-run
+variation, not uncertainty across independent allocations.
+
+The compatibility path has lost the legacy small-batch graph advantage and
+is slower than native for larger homogeneous batches. Eager is faster than
+legacy but still slower than native. These results support no serving-speedup
+claim. The legacy implementation remains a failed full-model numerical control,
+even though this synthetic output sample happened to agree with native.
+
+Reproduce with a trusted historical module from this repository:
+
+```bash
+git show 00b4ed9:src/loraforge/ops/gemv.py > /tmp/legacy_gemv.py
+python benchmarks/benchmark_sglang_decode.py --legacy-module /tmp/legacy_gemv.py --output speed.json
+```
+
+Run on an allocated GPU with the validated framework environment. The JSON
+records versions, source hashes, individual trial timings and numerical drift.
