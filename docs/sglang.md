@@ -136,6 +136,21 @@ results at matching batch shapes. The backend-comparison threshold stays 0.05;
 within-shape repeat checks stay 1e-5. Version and input identity are checked when
 resuming or comparing reports, and mixed outputs are saved before assertions.
 A regression test demonstrates that 0.0573 cross-shape drift is recorded while
-0.05-exceeding drift between matched native/custom batches still fails. Full
-service validation remains pending rerun job `23430057` in the independent
-`loraforge-serving-20261103-v2` directory. The updated CPU suite passed 91 checks.
+0.05-exceeding drift between matched native/custom batches still fails. The
+updated CPU suite passed 91 checks.
+
+Rerun `23430057` completed all four service modes in 6 minutes 31 seconds in
+`loraforge-serving-20261103-v2`. Each mode recorded 12 adapter loads, 9 slot
+reuses and 7 rank changes with stable addresses. Native and custom graph modes
+each recorded 367 decode graph forwards; the custom observer also recorded
+actual GEMV capture/execution. These per-mode checks passed, but the final CPU
+comparison **failed**: generated token IDs matched for every single/mixed case,
+while the largest native/custom output logprob difference was
+0.08525431156158447, above the unchanged 0.05 criterion. Native eager/graph
+outputs matched exactly, as did custom eager/graph outputs. Base-only outputs
+also matched exactly. This narrows investigation to custom adapter decode
+numerics; it does not establish the precise source of the discrepancy.
+Full-model acceptance remains incomplete and PR #6 remains a draft. An isolated
+single-GCD diagnostic (`23430621`) compares shrink/expand on identical real
+activations and separately substitutes native shrink or native expand. Its
+hybrid outputs are diagnostic only, not acceptance results.

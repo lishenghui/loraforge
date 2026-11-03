@@ -159,4 +159,10 @@ the unchanged 0.05 threshold. Regression checks retain rejection of above-limit
 matched-backend differences and reject stale protocols/nonfinite values. The
 updated CPU suite passed 91 checks. Rerun `23430057` uses a separate directory
 and the same cached inputs on one small-g GCD (40GB host memory, 20 minutes).
-Full-model validation is still pending; PR #6 remains a draft.
+Rerun `23430057` completed all four modes with real rank-changing slot reuse,
+stable addresses and eager/graph execution. Final matched-shape comparison
+failed: token IDs all matched, but native/custom logprob drift reached
+0.08525431156158447 > 0.05. Native eager/graph, custom eager/graph and base-only
+comparisons were exact. Isolated diagnostic job `23430621` investigates the
+custom shrink/expand numerics; no root cause or full-model success is claimed.
+PR #6 remains a draft.
