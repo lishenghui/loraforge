@@ -125,3 +125,13 @@ The new component deliberately implements synchronous CPU snapshots and explicit
 pool/generation ownership. It reuses LoRAForge's maintained PEFT validator and
 preserves scaling. It does not claim equivalence to the research GPU loader,
 persistent shadows, fused projections or graph replay. No numerical kernel changes.
+
+### GPU residency and scoped leases (2026-11-03)
+
+`runtime/gpu.py` and `tests/test_runtime_gpu.py` are new library code, building
+on the CPU slot contract from commit `4f15389`. No research or third-party code
+is copied and no numerical kernel changes. The implementation uses pinned host
+staging, per-load completion events, explicit read leases and PyTorch stream
+recording. Reload publishes freshly allocated compact factors rather than
+mutating old addresses. GPU graph replay and SGLang/vLLM registration remain
+outside the supported scope. Validation results are recorded in runtime docs.

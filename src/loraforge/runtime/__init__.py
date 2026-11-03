@@ -1,6 +1,7 @@
 # SPDX-License-Identifier: Apache-2.0
-"""CPU compact adapter snapshots and explicit slot ownership."""
+"""Compact CPU/GPU residency and explicit slot ownership."""
 
+from .gpu import GPUAdapterSlots
 from .slots import AdapterSlots, SlotHandle
 
-__all__ = ["AdapterSlots", "SlotHandle"]
+__all__ = ["GPUAdapterSlots", "AdapterSlots", "SlotHandle"]

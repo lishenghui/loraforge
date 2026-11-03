@@ -106,3 +106,18 @@ export loading, LoRA/rsLoRA scaling, stale/foreign handles, reload integrity
 failures, byte-limit failures, detached ownership, invalid indices and concurrent
 independent slots. Ruff checks, wheel/sdist builds, and a separate installed-wheel
 runtime import without PyTorch passed. This step uses no GPU allocation.
+
+## Compact GPU residency and leases — 2026-11-03
+
+`runtime.GPUAdapterSlots` adds pinned staging, nonblocking compact H2D loading,
+ready-event waits across streams and read leases that block active-slot reuse.
+Consumer stream recording protects queued operations after eviction. Replacement
+publishes new allocations and generations rather than overwriting old buffers.
+See [runtime contracts](runtime.md) for residency accounting and caller duties.
+
+Local validation: 78 CPU tests passed; lint/format checks, wheel and source
+archive builds, wheel-from-source rebuild and an isolated installed-wheel import
+without PyTorch passed. LUMI single-GCD job `23424086` is validating seven GPU
+cases across FP32/FP16/BF16 and LoRA/rsLoRA. GPU results are pending.
+Fixed-address pools, graph replay, serving kernels, SGLang/vLLM and NVIDIA CUDA
+validation remain pending.

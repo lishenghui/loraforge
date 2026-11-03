@@ -35,3 +35,45 @@ This step provides CPU ownership and compact file loading. It does not implement
 GPU storage, asynchronous transfers, GPU stream lifetime, stable device pointers,
 graph replay, fused layouts or framework registration. Those need separate
 contracts and hardware validation before SGLang/vLLM use.
+
+## Asynchronous compact GPU residency
+
+```python
+from loraforge.runtime import GPUAdapterSlots
+
+slots = GPUAdapterSlots(2, device="cuda:0", max_tensor_bytes=512 * 1024 * 1024)
+handle = slots.load("compressed_adapter", slot=0)
+with slots.borrow(handle) as modules:
+    # Enqueue consumer work on this device's current stream within this scope.
+    module = modules[0]
+    # update = (x @ module.a.T @ module.b.T) * module.scaling
+slots.evict(handle)
+slots.collect()
+```
+
+Construction requires an explicit indexed CUDA/ROCm device. Imports remain free
+of tensor/device initialization. Loading validates files on CPU, pins compact
+host factors, and enqueues nonblocking copies on the selected device's current
+stream. Parsing and pinning are synchronous host work. A ready event orders
+subsequent borrowing on any stream of the same device, without a global sync.
+
+A lease returns the pool's actual GPU tensors. Treat them as read-only and keep
+all enqueue calls inside the lease, on the stream current when borrowing starts.
+Do not retain references for later work or switch consumer streams within a
+lease. Multiple read leases are supported. Active leases block replacement and
+eviction. Exception exit releases the lease. Device tensors are recorded on the
+consumer stream so queued work remains protected after scope exit and eviction.
+This is an execution contract, not protection against deliberate tensor mutation.
+
+Reload allocates new compact storage, then atomically publishes its generation;
+it does not overwrite old buffers. Failed loads preserve existing handles.
+Pinned staging is retained through copy completion. `collect()` polls events to
+release completed staging; load/borrow/evict also collect. Pending old transfers
+can temporarily retain retired device factors. The residency byte limit counts
+committed factor payloads, not pinned staging, retired allocations, allocator
+caches or peak replacement memory. Partial transfer failures synchronize the
+load stream before propagating the exception.
+
+GPU operations reject graph capture. Addresses change on replacement; graph
+replay and fixed-address device pools are not supported. There is no automatic
+LRU, framework registration or serving operator in this component.

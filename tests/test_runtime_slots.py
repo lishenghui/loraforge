@@ -134,3 +134,11 @@ def test_invalid_slot(tmp_path, slot):
 def test_invalid_limit(limit):
     with pytest.raises(ValueError):
         AdapterSlots(1, max_tensor_bytes=limit)
+
+
+@pytest.mark.parametrize("device", ["cpu", "cuda", "meta"])
+def test_gpu_requires_indexed_device(device):
+    from loraforge.runtime import GPUAdapterSlots
+
+    with pytest.raises(ValueError, match="explicitly"):
+        GPUAdapterSlots(1, device=device)
