@@ -315,3 +315,22 @@ per-mode service checks passing does not imply cross-mode numerical parity.
 The hybrid therefore must not replace the validated rank-aware path or be
 advertised as a validated serving speedup. Its observer patch remains outside
 the production library. Local CPU checks passed 94 cases.
+
+The isolated eager shadow diagnostic (`23437670`, completed in 10m17s) ran
+HIP A beside native A on identical real activations, while returning native A
+to the model. The resulting full-model outputs matched the prior native
+baseline exactly. Across 2,048 sampled calls and 143,360 live elements, 53
+elements differed; maximum absolute difference was 0.001953125. Sampling
+covered rank 16/32/64 and the mixed rank-32/16 batch, with a limit of 128
+calls per width/slice/rank-pattern group; this is not exhaustive coverage.
+
+CPU replay of the HIP FP32 accumulation and shuffle order reproduced all
+12 saved differing elements. A high-precision sum rounded to BF16 matched
+HIP in 10 of those samples and native in 2. Thus these discrepancies are
+accumulation/rounding differences, not evidence that HIP is uniformly less
+accurate; increasing accumulator precision alone cannot guarantee native
+compatibility. The FP64-accumulator diagnostic library was compiled in an
+isolated directory, but no additional full-model GPU run was submitted for
+it after this finding. Preserving the native accumulation behavior remains
+necessary for the current output-parity contract. These observations do not
+establish a model-quality improvement or an end-to-end serving speedup.
