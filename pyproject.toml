@@ -27,6 +27,9 @@ gpu = ["torch>=2.7", "ninja>=1.11"]
 adapters = ["torch>=2.7", "safetensors>=0.5"]
 test-adapters = ["peft==0.18.0", "transformers>=4.52,<5", "pytest>=8"]
 
+[project.entry-points."sglang.srt.plugins"]
+loraforge = "loraforge.integrations.sglang:install"
+
 [project.urls]
 Repository = "https://github.com/lishenghui/loraforge"
 Issues = "https://github.com/lishenghui/loraforge/issues"

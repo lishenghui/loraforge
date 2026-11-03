@@ -135,3 +135,32 @@ staging, per-load completion events, explicit read leases and PyTorch stream
 recording. Reload publishes freshly allocated compact factors rather than
 mutating old addresses. GPU graph replay and SGLang/vLLM registration remain
 outside the supported scope. Validation results are recorded in runtime docs.
+
+### Decode GEMV and SGLang integration (2026-11-03)
+
+Imported mathematical kernels: `tools/llm_fleet/sglang_plugin/probe_sglang_gemv/kernels.py`
+from probe commit `b217b17fac6cd6105cd3f04865962fb51d8a8ba3`, authored by Shenghui Li
+(file history commit `5ab76d171374d313ec7594dc7c24acfd5ccce796`). The working file is
+unchanged from this pinned revision. Source checksum is recorded in
+[gemv-source-hashes.json](gemv-source-hashes.json). The project-owned implementation
+is migrated under Apache-2.0 with retained authorship/source notices.
+
+Destination: `ops/_gemv_kernels.py` contains the three extracted shrink,
+reduce and expand kernels. `ops/gemv.py` supplies adapted lazy public wrappers.
+`integrations/sglang.py` is new orchestration implementing the source backend's
+decode/native-prefill boundary through SGLang's installed public method contract.
+No upstream SGLang implementation or source experiment/result trees are copied.
+
+Intentional differences from the source: remove import-time Torch/Triton loading
+from public modules, remove environment-driven tuning/global rank buckets, use
+one explicit flat split-K schedule, initialize shrink output to zero, validate
+shape/dtype/device contracts, and reject autograd. Kernel math, actual-rank A
+slice packing, max-rank B stride, FP32 accumulation and intermediate/delta rounding
+are retained. Compile specialization decorators and symbol names are simplified.
+Native SGLang buffers and loader/scheduler own fixed addresses and lifetimes;
+LoRAForge's independent runtime pools are not substituted into the framework.
+
+The inspected LUMI SGLang checkout reports version 0.5.22 and source commit
+`baa9befa381511cd4d56f83980951e5a45fffc6d`. The integration is version-gated and
+conflict-aware, opt-in per worker, and retains native eager prefill/pruned paths.
+Validation scope and commands live in [sglang.md](sglang.md).

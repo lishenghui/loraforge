@@ -125,3 +125,20 @@ elapsed time was 57 seconds. Command: `python -m pytest tests/test_runtime_gpu.p
 eviction/lifetime, byte-limit rejection and exception release.
 Fixed-address pools, graph replay, serving kernels, SGLang/vLLM and NVIDIA CUDA
 validation remain pending.
+
+## Decode operators and SGLang bridge — 2026-11-03
+
+Stage 5 now has extracted split-K GEMV shrink/reduce/expand operators and an
+opt-in SGLang 0.5.22 decode backend. It consumes native fixed-address padded
+buffers and device rank/scale/route metadata; it does not replace SGLang's
+scheduler or connect a competing pool. Eager prefill/pruned paths remain native.
+Source checksums, authorship and intentional changes are in provenance.
+
+Validation includes CPU registration/version/conflict contracts and isolated
+installed-wheel plugin discovery without framework imports. LUMI job `23425475`
+is checking 36 GPU cases: raw numerics, fixed-address graph replay with updated
+occupants/ranks/routes, real SGLang batch preparation, dense projection methods
+and inherited native eager prefill. GPU results are pending. The environment is
+SGLang 0.5.22 at the recorded source revision, PyTorch 2.11.0+rocm7.2, Triton 3.6.0.
+Full-model serving, native paging/loader integration, compact serving storage,
+prefill graphs, TP/MoE and performance benchmarking remain separate work.

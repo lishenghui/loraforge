@@ -9,6 +9,7 @@ from importlib import metadata, resources
 import loraforge
 import loraforge.adapters
 import loraforge.compression
+import loraforge.integrations.sglang
 import loraforge.ops
 import loraforge.runtime
 
@@ -39,6 +40,7 @@ import loraforge
 import loraforge.adapters
 import loraforge.ops
 import loraforge.runtime
+import loraforge.integrations.sglang
 import loraforge.compression
 print(json.dumps({'version': loraforge.__version__}))
 """
