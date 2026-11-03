@@ -87,3 +87,39 @@ Local CPU suites passed 85 cases, including disabled activation, unsupported
 versions, conflicts, lazy imports and existing compression/runtime regressions.
 No model weights were downloaded. NVIDIA, full-model serving and throughput
 claims require separate validation.
+
+## Full-model service protocol
+
+`benchmarks/prepare_serving_manifest.py` prepares existing local model and four
+adapter paths on a CPU/login node. It hashes adapter configs/weights and the
+model config and tokenizes two fixed chat prompts without downloading models.
+On an allocated GPU, `benchmarks/validate_sglang_serving.py run` starts four
+separate servers: native CSGMV eager/graph and LoRAForge eager/graph. It uses
+fewer native GPU slots than adapters and observes the actual native loader and
+model runner. Instrumentation is validation-only and affects timing.
+
+Each server runs two cycles of base/adapter requests, a mixed adapter batch,
+and explicit HTTP unload/reload. Acceptance requires repeated generated token
+IDs and logprobs to agree, real slot reuse with rank changes, stable native
+buffer addresses, expected eager/graph execution, and actual custom decode calls
+in LoRAForge modes. The `compare` action runs on a CPU/login node after GPU work
+and requires matching token IDs against native eager with max absolute output
+logprob difference at most 0.05. This threshold is a protocol criterion, not
+bitwise equality or an accuracy guarantee. Partial reports and server logs are
+preserved on failure. Completed mode reports can be resumed for the same input
+manifest; use a new output directory when changing protocol options.
+
+```bash
+# CPU/login node; all inputs must already exist locally.
+python benchmarks/prepare_serving_manifest.py --model /path/to/model \
+  --adapters /path/to/a /path/to/b /path/to/c /path/to/d --output manifest.json
+# Allocated GPU; include LoRAForge in the SGLang worker environment.
+python benchmarks/validate_sglang_serving.py run --manifest manifest.json --output validation
+# CPU/login node, after the GPU job finishes.
+python benchmarks/validate_sglang_serving.py compare --manifest manifest.json --output validation
+```
+
+The first LUMI full-model run is job `23426358`, using the cached
+Llama-3.1-8B-Instruct snapshot `0e9e39f249a16976918f6564b8830bc894c89659`
+and four existing ordinary-LoRA adapters with ranks 32/16/64/32. Input hashes
+and paths are in the job directory's manifest. Results are pending.
