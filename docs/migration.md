@@ -220,11 +220,16 @@ decode dispatch, low-rank prefill, unsupported-rank fallback, loader updates,
 and graph metadata. The optional Qwen stable-prefill hook and a compact-PEFT to
 SGLang export bridge are also extracted. See [RowExpand](rowexpand.md) for the
 component checklist and limits. Job 23440720 passed 33 GPU checks, including
-21 exact old/new kernel comparisons. Full-model verification of this packaged
-path is still pending; the earlier partial-path speedups do not validate it.
+21 exact old/new kernel comparisons. The earlier partial-path speedups do not
+validate this packaged path; its separate full-model result is recorded below.
 
 Full-model job 23440815 exposed a fused-projection keyword interface mismatch
 after native completed. QKV and gate/up now preserve SGLang's parameter names;
 integration tests exercise public keyword calls rather than private helpers.
-Retry 23441471 gates the model run on those GPU regressions. The failed attempt
-is retained and does not count as a full-model pass.
+Retry 23441471 passed all 33 GPU regressions and completed both full-model modes
+in 15m58s. CPU analysis verified trace IDs and custom prefill/decode execution.
+The original-adapter batch-1/2 pilot measured 1.1126x–1.1251x versus native;
+medical quality was 15/32 native versus 14/32 Fleet, with one repeated-output
+truncation loss. Functional execution is verified in this scope, not native
+parity or quality equivalence. Qwen prefill graphs and the compressed-fleet
+workload remain outstanding. The failed attempt is retained separately.

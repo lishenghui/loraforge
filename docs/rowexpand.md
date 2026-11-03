@@ -83,10 +83,38 @@ prefill-graph correctness in this package.
   GPU tests called private helpers and therefore missed this framework boundary.
   The parameter names are corrected, and all twelve integration cases now use
   the public methods with the same keywords as actual SGLang layers.
-- Retry **23441471** runs the GPU regression first, then the same four-adapter
-  full-model protocol with a 256-token quality allowance. Full-model results and
-  Qwen stable-prefill graph reproduction remain pending. Operator migration
-  fidelity does not certify task quality or performance.
+- Retry **23441471 completed in 15m58s**. All 33 GPU checks passed again,
+  including the corrected public keyword calls. Both native and packaged Fleet
+  then completed ten timing workloads, 32 quality cases and ten forced-prefix
+  traces. CPU analysis verified actual continuation IDs, complete trace sets,
+  RowExpand prefill/decode capture evidence and real decode graph execution.
+  The model owned 128 retained layouts and **378 MiB** of compact B shadows.
+
+### Full-model pilot after the interface fix
+
+Nine LoRA workloads measured **1.1126x–1.1251x** speedup versus native, with
+49-token inputs, 64 generated tokens, resident adapters, batch 1/2 and three
+timing trials. Base-only measured 0.9859x. The four original adapters have ranks
+32/16/64/32; this is not the paper's compressed-fleet concurrent workload.
+Fixed mode order and the base-control difference limit interpretation of small
+cross-job gains. These results do not show a clear speedup over the earlier
+partial-path pilots or reproduce the paper's fleet-level throughput claims.
+
+At the 256-token output allowance, medical quality was **15/32 native versus
+14/32 Fleet**, one paired loss and no gain. Invalid answers were 3/5, all
+truncated. Case 994 again yielded a native correct answer after 123 tokens,
+while Fleet repeated its explanation until the cap. The conservative approximate
+95% degradation interval remains **[-13.11, +18.52] percentage points**; this
+small sample establishes neither general degradation nor non-inferiority.
+
+Identical-prefix adapter decode had **1/120 top-1 flips**, mean KL 0.00047485,
+maximum KL 0.00721362 and maximum total variation 0.0585396. All 30 base-only
+decode positions remained exact. Unlike the partial-path pilots, prefill also
+had nonzero distribution differences: no top-1 flips across ten positions,
+maximum KL 0.00236344 and maximum total variation 0.0326424. Functional completion
+and migration fidelity therefore do not establish native numerical or task-quality
+equivalence. Qwen stable-prefill graph reproduction and matched compressed-fleet
+serving validation remain outstanding; no automatic backend promotion follows.
 
 The previous 1.11x–1.12x pilot used partial experimental paths. Those measurements
 must not be labeled as results of this complete migrated runtime. vLLM integration
