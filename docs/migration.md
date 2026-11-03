@@ -387,3 +387,19 @@ own eager arithmetic. The expanded suite also reveals that the pre-existing
 fast research policy matches only 28/32 long native outputs (92/96 overall).
 This native parity failure is retained; graph adds no new difference. These
 remain synthetic benchmark prototypes, not a production/default runtime change.
+
+## vLLM linear decode migration — 2026-11-03
+
+The independent `migrate/vllm-decode` branch adds an opt-in vLLM 0.26.0 backend
+from the pinned probe GEMV reference. Padded-slot shrink/expand kernels and a
+mutating opaque custom op implement the small-decode path; native prefill and
+unspecialized execution are retained. Version/conflict checks and a lazy general
+plugin entrypoint replace import-time patching. SGLang work is not included.
+
+Validation: 27 GPU tests passed on an allocated H100 with PyTorch 2.11.0+cu130
+and Triton 3.6.0, including actual vLLM dispatch, slot/route updates during graph
+replay and full-graph torch.compile. CPU suites passed 86 tests. Native plugin
+discovery, lint/format, builds and isolated wheel/source-archive checks passed.
+See [the vLLM contract](vllm.md) for numeric tolerances and provenance. Full-model
+serving acceptance, native loader eviction, other GPUs and throughput remain
+separate validation tasks; no performance or token/logprob parity claim is made.

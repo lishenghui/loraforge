@@ -88,6 +88,9 @@ scoped stream leases. Serving integration and graph replay remain planned.
 
 ## Development
 
+An experimental opt-in vLLM 0.26.0 linear decode backend is described in
+[the vLLM integration guide](docs/vllm.md), including its validation scope.
+
 See [CONTRIBUTING.md](CONTRIBUTING.md) for setup and checks,
 [the architecture](docs/architecture.md) for module boundaries, and
 [the migration plan](docs/migration.md) for the order of implementation.

@@ -14,6 +14,11 @@ compression workflow; its configuration rules live in an internal module.
 The following boundaries guide implementation; empty placeholder modules
 are omitted until they contain a working capability.
 
+The optional `integrations.vllm` module activates a pinned vLLM 0.26.0 linear
+decode replacement. Framework-independent padded-slot kernels live in
+`ops/vllm_gemv.py` and `ops/_vllm_gemv_kernels.py`; serving imports remain lazy.
+See [the vLLM contract](vllm.md) for dispatch, ownership and validation limits.
+
 ## Package boundaries
 
 | Location | Responsibility |

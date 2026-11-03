@@ -648,3 +648,28 @@ It covers native csgmv metadata preparation and does not require the private
 consumer/tiny-rank research hooks. Storage sharing reuses the attributed
 project-owned implementation above. Numerical/shape and package-validation
 boundaries are in [experimental APIs](experimental.md).
+
+### vLLM linear decode extraction
+
+Source: Shenghui Li's `lishenghui/probe` commit
+`5fd6ae060d106066b306959f9a34b726a281ef4c`, files
+`tools/llm_fleet/gemv_lora.py` and `tools/llm_fleet/vllm_gemv_patch.py`.
+Original content hashes are recorded in [vllm-source-hashes.json](vllm-source-hashes.json).
+The project-owned implementation is migrated under Apache-2.0 with source and
+authorship notices. No upstream vLLM code, experiment artifacts or launchers
+are copied. The inspected vLLM tag is 0.26.0, upstream commit
+`568afb3a13806beb53bb2e6bd518269357b237c0`.
+
+Destinations: `ops/_vllm_gemv_kernels.py` retains the shrink/expand mathematical
+kernels; `ops/vllm_gemv.py` provides lazy validated launchers; `integrations/vllm.py`
+adapts the reference linear-method replacement. Native slot layouts, FP32
+intermediates, split-K atomic accumulation and the tokens/active-count heuristic
+are retained. Wrappers add device guarding, input validation and lazy imports.
+Registration is explicit, version-gated, repeatable and conflict-aware. An
+opaque `torch.library.custom_op` declares the output mutation and fake behavior.
+Prefill and unspecialized execution retain the original framework method.
+
+This code intentionally lives separately from SGLang's packed-slice operators;
+the two layouts and intermediate rounding contracts differ. No code on the
+concurrently developed SGLang branch is modified. See [vllm.md](vllm.md) for
+activation, validation scope and numerical limitations.

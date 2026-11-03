@@ -26,6 +26,7 @@ dev = ["build>=1", "pytest>=8", "ruff>=0.9"]
 gpu = ["torch>=2.7", "ninja>=1.11"]
 adapters = ["torch>=2.7", "safetensors>=0.5"]
 test-adapters = ["peft==0.18.0", "transformers>=4.52,<5", "pytest>=8"]
+vllm = ["vllm==0.26.0"]
 docs = [
   "sphinx>=8.2,<9",
   "myst-parser>=4,<5",
@@ -36,6 +37,9 @@ docs = [
 
 [project.entry-points."sglang.srt.plugins"]
 loraforge = "loraforge.integrations.sglang:install"
+
+[project.entry-points."vllm.general_plugins"]
+loraforge = "loraforge.integrations.vllm:register"
 
 [project.urls]
 Repository = "https://github.com/lishenghui/loraforge"
