@@ -334,3 +334,66 @@ isolated directory, but no additional full-model GPU run was submitted for
 it after this finding. Preserving the native accumulation behavior remains
 necessary for the current output-parity contract. These observations do not
 establish a model-quality improvement or an end-to-end serving speedup.
+
+### Experimental quality and service-performance pilot
+
+Strict native-output compatibility and task quality are separate contracts.
+The Fleet candidate's failed strict comparison remains a failure of that
+contract; it does not by itself establish degraded task quality. Likewise,
+rounding differences do not establish that quality is unaffected. vLLM's
+[reproducibility guidance](https://docs.vllm.ai/en/stable/usage/reproducibility/)
+and [FAQ](https://docs.vllm.ai/en/stable/usage/faq/) describe analogous limitations
+of default inference reproducibility; those statements do not validate this
+LoRAForge candidate.
+
+`benchmarks/benchmark_sglang_service.py` adds an **experimental, isolated**
+HIP-A/native-B pilot. It requires an explicitly supplied compiled library
+implementing the public probe Fleet shrink ABI; the production backend and
+`validate_sglang_serving.py` acceptance rules are unchanged. Use the pinned
+probe source described above. The protocol records library, benchmark-source,
+manifest and quality-input SHA-256 hashes.
+
+The GPU run performs three separate measurements, on the same allocation:
+
+- **Service timing:** single-client HTTP wall time including base-model
+  computation, prefill and decode. Workloads cover base-only, each adapter at
+  batch 1/2, and mixed adapters. Each adapter set is warmed before three timed
+  fixed-length requests. Model startup and adapter paging are excluded;
+  logits capture and forced-token processing are disabled for these requests.
+  Lightweight execution observation records each phase once, during warmup.
+- **Labeled quality:** normal free generation, with no forced tokens. The first
+  pilot uses 32 deterministically sampled MedMCQA validation questions with
+  the rank-32 medical adapter. A brief explanation precedes an explicit final
+  answer so the task exercises decode. Invalid answer formats count as wrong;
+  raw outputs, completion lengths and finish reasons are retained. This does
+  not assess SQL, translation or intent-adapter quality, and overlap with the
+  adapter's original training data is unknown.
+- **Same-prefix numerics:** capture full-vocabulary logits before any token
+  intervention, then force the native continuation in both modes. Compare
+  decode-step KL divergence, total variation, native-token logprob changes,
+  top-1 changes and native top-two margins. Prefill positions are labeled
+  separately. This tests actual decode computations, not prompt-only scoring.
+
+Data preparation and trace analysis run on CPU. Each GPU attempt uses a fresh
+output directory; old attempts are preserved. Example commands:
+
+```bash
+python benchmarks/benchmark_sglang_service.py run \
+  --manifest manifest.json --quality quality.json \
+  --fleet-library /absolute/path/loraforge_fleet_probe.so --output pilot-new
+# After the GPU allocation ends, on CPU:
+python benchmarks/benchmark_sglang_service.py analyze --output pilot-new
+```
+
+`quality.json` contains `split: "validation"`, `source`, `adapter` (a manifest
+adapter name), and `cases` with unique `id`, tokenized `input_ids`, and an
+`answer` digit from 0 to 3. Prompts must request the final `Answer: X` format.
+The concrete dataset and model artifacts are not published in this repository.
+
+This is a pilot, not a production qualification. Quality reports paired gains
+and losses plus an approximate conservative 95% interval built from Bonferroni
+Wilson intervals; even zero disagreements in 32 cases cannot certify a small
+quality-regression bound. Performance uses a fixed native-then-candidate mode
+order and few repetitions. A useful pilot should be followed by larger
+adapter-relevant held-out evaluations and repeated/reversed-order speed runs.
+There is no automatic promotion or merging based on these pilot results.
