@@ -21,7 +21,7 @@ import time
 from pathlib import Path
 
 from serving_experiment_metrics import answer_digit, paired_quality
-from validate_sglang_serving import dump, http
+from validate_sglang_serving import dump, http, normalize
 
 if os.environ.get("FLEET_EXPERIMENT_MODE") in ("native", "fleet"):
     from sglang_fleet_experiment_hook import install, observe_graph_execution
@@ -153,6 +153,8 @@ def run_requests(args, manifest, quality, mode, root, shared):
             case = f"{label}-p{prompt}"
             extra = dict(
                 custom_logit_processor=processor,
+                return_logprob=True,
+                logprob_start_len=-1,
                 sampling_params=dict(
                     temperature=0,
                     ignore_eos=True,
@@ -165,7 +167,8 @@ def run_requests(args, manifest, quality, mode, root, shared):
                 ),
             )
             rows, _, _ = generate(url, ids, adapter, args.trace_tokens, extra=extra)
-            result["trace"][case] = rows[0]["text"]
+            observed = normalize(rows[0], args.trace_tokens)
+            result["trace"][case] = {k: observed[k] for k in ("text", "tokens")}
             dump(root / "result.json", result)
     result["completed"] = True
     dump(root / "result.json", result)
@@ -330,6 +333,12 @@ def analyze(args):
         ]
         if a["forced_token"] != b["forced_token"] or a["step"] != b["step"]:
             raise ValueError("trace conditioning differs")
+        case, step = a_path.parent.name, int(a_path.stem)
+        if a["step"] != step or any(
+            reports[mode]["trace"][case]["tokens"][step] != a["forced_token"]
+            for mode in ("native", "fleet")
+        ):
+            raise ValueError("actual generated token IDs differ from forced continuation")
         x, y = a["logits"].double(), b["logits"].double()
         if (
             x.shape != y.shape
