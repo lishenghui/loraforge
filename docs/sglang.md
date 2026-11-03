@@ -306,6 +306,12 @@ translator's same-line parsing error. HIP paths are diagnostic candidates,
 not validated serving defaults. The HIP-A/native-B hybrid's graph operator
 speedup over native was 1.785x/1.772x/1.679x for batch 1/2/8. Synthetic
 output drift was zero, which does not establish full-model numerical parity.
-Isolated full-model validation job `23436657` for this hybrid is pending;
-its observer patch is outside the production library. Local CPU checks
-passed 94 cases.
+Isolated full-model validation job `23436657` completed in 17m06s, but the
+final cross-mode comparison failed. Native eager and graph outputs matched
+exactly. Both HIP-A hybrid modes changed generated token IDs for
+`adapter_1/0`; among cases with matching token IDs, maximum logprob delta
+was 0.0777238011, exceeding 0.05. Base-only outputs remained exact. The
+per-mode service checks passing does not imply cross-mode numerical parity.
+The hybrid therefore must not replace the validated rank-aware path or be
+advertised as a validated serving speedup. Its observer patch remains outside
+the production library. Local CPU checks passed 94 cases.
