@@ -90,3 +90,19 @@ exhaustive enumeration of feasible choices, nonmonotonic losses, zero costs,
 infeasible budgets, deterministic ordering and existing adapter regressions.
 Wheel/sdist builds and an isolated installed-wheel example passed. No GPU
 computation or numerical backend changed in this extension.
+
+## Runtime ownership extraction — 2026-11-03
+
+Stage 5 now has a working synchronous CPU component: `runtime.AdapterSlots`
+loads validated PEFT factors into compact owned storage, enforces an optional
+resident tensor-byte limit, and uses pool/generation handles to reject stale
+references after slot reuse. Failed loads preserve the old occupant. Resolve
+returns independent copies and eviction releases residency. See [runtime](runtime.md).
+GPU layouts/transfers, async lifetime, serving operators, SGLang/vLLM integration
+and graph replay remain pending; this component makes no GPU execution claim.
+
+Validation: 75 CPU tests passed, including 16 slot tests covering compact PEFT
+export loading, LoRA/rsLoRA scaling, stale/foreign handles, reload integrity
+failures, byte-limit failures, detached ownership, invalid indices and concurrent
+independent slots. Ruff checks, wheel/sdist builds, and a separate installed-wheel
+runtime import without PyTorch passed. This step uses no GPU allocation.

@@ -110,3 +110,18 @@ The library uses exact integer costs and sparse dominated-state pruning rather
 than the experiment's rounded-up cost grid. Calibration, isotonic fitting,
 minimax objectives, experiment results and framework dependencies are not
 imported. Losses and costs are explicit caller data; tie-breaking is documented.
+
+### Compact CPU slot ownership (2026-11-03)
+
+`runtime/slots.py` and its tests are new project code. No research loader or
+framework implementation is copied. Design inspection included local probe
+`tools/llm_fleet/sglang_plugin/probe_sglang_gemv/fast.py` and the untracked
+`tools/llm_fleet/test_paging_loader.py`; these remain research evidence, not
+imported source. The inspected checkout HEAD is
+`b217b17fac6cd6105cd3f04865962fb51d8a8ba3`, but `fast.py` has local edits and the
+test file is untracked, so that commit does not identify their working content.
+
+The new component deliberately implements synchronous CPU snapshots and explicit
+pool/generation ownership. It reuses LoRAForge's maintained PEFT validator and
+preserves scaling. It does not claim equivalence to the research GPU loader,
+persistent shadows, fused projections or graph replay. No numerical kernel changes.
