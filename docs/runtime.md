@@ -77,3 +77,14 @@ load stream before propagating the exception.
 GPU operations reject graph capture. Addresses change on replacement; graph
 replay and fixed-address device pools are not supported. There is no automatic
 LRU, framework registration or serving operator in this component.
+
+## Recorded GPU validation
+
+LUMI job `23424086` completed on 2026-11-03 using one MI250X GCD (gfx90a),
+Python 3.12.11 and PyTorch 2.7.1+rocm6.2.4. All seven cases in
+`python -m pytest tests/test_runtime_gpu.py -m gpu -v` passed (16.35 seconds).
+Tests cover FP32/FP16/BF16, LoRA/rsLoRA scaling and dense update values after
+cross-stream loading, active-lease replacement/eviction rejection, stale and
+foreign handles, allocator churn after reuse, byte limits and exception release.
+The single allocated device does not establish multi-GPU or NVIDIA CUDA support.
+These are correctness/lifecycle checks, not serving performance measurements.

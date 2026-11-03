@@ -117,7 +117,11 @@ See [runtime contracts](runtime.md) for residency accounting and caller duties.
 
 Local validation: 78 CPU tests passed; lint/format checks, wheel and source
 archive builds, wheel-from-source rebuild and an isolated installed-wheel import
-without PyTorch passed. LUMI single-GCD job `23424086` is validating seven GPU
-cases across FP32/FP16/BF16 and LoRA/rsLoRA. GPU results are pending.
+without PyTorch passed. LUMI single-GCD job `23424086` completed successfully:
+7 GPU cases passed across FP32/FP16/BF16 and LoRA/rsLoRA on MI250X (`gfx90a`),
+Python 3.12.11, PyTorch 2.7.1+rocm6.2.4. Pytest took 16.35 seconds; Slurm
+elapsed time was 57 seconds. Command: `python -m pytest tests/test_runtime_gpu.py
+-m gpu -v`. Checks cover cross-stream values, lease protection, slot replacement,
+eviction/lifetime, byte-limit rejection and exception release.
 Fixed-address pools, graph replay, serving kernels, SGLang/vLLM and NVIDIA CUDA
 validation remain pending.
