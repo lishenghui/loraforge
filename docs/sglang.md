@@ -428,3 +428,44 @@ exactly (KL and total variation zero). These are measured distribution
 changes, not a task-quality score. The strict compatibility failure remains
 recorded; the candidate now has a positive service-performance pilot and an
 inconclusive, rather than certified-equivalent, quality pilot.
+
+#### Gate/up expansion candidate
+
+The batch-1 pilot averaged 1.6092s native and 1.4420s HIP-A/native-B, versus
+1.3046s for the base-only control. This is an approximate overhead comparison,
+not an isolated kernel profile or a strict speedup ceiling: base computation,
+prefill, scheduling and HTTP costs remain in every measurement.
+
+The earlier graph operator sweep identifies gate/up B as a candidate for
+further work. Relative to HIP-A/native-B, full HIP A+B improved the gate/up
+projection by 1.383x at batch 1 and 1.337x at batch 2 (sums of medians across
+ranks 16/32/64). Other projections showed little gain, and several regressed
+at batch 8. The next isolated experiment therefore adds only **gate/up** HIP
+expansion via `--fleet-expand gate`; the default remains `native` expansion.
+
+`benchmarks/sglang_gate_expand_experiment.py` maintains fixed-address compact
+B regions per native slot for this projection, refreshed after native loading.
+It preserves the original buffers for native prefill and other projections.
+This duplicates the gate/up B allocation, so it is not a memory-saving claim.
+GPU-resident bucket/offset metadata and a stable active-segment-count tensor
+allow route and rank changes during graph replay. The experiment is limited
+to BF16, power-of-two slot capacities up to 64 and decode batches up to 16;
+unsupported expand calls retain native execution. It is not a production policy.
+
+`benchmarks/check_sglang_gate_expand.py` checks mixed routes, rank-changing
+slot reuse, clearing and fixed addresses under graph replay, then compares
+native B with Fleet launch grids 64/110/220/440/880 at batch 1/2/8 and ranks
+16/32/64. These are synthetic operator checks; actual service integration,
+quality and end-to-end benefit require a new full-model run. Local CPU checks
+passed 99 cases, including compact-slot ownership and padding regressions.
+
+The allocated one-GCD check (job **23439843**, 35 seconds) passed all four
+mixed-route/slot-reuse graph states, with zero maximum absolute difference in
+these synthetic outputs. At the retained 880-block launch, native/Fleet B-only
+speedups were 1.264/1.450/1.741x for ranks 16/32/64 at batch 1,
+1.236/1.402/1.652x at batch 2, and 1.128/1.223/1.236x at batch 8.
+Grids 220/440/880 were close; this sweep does not justify a per-shape tuning
+table. The full-model follow-up, job **23439944**, uses `--fleet-expand gate`
+and uniformly raises the quality output allowance to 256 tokens. Its actual
+service benefit and output-quality results are pending; the B-only ratios
+must not be reported as model speedups.

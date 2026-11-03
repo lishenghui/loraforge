@@ -31,6 +31,7 @@ if os.environ.get("FLEET_EXPERIMENT_MODE") in ("native", "fleet"):
         install(
             Path(os.environ["FLEET_EXPERIMENT_LIBRARY"]),
             Path(os.environ["FLEET_EXPERIMENT_OUTPUT"]),
+            os.environ.get("FLEET_EXPERIMENT_EXPAND", "native"),
         )
 
 
@@ -193,6 +194,7 @@ def run(args, manifest):
                 "serving_experiment_metrics.py",
                 "sglang_forced_trace.py",
                 "sglang_fleet_experiment_hook.py",
+                "sglang_gate_expand_experiment.py",
                 "validate_sglang_serving.py",
             )
         },
@@ -200,6 +202,7 @@ def run(args, manifest):
         quality_sha256=hashlib.sha256(args.quality.read_bytes()).hexdigest(),
         library_sha256=hashlib.sha256(args.fleet_library.read_bytes()).hexdigest(),
         trials=args.trials,
+        fleet_expand=args.fleet_expand,
         timing_tokens=args.timing_tokens,
         quality_tokens=args.quality_tokens,
         trace_tokens=args.trace_tokens,
@@ -219,6 +222,7 @@ def run(args, manifest):
         }
         env.update(
             FLEET_EXPERIMENT_MODE=mode,
+            FLEET_EXPERIMENT_EXPAND=args.fleet_expand,
             FLEET_EXPERIMENT_LIBRARY=str(args.fleet_library),
             FLEET_EXPERIMENT_OUTPUT=str(root),
             LORAFORGE_SGLANG="1" if mode == "fleet" else "0",
@@ -320,6 +324,13 @@ def analyze(args):
     native_files = sorted((root / "traces/native").glob("*/*.pt"))
     fleet_files = sorted((root / "traces/fleet").glob("*/*.pt"))
     protocol = json.loads((root / "protocol.json").read_text())
+    if protocol.get("fleet_expand") == "gate":
+        gate = [
+            json.loads(p.read_text())
+            for p in (root / "fleet").glob("gate-expand-*.json")
+        ]
+        if not any(e["capture"] for e in gate):
+            raise ValueError("gate expansion was not captured")
     if len(native_files) != len(native["trace"]) * protocol["trace_tokens"]:
         raise ValueError("missing native trace positions")
     if [p.relative_to(root / "traces/native") for p in native_files] != [
@@ -396,6 +407,7 @@ def main():
     parser.add_argument("--manifest", type=Path)
     parser.add_argument("--quality", type=Path)
     parser.add_argument("--fleet-library", type=Path)
+    parser.add_argument("--fleet-expand", choices=("native", "gate"), default="native")
     parser.add_argument("--output", type=Path, required=True)
     parser.add_argument("--port", type=int, default=31000)
     parser.add_argument("--startup-timeout", type=int, default=900)

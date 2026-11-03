@@ -37,7 +37,7 @@ def observe_graph_execution(output):
     ModelRunner._forward_raw = forward
 
 
-def install(library, output):
+def install(library, output, expand="native"):
     import torch
 
     from loraforge.integrations.sglang import get_backend
@@ -96,3 +96,9 @@ def install(library, output):
         return result
 
     backend._shrink = shrink
+    if expand == "gate":
+        from sglang_gate_expand_experiment import install_gate_expand
+
+        install_gate_expand(backend, module, output)
+    elif expand != "native":
+        raise ValueError("unknown experimental expand policy")

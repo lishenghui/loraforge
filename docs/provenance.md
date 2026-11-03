@@ -195,3 +195,17 @@ no upstream implementation was copied describes the original GEMV extraction;
 this separately attributed extraction does include a derived SGLang kernel.
 
 Pinned probe source SHA-256: `0af480cc8ead0a7c40292dee1d20551232a6228c3a189758051f9c92bd56a92a`.
+
+### Isolated Fleet gate/up expansion experiment
+
+The benchmark-only `sglang_gate_expand_experiment.py` follows the compact B
+layout and device metadata design in public probe commit
+`5fd6ae060d106066b306959f9a34b726a281ef4c`,
+`tools/llm_fleet/sglang_plugin/probe_sglang_gemv/fast.py` and `fast_decode.cu`.
+Its Python wrapper was implemented here with fixed per-slot regions, only
+for gate/up, refreshed from native B buffers after native loading. It does
+not import the per-checkpoint manifest cache, Qwen tuning tables or prefill
+replacement. The explicitly supplied compiled HIP library remains external;
+its hash is recorded by the service pilot. No native source is copied into
+the installed package by this experiment. GPU/serving validation is recorded
+separately in the SGLang guide.
