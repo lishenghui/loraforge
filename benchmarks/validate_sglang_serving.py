@@ -303,6 +303,7 @@ def run_mode(args, manifest, mode):
     manifest_hash = hashlib.sha256(args.manifest.read_bytes()).hexdigest()
     protocol = {
         "version": PROTOCOL_VERSION,
+        "decode_policy": os.environ.get("LORAFORGE_SGLANG_POLICY", "compatible"),
         "new_tokens": args.new_tokens,
         "tolerance": args.tolerance,
     }

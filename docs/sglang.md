@@ -265,3 +265,36 @@ python benchmarks/benchmark_sglang_decode.py --legacy-module /tmp/legacy_gemv.py
 
 Run on an allocated GPU with the validated framework environment. The JSON
 records versions, source hashes, individual trial timings and numerical drift.
+
+## Probe strategy migration in progress
+
+Job `23435268` validated grouping same-slot tokens within each 16-token tile
+and pipelining shrink loads while retaining the accumulation order: 42 GPU
+checks passed and the four-mode full-model comparison again had identical token
+IDs and maximum logprob delta 0.0. In the same-allocation operator benchmark,
+graph latency versus native was 1.034x/1.119x/1.161x for batch 1/2/8; batch 8
+was 22.5% faster than the prior compatible path, but small batches did not
+recover the old GEMV advantage. These remain warm-cache operator measurements.
+
+The public probe Fleet backend does not use one custom path universally. Its
+rank-aware shrink skips column blocks outside actual adapter rank; its tuned
+and Fleet variants select native or specialized kernels by shape and workload.
+The Qwen3-4B/MI250X table is not a validated Llama-3.1-8B tuning table.
+
+An explicit `LORAFORGE_SGLANG_POLICY=rank-aware` candidate now extracts the
+non-split probe shrink with native launch configuration and uses native expand.
+The default remains `compatible`. Native explicit split-K settings retain the
+native path, and unsupported noncontiguous shrink inputs retain the tensor
+operator. Prefill and framework globals are unchanged. See provenance for the
+pinned upstream-derived source and license.
+
+Validation job `23436482` is pending for the rank-aware candidate: GPU checks,
+capacity-64/actual-rank-16/32/64 operator timings, and four-mode full-model
+verification. The offline benchmark also loads a separately CPU-built public
+Fleet V3 HIP library, including A-only/B-only hybrid comparisons with native.
+Its compact B layout is prepared outside timing, as a resident shadow layout;
+that is a layout-plus-kernel comparison. This does not migrate Fleet's loader,
+per-layer compact pools or global hooks into the library. The isolated source
+only adds line breaks before kernel launches to avoid the current HIP
+translator's same-line parsing error. HIP paths are diagnostic candidates,
+not validated serving defaults. Local CPU checks passed 94 cases.

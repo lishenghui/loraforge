@@ -177,3 +177,21 @@ default reduction contract, retaining native slot layout but no framework
 dependency. FP32/FP16 retain the extracted GEMV kernels. This is a correctness
 compatibility path; performance equivalence and tuned SGLang configurations
 are not claimed. Hardware/full-model results are tracked in sglang.md.
+
+### Probe rank-aware policy extraction (2026-11-03)
+
+`integrations/_sglang_rank_aware.py` extracts the non-split segmented shrink
+kernel from public probe commit `5fd6ae060d106066b306959f9a34b726a281ef4c`,
+`tools/llm_fleet/sglang_plugin/probe_sglang_gemv/rank_aware_shrink.py`.
+The source identifies itself as derived from SGLang 0.5.22's
+`sglang/kernels/ops/lora/dense/chunked_sgmv_shrink.py` (Apache-2.0), with Shenghui
+Li's actual-rank column-block early exit. This extraction retains that
+attribution and algorithm; it renames the kernel, omits the custom cache decorator
+and split-K/prefill tuning, and adds a narrow wrapper using installed native
+launch configuration. Native expand remains native. Explicit native split-K
+settings delegate back to native shrink. No Qwen-specific table, global config
+patch or Fleet adapter shadow pool is installed. The previous statement that
+no upstream implementation was copied describes the original GEMV extraction;
+this separately attributed extraction does include a derived SGLang kernel.
+
+Pinned probe source SHA-256: `0af480cc8ead0a7c40292dee1d20551232a6228c3a189758051f9c92bd56a92a`.

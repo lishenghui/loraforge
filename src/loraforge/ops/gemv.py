@@ -82,6 +82,7 @@ def lora_shrink(x, weights, ranks, token_map, num_slices: int = 1):
                 rank,
                 num_slices,
                 x.stride(0),
+                tokens,
                 num_warps=4,
             )
         return out
@@ -210,6 +211,7 @@ def lora_expand(
                 slices,
                 output.stride(0),
                 output.stride(1),
+                x.shape[0],
                 num_warps=4,
             )
         return output

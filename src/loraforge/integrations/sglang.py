@@ -13,10 +13,19 @@ def _check_version():
         )
 
 
+def _decode_policy():
+    policy = os.environ.get("LORAFORGE_SGLANG_POLICY", "compatible")
+    if policy not in ("compatible", "rank-aware"):
+        raise ValueError("LORAFORGE_SGLANG_POLICY must be compatible or rank-aware")
+    return policy
+
+
 @lru_cache(maxsize=1)
 def get_backend():
     """Resolve inside each worker; preserve the native CSGMV prefill path."""
     _check_version()
+    policy = _decode_policy()
+    import torch
     from sglang.srt.lora.backend.chunked_backend import ChunkedSgmvLoRABackend
 
     from loraforge.ops.gemv import lora_expand, lora_shrink
@@ -38,6 +47,14 @@ def get_backend():
             )
 
         def _shrink(self, x, weights, slices=1):
+            if (
+                policy == "rank-aware"
+                and x.dtype == torch.bfloat16
+                and x.is_contiguous()
+            ):
+                from ._sglang_rank_aware import shrink
+
+                return shrink(x, weights, self.batch_info, slices)
             return lora_shrink(
                 x,
                 weights,
@@ -46,7 +63,21 @@ def get_backend():
                 slices,
             )
 
-        def _expand(self, x, weights, offsets, max_slice, base):
+        def _expand(self, x, weights, offsets, max_slice, base, offsets_cpu=None):
+            if policy == "rank-aware" and x.dtype == torch.bfloat16:
+                from sglang.kernels.ops.lora.dense.chunked_sgmv_expand import (
+                    chunked_sgmv_lora_expand_forward,
+                )
+
+                return chunked_sgmv_lora_expand_forward(
+                    x=x,
+                    weights=weights,
+                    batch_info=self.batch_info,
+                    slice_offsets=offsets,
+                    slice_offsets_cpu=offsets_cpu,
+                    max_slice_size=max_slice,
+                    base_output=base,
+                )
             return lora_expand(
                 x,
                 weights,
@@ -79,7 +110,12 @@ def get_backend():
         ):
             if self._use_decode(x, pruned_batch_info):
                 return self._expand(
-                    x, weights, output_offset, weights.shape[-2], base_output
+                    x,
+                    weights,
+                    output_offset,
+                    weights.shape[-2],
+                    base_output,
+                    kwargs.get("output_offset_cpu"),
                 )
             return super().run_lora_b_sgemm(
                 x,
@@ -110,6 +146,7 @@ def get_backend():
                     output_offset,
                     max_qkv_out_dim,
                     base_output,
+                    kwargs.get("output_offset_cpu"),
                 )
             return super().run_qkv_lora(
                 x,
@@ -140,6 +177,7 @@ def get_backend():
                     output_offset,
                     gate_up_lora_b.shape[-2] // 2,
                     base_output,
+                    kwargs.get("output_offset_cpu"),
                 )
             return super().run_gate_up_lora(
                 x,

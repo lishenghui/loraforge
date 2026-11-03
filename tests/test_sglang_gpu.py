@@ -27,15 +27,15 @@ def make_backend(monkeypatch):
     )
 
 
-def batch(decode=True):
+def batch(decode=True, tokens=7):
     from sglang.srt.model_executor.forward_batch_info import ForwardMode
 
     return SimpleNamespace(
         forward_mode=ForwardMode.DECODE if decode else ForwardMode.EXTEND,
-        batch_size=7,
-        extend_num_tokens=7,
-        extend_seq_lens_cpu=[1] * 7,
-        extend_seq_lens=torch.ones(7, dtype=torch.int32, device="cuda:0"),
+        batch_size=tokens,
+        extend_num_tokens=tokens,
+        extend_seq_lens_cpu=[1] * tokens,
+        extend_seq_lens=torch.ones(tokens, dtype=torch.int32, device="cuda:0"),
         return_logprob=False,
     )
 
@@ -145,29 +145,33 @@ def test_real_graph_metadata_and_fixed_slots(monkeypatch, slices):
 @pytest.mark.parametrize(
     "slices,width,rank", [(1, 14336, 64), (2, 4096, 32), (3, 4096, 16)]
 )
-def test_bf16_decode_matches_native_accumulation(monkeypatch, slices, width, rank):
+@pytest.mark.parametrize("tokens", [7, 33])
+def test_bf16_decode_matches_native_accumulation(
+    monkeypatch, slices, width, rank, tokens
+):
     """Model-width reductions must preserve native BF16 rounding boundaries."""
     from sglang.srt.lora.backend.chunked_backend import ChunkedSgmvLoRABackend
 
     backend = make_backend(monkeypatch)
     torch.manual_seed(741)
-    x = torch.randn(7, width, device="cuda:0", dtype=torch.bfloat16)
+    x = torch.randn(tokens, width, device="cuda:0", dtype=torch.bfloat16)
     a = torch.randn(4, slices * rank, width, device=x.device, dtype=x.dtype) / 100
     b = torch.randn(4, slices * 128, rank, device=x.device, dtype=x.dtype) / 100
     offsets = torch.arange(slices + 1, device=x.device, dtype=torch.int64) * 128
+    routes = ([1, 2, 3, 0, 1, 2, 3] * 5)[:tokens]
     backend.prepare_lora_batch(
-        batch(),
-        [1, 2, 3, 0, 1, 2, 3],
+        batch(tokens=tokens),
+        routes,
         [0, rank, rank // 2, rank],
         [0, 0.5, 1.5, 2.0],
         False,
     )
     z = backend._shrink(x, a, slices)
     native_z = ChunkedSgmvLoRABackend.run_lora_a_sgemm(backend, x, a, stack_num=slices)
-    for i, g in enumerate([1, 2, 3, 0, 1, 2, 3]):
+    for i, g in enumerate(routes):
         live = [0, rank, rank // 2, rank][g] * slices
         torch.testing.assert_close(z[i, :live], native_z[i, :live], rtol=0, atol=0)
-    base = torch.randn(7, slices * 128, device=x.device, dtype=x.dtype)
+    base = torch.randn(tokens, slices * 128, device=x.device, dtype=x.dtype)
     expected = ChunkedSgmvLoRABackend.run_lora_b_sgemm(
         backend, z, b, offsets, base.clone()
     )

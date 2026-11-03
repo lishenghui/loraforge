@@ -134,19 +134,34 @@ def expand_kernel(
 
 @triton.jit
 def shrink_dot_kernel(
-    X, A, Y, MAP, RANKS, K: tl.constexpr, RMAX: tl.constexpr, S: tl.constexpr, SX
+    X,
+    A,
+    Y,
+    MAP,
+    RANKS,
+    K: tl.constexpr,
+    RMAX: tl.constexpr,
+    S: tl.constexpr,
+    SX,
+    M: tl.constexpr,
 ):
-    """One routed token per tile, with sequential FP32 matrix-dot blocks."""
+    """Group up to 16 same-slot tokens, preserving sequential dot accumulation."""
     t, block = tl.program_id(0), tl.program_id(1)
     g = tl.load(MAP + t)
+    rows = (t // 16) * 16 + tl.arange(0, 16)
+    routes = tl.load(MAP + rows, rows < M, -1)
+    active = (rows < M) & (routes == g)
+    if t != tl.min(tl.where(active, rows, M), 0):
+        return
     rank = tl.minimum(tl.load(RANKS + g), RMAX)
-    rows = tl.arange(0, 16)
     cols = block * 16 + tl.arange(0, 16)
     kk = tl.arange(0, 256)
     acc = tl.zeros((16, 16), tl.float32)
-    for start in range(tl.cdiv(K, 256)):
+    for start in tl.range(0, tl.cdiv(K, 256), num_stages=3):
         k = start * 256 + kk
-        x = tl.load(X + t * SX + k[None, :], (rows[:, None] == 0) & (k[None, :] < K), 0)
+        x = tl.load(
+            X + rows[:, None] * SX + k[None, :], active[:, None] & (k[None, :] < K), 0
+        )
         a = tl.load(
             A + g * S * RMAX * K + cols[None, :] * K + k[:, None],
             (k[:, None] < K) & (cols[None, :] < S * rank),
@@ -154,9 +169,9 @@ def shrink_dot_kernel(
         )
         acc += tl.dot(x, a)
     tl.store(
-        tl.broadcast_to(Y + t * S * RMAX + cols[None, :], (16, 16)),
+        Y + rows[:, None] * S * RMAX + cols[None, :],
         acc,
-        (rows[:, None] == 0) & (cols[None, :] < S * rank),
+        active[:, None] & (cols[None, :] < S * rank),
     )
 
 
@@ -174,6 +189,7 @@ def expand_dot_kernel(
     S: tl.constexpr,
     SY0,
     SY1,
+    M: tl.constexpr,
 ):
     t, block, sl = tl.program_id(0), tl.program_id(1), tl.program_id(2)
     g = tl.load(MAP + t)
@@ -181,15 +197,19 @@ def expand_dot_kernel(
     if rank == 0:
         return
     begin, end = tl.load(OFFSETS + sl), tl.load(OFFSETS + sl + 1)
-    rows = tl.arange(0, 16)
+    rows = (t // 16) * 16 + tl.arange(0, 16)
+    routes = tl.load(MAP + rows, rows < M, -1)
+    active = (rows < M) & (routes == g)
+    if t != tl.min(tl.where(active, rows, M), 0):
+        return
     cols = begin + block * 64 + tl.arange(0, 64)
     kk = tl.arange(0, 16)
     acc = tl.zeros((16, 64), tl.float32)
     for start in range(tl.cdiv(rank, 16)):
         k = start * 16 + kk
         v = tl.load(
-            V + t * S * RMAX + sl * rank + k[None, :],
-            (rows[:, None] == 0) & (k[None, :] < rank),
+            V + rows[:, None] * S * RMAX + sl * rank + k[None, :],
+            active[:, None] & (k[None, :] < rank),
             0,
         )
         b = tl.load(
@@ -199,7 +219,7 @@ def expand_dot_kernel(
         )
         acc += tl.dot(v, b)
     delta = (acc * tl.load(SCALES + g)).to(V.dtype.element_ty)
-    ptr = tl.broadcast_to(Y + t * SY0 + cols[None, :] * SY1, (16, 64))
-    mask = (rows[:, None] == 0) & (cols[None, :] < end)
+    ptr = Y + rows[:, None] * SY0 + cols[None, :] * SY1
+    mask = active[:, None] & (cols[None, :] < end)
     base = tl.load(ptr, mask, 0)
     tl.store(ptr, delta + base, mask)

@@ -7,6 +7,7 @@ import importlib.util
 import json
 import random
 import statistics
+import sys
 import time
 from importlib.metadata import version
 from pathlib import Path
@@ -17,6 +18,10 @@ def main():
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--legacy-module", type=Path, required=True)
     parser.add_argument("--output", type=Path, required=True)
+    parser.add_argument("--baseline-package", type=Path)
+    parser.add_argument("--fleet-library", type=Path)
+    parser.add_argument("--capacity", type=int, default=0)
+    parser.add_argument("--policy", action="store_true")
     parser.add_argument("--iterations", type=int, default=50)
     parser.add_argument("--trials", type=int, default=5)
     args = parser.parse_args()
@@ -34,8 +39,31 @@ def main():
     )
     legacy = importlib.util.module_from_spec(spec)
     spec.loader.exec_module(legacy)
+    baseline = None
+    if args.baseline_package:
+        package_spec = importlib.util.spec_from_file_location(
+            "loraforge_benchmark_baseline",
+            args.baseline_package / "__init__.py",
+            submodule_search_locations=[str(args.baseline_package)],
+        )
+        package = importlib.util.module_from_spec(package_spec)
+        sys.modules[package_spec.name] = package
+        package_spec.loader.exec_module(package)
+        baseline = importlib.import_module("loraforge_benchmark_baseline.gemv")
     native.get_lora = lambda: SimpleNamespace(max_lora_chunk_size=16)
     backend = native.ChunkedSgmvLoRABackend(4, torch.device("cuda:0"), None)
+    policy_backend = None
+    if args.policy:
+        from loraforge.integrations.sglang import get_backend
+
+        policy_backend = get_backend()(4, torch.device("cuda:0"), None)
+    fleet = None
+    if args.fleet_library:
+        fleet_spec = importlib.util.spec_from_file_location(
+            "loraforge_fleet_probe", args.fleet_library
+        )
+        fleet = importlib.util.module_from_spec(fleet_spec)
+        fleet_spec.loader.exec_module(fleet)
     torch.manual_seed(741)
     rng = random.Random(741)
     report = dict(
@@ -71,15 +99,27 @@ def main():
             backend.prepare_lora_batch(
                 batch, [1] * tokens, [0, rank, rank, rank], [0, 0.5, 1, 1], False
             )
+            if policy_backend is not None:
+                policy_backend.prepare_lora_batch(
+                    batch, [1] * tokens, [0, rank, rank, rank], [0, 0.5, 1, 1], False
+                )
+            capacity = args.capacity or rank
+            if capacity < rank:
+                raise ValueError("capacity must cover every tested rank")
             info = backend.batch_info
             for name, width, sizes in shapes:
                 slices = len(sizes)
                 x = torch.randn(tokens, width, device="cuda", dtype=torch.bfloat16) / 10
                 a = (
-                    torch.randn(4, slices * rank, width, device="cuda", dtype=x.dtype)
+                    torch.randn(
+                        4, slices * capacity, width, device="cuda", dtype=x.dtype
+                    )
                     / 100
                 )
-                b = torch.randn(4, sum(sizes), rank, device="cuda", dtype=x.dtype) / 100
+                b = (
+                    torch.randn(4, sum(sizes), capacity, device="cuda", dtype=x.dtype)
+                    / 100
+                )
                 base = torch.randn(tokens, sum(sizes), device="cuda", dtype=x.dtype)
                 boundaries = [0]
                 for size in sizes:
@@ -115,6 +155,109 @@ def main():
                     "legacy": lambda: custom_call(legacy),
                     "compatible": lambda: custom_call(gemv),
                 }
+                if baseline is not None:
+                    functions["previous_compatible"] = lambda: custom_call(baseline)
+                if policy_backend is not None:
+
+                    def policy_call():
+                        out = base.clone()
+                        z = policy_backend.run_lora_a_sgemm(x, a, stack_num=slices)
+                        return policy_backend.run_lora_b_sgemm(
+                            z, b, offsets, out, output_offset_cpu=offsets_cpu
+                        )
+
+                    functions["probe_policy"] = policy_call
+                if fleet is not None:
+                    packed = b[:, :, :rank].contiguous().flatten()
+                    boff = (
+                        torch.arange(4, device=x.device, dtype=torch.int64)
+                        * sum(sizes)
+                        * rank
+                    )
+                    buckets = torch.full((4,), rank, device=x.device, dtype=torch.int32)
+                    nseg = torch.tensor(
+                        [info.num_segments], device=x.device, dtype=torch.int32
+                    )
+                    offs32 = offsets.to(torch.int32)
+
+                    def fleet_call():
+                        out = base.clone()
+                        z = torch.empty(
+                            (tokens, slices * capacity), device=x.device, dtype=x.dtype
+                        )
+                        fleet.shrink(
+                            x,
+                            a,
+                            z,
+                            info.req_weight_indices,
+                            info.lora_ranks,
+                            slices,
+                            rank,
+                        )
+                        fleet.expand(
+                            z,
+                            packed,
+                            boff,
+                            buckets,
+                            out,
+                            info.seg_indptr,
+                            info.weight_indices,
+                            info.permutation,
+                            info.lora_ranks,
+                            info.scalings,
+                            offs32,
+                            nseg,
+                            sum(sizes),
+                            capacity,
+                            880,
+                            256,
+                        )
+                        return out
+
+                    def hip_a_native_b():
+                        out = base.clone()
+                        z = torch.empty(
+                            (tokens, slices * capacity), device=x.device, dtype=x.dtype
+                        )
+                        fleet.shrink(
+                            x,
+                            a,
+                            z,
+                            info.req_weight_indices,
+                            info.lora_ranks,
+                            slices,
+                            rank,
+                        )
+                        return backend.run_lora_b_sgemm(
+                            z, b, offsets, out, output_offset_cpu=offsets_cpu
+                        )
+
+                    def native_a_hip_b():
+                        out = base.clone()
+                        z = backend.run_lora_a_sgemm(x, a, stack_num=slices)
+                        fleet.expand(
+                            z,
+                            packed,
+                            boff,
+                            buckets,
+                            out,
+                            info.seg_indptr,
+                            info.weight_indices,
+                            info.permutation,
+                            info.lora_ranks,
+                            info.scalings,
+                            offs32,
+                            nseg,
+                            sum(sizes),
+                            capacity,
+                            880,
+                            256,
+                        )
+                        return out
+
+                    functions["probe_fleet_hip"] = fleet_call
+                    functions["probe_hip_a_native_b"] = hip_a_native_b
+                    functions["probe_native_a_hip_b"] = native_a_hip_b
                 stream = torch.cuda.Stream()
                 stream.wait_stream(torch.cuda.current_stream())
                 graphs = {}
@@ -174,6 +317,7 @@ def main():
                         projection=name,
                         tokens=tokens,
                         rank=rank,
+                        capacity=capacity,
                         width=width,
                         sizes=sizes,
                         mode=mode,
