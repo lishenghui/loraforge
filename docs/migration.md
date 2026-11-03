@@ -55,7 +55,12 @@ spectral energy. For example, `{"a": [6, 2], "b": [5, 1]}` with budget 2 yields
 `budget=` and reserves one direction per module, measures spectra through
 FlashTSQR, and records the chosen ranks in the export manifest.
 
-Still pending in stage 4: quality-curve objectives and heterogeneous costs. Stages 5–6 remain pending:
+Stage 4 also provides `allocate_quality_budget` with explicit candidate ranks,
+integer costs and calibration losses. It minimizes additive loss using exact
+sparse multiple-choice knapsack, with deterministic ties and infeasible-budget
+checks. See [allocation contracts](allocation.md). Automatic calibration,
+minimax objectives and large-frontier approximations remain outside this API.
+Stages 5–6 remain pending:
 serving kernels, compact runtime/loading and slot lifecycle, SGLang, vLLM,
 graph replay and framework/hardware validation. Experimental cuSOLVER batched
 EVD is also intentionally absent. Research results, launchers and paper assets
@@ -79,3 +84,9 @@ LoRAForge HEAD matches the local baseline
 `5fa6242dd40116b7218bda130eb2f2150ea42a12`; probe GitHub HEAD remains the original
 migration baseline `5fd6ae060d106066b306959f9a34b726a281ef4c`.
 The planner's later local source revision is recorded explicitly in provenance.
+
+Quality-planner validation: 59 CPU tests passed after this extension, including
+exhaustive enumeration of feasible choices, nonmonotonic losses, zero costs,
+infeasible budgets, deterministic ordering and existing adapter regressions.
+Wheel/sdist builds and an isolated installed-wheel example passed. No GPU
+computation or numerical backend changed in this extension.
