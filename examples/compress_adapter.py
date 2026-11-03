@@ -10,7 +10,9 @@ def main() -> None:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("source")
     parser.add_argument("output")
-    parser.add_argument("--keep", type=int, required=True)
+    allocation = parser.add_mutually_exclusive_group(required=True)
+    allocation.add_argument("--keep", type=int)
+    allocation.add_argument("--budget", type=int)
     parser.add_argument("--device", required=True)
     parser.add_argument("--batch-size", type=int, default=16)
     parser.add_argument(
@@ -23,6 +25,7 @@ def main() -> None:
         args.source,
         args.output,
         args.keep,
+        budget=args.budget,
         device=args.device,
         batch_size=args.batch_size,
         output_dtype=args.output_dtype,

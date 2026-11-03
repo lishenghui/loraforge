@@ -80,3 +80,33 @@ Each import must add:
 - Verification commands, hardware/software environment, and results.
 
 A new package license does not replace the terms of imported source files.
+
+### Spectral budget planner (2026-11-03)
+
+New dependency-free implementation in `compression/allocation.py`, following
+Shenghui Li's global singular-value ordering in probe commit
+`b217b17fac6cd6105cd3f04865962fb51d8a8ba3`,
+`vla_fleet/compress_oft_gpu.py` lines 50–59. No source code is copied.
+The source file was inspected locally; its uncommitted experiments are not imported.
+The API accepts an integer direction budget and sorted spectra, validates inputs,
+and resolves ties by module name and index. It does not perform compression.
+CPU tests exhaustively compare all budgets in a small instance with every feasible
+prefix-rank allocation. No GPU algorithm or hardware support changes.
+
+The budget-to-PEFT extension adds a minimum retained rank (default zero in the
+standalone planner, one in the file workflow), an explicit `budget` keyword,
+and a two-pass FlashTSQR spectrum/compression workflow. This is new library
+orchestration; no additional source files or numerical kernels are imported.
+The objective deliberately uses unscaled spectra as in the recorded research
+source. The export manifest records this convention and the selected ranks.
+
+### Quality-curve budget planning (2026-11-03)
+
+New implementation: `compression/quality.py`, with CPU exhaustive-search tests.
+Conceptual reference: Shenghui Li's `tools/llm_fleet/allocate_qwen_tasks.py`,
+function `dp`, at local probe commit
+`b217b17fac6cd6105cd3f04865962fb51d8a8ba3`. No source code is copied.
+The library uses exact integer costs and sparse dominated-state pruning rather
+than the experiment's rounded-up cost grid. Calibration, isotonic fitting,
+minimax objectives, experiment results and framework dependencies are not
+imported. Losses and costs are explicit caller data; tie-breaking is documented.

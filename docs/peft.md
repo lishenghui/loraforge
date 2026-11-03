@@ -175,3 +175,39 @@ then passed both rsLoRA GPU file-compression cases (heterogeneous and grouped
 modules) on one MI250X GCD, with the same PyTorch/PEFT/Transformers versions as
 job `23375283`. Tests confirm the retained flag, square-root alpha adjustment,
 PEFT's effective scales, and forward outputs after reload. Kernels are unchanged.
+
+## Global direction budget
+
+Instead of `keep`, pass an integer `budget` to `compress_peft_adapter`:
+
+```python
+result = compress_peft_adapter("original", "compressed", budget=128, device="cuda:0")
+```
+
+The budget is the sum of retained module ranks. Every module reserves one
+rank; the remaining directions are selected by descending singular value,
+with module name and direction index breaking ties. The objective uses the
+unscaled factors B @ A, matching the research spectral allocation convention;
+it does not optimize task quality, scaled update energy, bytes or latency.
+Infeasible budgets and simultaneous `keep`/`budget` arguments are rejected.
+
+Spectrum measurement uses GPU FlashTSQR per module, followed by the existing
+batched compression/export pass. This computes factorization twice while bounding
+GPU memory. The manifest records the objective, exact direction budget, minimum
+rank and chosen ranks under `compression.allocation`. Plain `keep` calls retain
+the existing workflow. GPU validation of the new two-pass workflow is separate
+from earlier file-compression validation.
+
+The included command-line example also accepts `--budget` in place of `--keep`:
+
+```bash
+python examples/compress_adapter.py original compressed --budget 128 --device cuda:0
+```
+
+On 2026-11-03, LUMI Slurm job `23423930` passed all six file-compression
+GPU tests on one MI250X GCD (gfx90a), Python 3.12.11 and PyTorch
+2.7.1+rocm6.2.4. This includes both new budget roundtrips (LoRA and rsLoRA),
+checking exact total ranks, positive per-module ranks, manifest allocation,
+preserved scaling and dense-SVD reconstruction error. The other four cases
+cover the existing heterogeneous/grouped file workflow. No NVIDIA validation
+is claimed by this run.
