@@ -120,14 +120,15 @@ def test_large_rank_wy_handle():
 
 
 @pytest.mark.skipif(torch.cuda.device_count() < 2, reason="two visible GPUs required")
-def test_device_guard_and_input_device_preservation():
+@pytest.mark.parametrize("path", ["full", "wide"])
+def test_device_guard_and_input_device_preservation(path):
     old = torch.cuda.current_device()
     try:
         x = random((2, 513, 32), device="cuda:1")
         torch.cuda.set_device(0)
-        first = qr_factor(x)
+        first = qr_factor(x, path=path)
         second_x = random((2, 513, 16), device="cuda:0")
-        second = qr_factor(second_x)
+        second = qr_factor(second_x, path=path)
         assert relative(first.apply_q(first.r), x) < 2e-5
         assert relative(second.apply_q(second.r), second_x) < 2e-5
         assert first.r.device.index == 1
@@ -137,6 +138,7 @@ def test_device_guard_and_input_device_preservation():
         )
         out = refactor_lora(a, b)
         assert out.a.device.index == out.b.device.index == 1
+        assert relative(out.b @ out.a, b @ a) < 2e-5
         assert torch.cuda.current_device() == 0
         with pytest.raises(ValueError, match="device"):
             first.apply_q(second.r)
@@ -227,6 +229,36 @@ def test_noncontiguous_inputs_and_apply():
 def test_cooperative_apply():
     x = random((2, 513, 16))
     factor = qr_factor(x, apply_mode="cooperative")
+    assert relative(factor.apply_q(factor.r), x) < 2e-5
+
+
+def test_wide_scratch_above_cuda_default_limit():
+    # CUDA requires explicit opt-in above 48 KiB even when the GPU has room.
+    # Exercise both wide kernels without an expensive high-rank factorization.
+    from loraforge.ops._extension import extension
+
+    ext = extension()
+    x = random((1, 12500, 1))
+    r, v, tau = ext.wide_factor(x)
+    c = torch.zeros_like(x)
+    c[:, :1] = r
+    assert relative(ext.wide_apply(v, tau, c), x) < 2e-5
+
+    factor = qr_factor(random((1, 17, 1)), path="wide")
+    z = random((1, 1, 12500))
+    q = factor.apply_q(torch.ones((1, 1, 1), device="cuda"))
+    assert relative(factor.apply_q(z), q @ z) < 2e-5
+
+
+def test_wide_rejects_scratch_above_device_limit():
+    from loraforge.ops._extension import extension
+
+    x = random((1, 17, 1))
+    factor = qr_factor(x, path="wide")
+    k = extension().shared_memory_limit(x) // 4
+    with pytest.raises(RuntimeError, match="shared memory"):
+        factor.apply_q(random((1, 1, k)))
+    # A rejected request must leave the handle and CUDA context usable.
     assert relative(factor.apply_q(factor.r), x) < 2e-5
 
 

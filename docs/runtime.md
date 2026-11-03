@@ -86,5 +86,12 @@ Python 3.12.11 and PyTorch 2.7.1+rocm6.2.4. All seven cases in
 Tests cover FP32/FP16/BF16, LoRA/rsLoRA scaling and dense update values after
 cross-stream loading, active-lease replacement/eviction rejection, stale and
 foreign handles, allocator churn after reuse, byte limits and exception release.
-The single allocated device does not establish multi-GPU or NVIDIA CUDA support.
+That single-MI250X run does not establish multi-GPU or NVIDIA CUDA support.
 These are correctness/lifecycle checks, not serving performance measurements.
+
+Subsequent Pelle job `7542157` on 2026-11-03 ran the full suite on two L40S GPUs
+with Python 3.12.3 and PyTorch 2.7.1+cu126. All nine GPU residency cases passed,
+including two new tests exercising each pool device while the other device was
+current. Load/borrow/evict/collect preserved the caller's current device and
+returned correctly placed factors and dense values. See [NVIDIA validation](nvidia.md)
+for the complete 126-pass/1-skip result, environment and limits.
