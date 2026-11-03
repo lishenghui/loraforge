@@ -136,9 +136,13 @@ Source checksums, authorship and intentional changes are in provenance.
 
 Validation includes CPU registration/version/conflict contracts and isolated
 installed-wheel plugin discovery without framework imports. LUMI job `23425475`
-is checking 36 GPU cases: raw numerics, fixed-address graph replay with updated
-occupants/ranks/routes, real SGLang batch preparation, dense projection methods
-and inherited native eager prefill. GPU results are pending. The environment is
-SGLang 0.5.22 at the recorded source revision, PyTorch 2.11.0+rocm7.2, Triton 3.6.0.
+completed successfully: all 36 GPU cases passed, including raw numerics,
+fixed-address graph replay with updated occupants/ranks/routes, real SGLang
+batch preparation, dense projection methods and inherited native eager prefill.
+The environment was MI250X (gfx90a), Python 3.12.3, SGLang 0.5.22 at the recorded
+source revision, PyTorch 2.11.0+rocm7.2, Triton 3.6.0. Pytest took 49.11 seconds;
+Slurm elapsed time was 61 seconds. Local CPU validation passed 85 tests.
+Wheel/sdist and wheel-from-sdist builds, isolated-wheel lazy imports/plugin
+metadata and fresh-process native SGLang plugin discovery passed.
 Full-model serving, native paging/loader integration, compact serving storage,
 prefill graphs, TP/MoE and performance benchmarking remain separate work.

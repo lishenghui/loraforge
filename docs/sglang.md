@@ -56,3 +56,34 @@ explicit deterministic launch configuration. Rank-bucket schedules, environment
 tuning tables, persistent B shadows, paging caches, HIP specializations and
 attention/model monkey patches are not imported. Benchmarking and further
 optimization are separate changes.
+
+## Recorded validation
+
+On 2026-11-03, LUMI Slurm job `23425475` passed all 36 cases in:
+
+```bash
+python -m pytest tests/test_gemv_gpu.py tests/test_sglang_gpu.py -m gpu -v
+```
+
+Hardware/software: one MI250X GCD (gfx90a), Python 3.12.3, PyTorch
+2.11.0+rocm7.2 LUMI build, Triton 3.6.0, SGLang 0.5.22, inspected SGLang source
+commit `baa9befa381511cd4d56f83980951e5a45fffc6d`. Pytest time was 49.11 seconds;
+Slurm elapsed time was 61 seconds. The existing AMD compatibility environment
+was reused rather than claiming a fresh generic pip installation is certified.
+
+Raw tests cover FP32/FP16/BF16, slice counts 1/2/3, rank capacities 8/33 plus
+BF16 capacities 128/256, split-K with masked input tails, row-strided inputs,
+base-model routes and in-place output views. Six raw graph cases update weights,
+ranks, scales and routes after capture while retaining buffer addresses.
+
+Ten real-framework cases cover repeatable registry activation, actual native
+batch preparation and linear/QKV/gate-up methods in eager prefill/decode, plus
+three graph cases using native static batch metadata refreshed before replay.
+Slot replacement is simulated with in-place tensor writes; these tests do not
+exercise the native adapter manager, full paging loader or scheduler.
+A separate login-node check confirmed that SGLang's general plugin loader in a
+fresh process discovers the installed entrypoint and selects the backend.
+Local CPU suites passed 85 cases, including disabled activation, unsupported
+versions, conflicts, lazy imports and existing compression/runtime regressions.
+No model weights were downloaded. NVIDIA, full-model serving and throughput
+claims require separate validation.
