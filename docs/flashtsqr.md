@@ -40,7 +40,9 @@ does not move inputs to the current default GPU. Ambient autocast is disabled
 inside operators. Autograd, graph capture, and torch.compile integration are
 not supported. Wide application is limited by its per-block shared scratch
 space; an oversized right-hand side raises an error rather than changing QR
-backends. Float32 ATen GEMMs follow the caller's TF32 policy on CUDA; validate
+backends. Wide scratch is checked against the actual device's per-block limit;
+CUDA launches explicitly opt in to shared memory above the default 48 KiB.
+Float32 ATen GEMMs follow the caller's TF32 policy on CUDA; validate
 your precision settings for that environment before relying on tolerances.
 
 ## LoRA refactoring and truncation
@@ -113,5 +115,9 @@ correctness validation, not a performance benchmark.
 
 The one skip is the 160-column full/WY test: its shared-memory policy does not
 fit MI250X, where the public API uses the wide kernel instead. NVIDIA CUDA and
-the large-rank full/WY path have not been hardware-validated in this extraction.
-Other GPUs, framework versions, and precision policies remain unverified.
+the large-rank full/WY path were not covered by that MI250X validation.
+Subsequent single-H100 validation, including the full/WY path and CUDA shared
+memory fix, and dual-L40S validation of full/wide device guards are recorded in
+[the NVIDIA guide](nvidia.md). L40S skips the full/WY case because its shared
+memory does not fit that policy. Other GPUs, framework versions, and precision
+policies remain unverified.

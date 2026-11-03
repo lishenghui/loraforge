@@ -369,7 +369,7 @@ template <typename K> static void allow_smem(K kernel, size_t bytes, const char*
     TORCH_CHECK(bytes <= max_dyn_smem(), what, " needs ", bytes, " B shared memory, device allows ",
                 max_dyn_smem(), " B; lower rows_per_leaf");
 #if !(defined(USE_ROCM) || defined(__HIP_PLATFORM_AMD__))
-    cudaFuncSetAttribute(kernel, cudaFuncAttributeMaxDynamicSharedMemorySize, (int)max_dyn_smem());
+    C10_CUDA_CHECK(cudaFuncSetAttribute(kernel, cudaFuncAttributeMaxDynamicSharedMemorySize, (int)max_dyn_smem()));
 #endif
 }
 static void launch_check(const char* what) {
