@@ -14,19 +14,6 @@ import re
 from pathlib import Path
 
 
-def packed_segment_capacity(tokens, slots, chunk_size):
-    """Maximum nonempty chunks after grouping tokens by adapter slot.
-
-    Each of G nonempty groups consumes one token and one chunk. Every further
-    chunk needs chunk_size additional tokens. This bound depends only on static
-    capacities, so routes may change freely between captured graph replays.
-    """
-    if tokens < 0 or slots < 1 or chunk_size < 1:
-        raise ValueError("invalid grouped chunk capacity")
-    groups = min(tokens, slots)
-    return groups + (tokens - groups) // chunk_size
-
-
 def read_rank_catalog(paths):
     """Read local padded PEFT headers and optional probe compression rank metadata.
 

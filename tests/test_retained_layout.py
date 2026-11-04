@@ -1,5 +1,4 @@
 # SPDX-License-Identifier: Apache-2.0
-from itertools import product
 from types import SimpleNamespace
 
 import pytest
@@ -9,24 +8,7 @@ from loraforge.integrations._sglang_fleet import (  # noqa: E402
     FleetPolicy,
     _active_rank_classes,
 )
-from loraforge.runtime.retained import (  # noqa: E402
-    RetainedLayout,
-    effective_rank,
-    packed_segment_capacity,
-)
-
-
-def test_segment_bound_covers_all_adapter_distributions():
-    for slots in (1, 2, 3, 4):
-        for chunk in (1, 2, 4, 16):
-            for counts in product(range(7), repeat=slots):
-                actual = sum((n + chunk - 1) // chunk for n in counts)
-                assert actual <= packed_segment_capacity(sum(counts), slots, chunk)
-    # All slots active, one larger group just beyond a chunk boundary.
-    assert packed_segment_capacity(33, 4, 16) == 5
-    assert packed_segment_capacity(32, 5, 16) == 6
-    assert packed_segment_capacity(1, 5, 16) == 1
-    assert packed_segment_capacity(0, 5, 16) == 0
+from loraforge.runtime.retained import RetainedLayout, effective_rank  # noqa: E402
 
 
 def ranks(k, other=None):

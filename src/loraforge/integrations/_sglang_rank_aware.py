@@ -9,8 +9,6 @@ import triton
 import triton.language as tl
 from sglang.kernels.ops.lora.dense.lora_tuning_config import get_lora_shrink_config
 
-from loraforge.runtime.retained import packed_segment_capacity
-
 
 @triton.jit(do_not_specialize=["num_segs"])
 def _rank_aware_shrink_kernel(
@@ -128,7 +126,7 @@ def _rank_aware_shrink_kernel(
     tl.store(output_ptr, partial_sum, mask=output_mask)
 
 
-def shrink(x, weights, info, slices, *, limit_segments=False):
+def shrink(x, weights, info, slices):
     from sglang.srt.environ import envs
 
     # Preserve the caller's explicit native split-K configuration.
@@ -147,13 +145,6 @@ def shrink(x, weights, info, slices, *, limit_segments=False):
     segments = (
         info.weight_indices.shape[0] if info.use_cuda_graph else info.num_segments
     )
-    if limit_segments:
-        # SGLang groups tokens by adapter and packs its nonempty chunks first.
-        # Bound using capacities, never the routes present during capture.
-        segments = min(
-            segments,
-            packed_segment_capacity(x.shape[0], info.lora_ranks.numel(), info.max_len),
-        )
     output = torch.empty((x.shape[0], weights.shape[1]), device=x.device, dtype=x.dtype)
     if not x.shape[0] or not segments:
         return output

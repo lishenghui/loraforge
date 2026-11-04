@@ -13,11 +13,7 @@ import weakref
 from collections import Counter
 from pathlib import Path
 
-from loraforge.runtime.retained import (
-    RetainedLayout,
-    packed_segment_capacity,
-    read_rank_catalog,
-)
+from loraforge.runtime.retained import RetainedLayout, read_rank_catalog
 
 
 class FleetPolicy:
@@ -235,13 +231,7 @@ def create_backend(catalog, *, active_prefill=False, hybrid=False):
             )
             if not eligible:
                 self._fleet_hits["rank_aware_shrink"] += 1
-                return rank_shrink(
-                    x,
-                    weights,
-                    _masked(info, e.rank),
-                    slices,
-                    limit_segments=self._fleet_hybrid,
-                )
+                return rank_shrink(x, weights, _masked(info, e.rank), slices)
             self._fleet_hits["direct_shrink"] += 1
             z = (
                 rank_shrink(x, weights, _masked(info, e.unsupported), slices)
@@ -325,19 +315,6 @@ def create_backend(catalog, *, active_prefill=False, hybrid=False):
             if not need_rowexpand:
                 return base
             self._fleet_hits[f"rowexpand_{phase}"] += 1
-            blocks = cfg["nblocks"]
-            if self._fleet_hybrid:
-                # SGLang packs chunks after grouping by adapter. Bound all
-                # possible replay routes, not the active count at capture.
-                # Each tile keeps one writer and the same arithmetic order.
-                segments = min(
-                    info.weight_indices.shape[0],
-                    packed_segment_capacity(
-                        z.shape[0], info.lora_ranks.numel(), info.max_len or 16
-                    ),
-                )
-                tiles = (base.shape[1] + cfg["threads"] - 1) // cfg["threads"]
-                blocks = max(1, min(blocks, segments * tiles))
             return row_expand(
                 z,
                 e.store,
@@ -352,7 +329,7 @@ def create_backend(catalog, *, active_prefill=False, hybrid=False):
                 e.slice_offsets,
                 self._fleet_segments,
                 e.capacity,
-                blocks=blocks,
+                blocks=cfg["nblocks"],
                 threads=cfg["threads"],
             )
 

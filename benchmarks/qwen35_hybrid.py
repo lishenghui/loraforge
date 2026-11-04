@@ -441,11 +441,8 @@ def run(root, modes, reference=None, validation_only=False):
                     status.update(state="measuring", concurrency=concurrency)
                     dump(root / f"{mode}-latest.json", status)
                     measure(32)
-                    count = m.get("requests_at_concurrency", {}).get(
-                        str(concurrency), m["requests"]
-                    )
                     for repeat in range(m["repeats"]):
-                        row = dict(measure(count), repeat=repeat)
+                        row = dict(measure(m["requests"]), repeat=repeat)
                         measurements.append(row)
                         dump(attempt / "measurements.json", measurements)
                         print(mode, row, flush=True)
