@@ -63,6 +63,18 @@ normal pool initialization does this automatically. ROCm builds on a login host
 without a GPU need `PYTORCH_ROCM_ARCH=gfx90a`. No global environment installation
 or changes to SGLang kernel-config getters are required.
 
+The low-level `row_expand` operation accepts `row_tile=2/4/8/16` and
+`threads=128/256`. The default `row_tile=16` invokes the original kernel.
+Smaller tiles subdivide each existing segment inside B into disjoint output
+rows, retaining native A batching and each token's rank-reduction order.
+Metadata stays on device during graph replay. This trades B reuse for more
+independent work; it is not uniformly faster across shapes and batch sizes.
+The [Qwen3.5 study](qwen35.md#b-only-row-subdivision) records the measured choices.
+Job 23463508 passed 93 GPU checks, including eight new combinations covering
+changing routes, segment counts, ranks, null slots, uneven slices and strided
+outputs during graph replay. All 32 operator-study cases were bitwise equal to
+the original kernel for every custom tile/thread variant.
+
 For the original Qwen3 small-prefill profile, additionally set
 `LORAFORGE_STABLE_PREFILL=vllm` and `LORAFORGE_STABLE_PREFILL_MAX_TOKENS=256`.
 The mode name refers to the inherited normalization path, not a vLLM serving

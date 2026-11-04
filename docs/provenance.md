@@ -11,6 +11,15 @@ kernel below, retaining its author/source notices and original three-slice
 shared-memory footprint. The synthetic adapters in the pilot are generated
 test data, not research model outputs or imported trained adapters.
 
+The B-only `row_tile=2/4/8` extension is new LoRAForge scheduling code around
+the existing attributed RowExpand reduction. It splits each existing segment
+inside B without changing A metadata, rank accumulation or BF16 rounding. The
+original `row_tile=16` kernel remains the default low-level implementation.
+`benchmarks/rowexpand_tiles.py` and its graph/rank/route regression cases are
+new project code; no additional probe or framework implementation is copied.
+MI250 validation and cache-regime timings are recorded in
+[qwen35-rowtiles-mi250.json](qwen35-rowtiles-mi250.json).
+
 ## Foundation
 
 Created on 2026-10-31 as new packaging, documentation, and CPU checks under

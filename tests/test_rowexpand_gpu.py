@@ -275,6 +275,110 @@ def test_four_slice_unequal_widths_and_strided_output():
     torch.testing.assert_close(output, expected, rtol=0.03, atol=0.003)
 
 
+@pytest.mark.parametrize("row_tile", [2, 4, 8, 16])
+@pytest.mark.parametrize("threads", [128, 256])
+def test_row_tiles_preserve_graph_routes_ranks_and_partial_outputs(row_tile, threads):
+    from loraforge.ops.rowexpand import row_expand
+
+    torch.manual_seed(319)
+    kw = dict(device="cuda", dtype=torch.bfloat16)
+    widths = [17, 265, 3, 514]  # Slice boundaries cross output blocks.
+    offsets = [0]
+    for width in widths:
+        offsets.append(offsets[-1] + width)
+    n, count = offsets[-1], 37
+    a = torch.randn(4, 256, 64, **kw) / 10
+    raw_a = a.clone()
+    b = torch.randn(4, n, 64, **kw) / 20
+    catalog = {
+        name: {"model.layers.0.linear_attn.in_proj_qkvz.lora_A.weight": rank}
+        for name, rank in (("one-low", 3), ("one-high", 64), ("two", 16), ("three", 64))
+    }
+    layout = RetainedLayout(a, b, "in_proj_qkvz", 0, catalog)
+    for slot, name in enumerate((None, "one-low", "two", "three")):
+        layout.load(name, slot, 64 if name else 0)
+
+    def ints(values):
+        return torch.tensor(values, device="cuda", dtype=torch.int32)
+
+    z = torch.randn(count, 256, **kw) / 10
+    base = torch.randn(count, n, **kw) / 10
+    output = torch.empty(count, n + 7, **kw)[:, :n]
+    reference = torch.empty_like(output)
+    seg, slots = ints([0, 16, 32, 37]), ints([1, 2, 3])
+    perm = torch.randperm(count, device="cuda", dtype=torch.int32)
+    scales = torch.tensor([0.0, 0.5, 1.25, -0.75], device="cuda")
+    offs, nseg = ints(offsets), ints(3)
+
+    def run(out, tile, block_threads):
+        out.copy_(base)
+        return row_expand(
+            z,
+            layout.store,
+            layout.boff,
+            layout.bucket,
+            out,
+            seg,
+            slots,
+            perm,
+            layout.rank,
+            scales,
+            offs,
+            nseg,
+            64,
+            row_tile=tile,
+            threads=block_threads,
+        )
+
+    run(output, row_tile, threads)
+    torch.cuda.synchronize()
+    graph = torch.cuda.CUDAGraph()
+    with torch.cuda.graph(graph):
+        run(output, row_tile, threads)
+    addresses = [
+        t.data_ptr() for t in (output, seg, slots, perm, nseg, layout.rank, layout.boff)
+    ]
+    for names, boundaries, active, high in (
+        ([1, 2, 3], [0, 16, 32, 37], 3, False),
+        ([3, 0, 1], [0, 5, 21, 37], 3, True),
+        ([2, 1, 0], [0, 16, 32, 37], 2, False),
+    ):
+        a[1].copy_(raw_a[1])
+        layout.load("one-high" if high else "one-low", 1, 64)
+        slots.copy_(ints(names))
+        seg.copy_(ints(boundaries))
+        perm.copy_(perm.flip(0))
+        nseg.fill_(active)
+        graph.replay()
+        run(reference, 16, 256)
+        torch.testing.assert_close(output, reference, rtol=0, atol=0)
+        expected = base.clone()
+        for segment in range(active):
+            slot = names[segment]
+            rank = [0, 64 if high else 3, 16, 64][slot]
+            if not rank:
+                continue
+            for row in perm[boundaries[segment] : boundaries[segment + 1]].tolist():
+                for sl, (start, end) in enumerate(
+                    zip(offsets[:-1], offsets[1:], strict=True)
+                ):
+                    delta = (
+                        z[row, sl * rank : (sl + 1) * rank].float()
+                        @ b[slot, start:end, :rank].float().T
+                    )
+                    expected[row, start:end] = (
+                        base[row, start:end].float()
+                        + (delta * scales[slot]).bfloat16().float()
+                    ).bfloat16()
+        torch.testing.assert_close(output, expected, rtol=0.03, atol=0.003)
+        assert addresses == [
+            t.data_ptr()
+            for t in (output, seg, slots, perm, nseg, layout.rank, layout.boff)
+        ]
+    with pytest.raises(RuntimeError, match="row_tile must"):
+        run(output, 3, threads)
+
+
 @pytest.mark.parametrize("rank", [1, 2, 4, 8, 16, 32, 64])
 @pytest.mark.parametrize("slices", [1, 2, 3])
 def test_migrated_kernels_match_pinned_probe(rank, slices):

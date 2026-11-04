@@ -282,14 +282,50 @@ matrix tiles and also reuses B across token rows. This explains a plausible
 crossover between reuse, per-thread serial work and parallelism; no occupancy
 or bandwidth counters were collected to assign a causal percentage.
 
-The next B experiment should vary **output tile width and rows per work item**
-while preserving each token's reduction order: for example, 128 threads and
-2/4-row chunks for narrow outputs, with native B as a matched alternative.
 Changing the maximum from 16 to 8 alone cannot split an already 8-row chunk.
 The rejected empty-grid bound changed launch size, not the number of useful
-work items, so it does not settle this question. Wide-output RowExpand and
-native prefill remain separate decisions. This is an experiment direction,
-not an enabled optimization or a demonstrated gain.
+work items. This motivated the smaller B-only work units tested below, while
+leaving A segments and native prefill unchanged.
+
+## B-only row subdivision
+
+Job **23463508** completed in 1m41s on one MI250X GCD. The new
+`row_expand(..., row_tile=2/4/8)` alternatives split only the B work inside
+each existing segment; `row_tile=16` retains the original kernel. Each token
+keeps the same scalar rank reduction and BF16 rounding. The 93 GPU tests passed,
+including graph replay across changed ranks, routes, segment counts and null
+slots. All eight custom tile/thread variants matched the original bitwise in
+all 32 operator cases (four shapes, single/mixed adapters, C1/8/32/64).
+
+`python benchmarks/rowexpand_tiles.py RESULTS.json` reproduces the study on an
+allocated GPU with the inspected SGLang runtime. Each slot has its own checkpoint
+region, including equal-rank slots. Native B receives the same effective ranks.
+Three rounds randomize variant order. Warm timing averages 160 graph calls;
+flushed timing uses single-call graphs after a 128 MiB flush and output reset,
+both outside the timed interval. Flushed measurements include graph/event costs
+and must not be interpreted as pure kernel duration or serving throughput.
+
+At C32 with four mixed-rank adapters, median microseconds:
+
+| B output | Variant | Warm | Flushed |
+| --- | --- | ---: | ---: |
+| 1024 | Original 16-row / 256-thread | 9.709 | 26.400 |
+| 1024 | 2-row / 128-thread | 5.800 | 21.120 |
+| 1024 | Native, same effective ranks | 6.853 | 21.920 |
+| QKV 4096/512/512 | Original 16-row / 256-thread | 12.070 | 28.800 |
+| QKV 4096/512/512 | 4-row / 256-thread | 11.049 | 26.721 |
+| QKV 4096/512/512 | Native, same effective ranks | 12.661 | 27.360 |
+
+The narrow-output warm ratio is **1.674x** versus the old RowExpand and
+**1.182x** versus rank-aware native B. The QKV warm improvement over the old
+RowExpand is **1.092x**. Wider qkvz/gate-up do not benefit from subdivision in
+the tested four-adapter C8/C32 cases and retain the original choice. Single
+adapter and C64 results differ, reinforcing that output width alone is not a
+dispatch rule. Exact samples, framework/source hashes and numerical checks are
+in [qwen35-rowtiles-mi250.json](qwen35-rowtiles-mi250.json).
+
+The matched full-model trial is pending. These are accepted operator results,
+not an additional full-model speedup or a trained-adapter quality claim.
 
 ## Sources
 
