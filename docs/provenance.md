@@ -27,6 +27,13 @@ no new probe or framework kernel is imported. Its separate timing opt-in
 preserves the original strict logprob result while allowing token-matched
 performance measurements. See [qwen35.md](qwen35.md) for scope and results.
 
+`benchmarks/qwen35_gdn_consumer.py` is an independently implemented research
+kernel for the fixed Qwen3.5-0.8B contiguous projection boundary. It computes
+BF16-rounded LoRA B corrections while producing QKV/Z/b/a for the original
+GDN consumer. It copies no upstream kernel. Its functions match the measured
+prototype AST; [the experiment report](qwen35-gdn.md) records GPU checks,
+framework hashes, whole-model controls and remaining scope limits.
+
 ## Foundation
 
 Created on 2026-10-31 as new packaging, documentation, and CPU checks under

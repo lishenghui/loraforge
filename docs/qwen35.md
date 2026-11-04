@@ -529,6 +529,12 @@ or the paper's 50-adapter workload result. Default hybrid behavior remains
 conservative. Timings, strict failures, hardware/source hashes and audits are in
 [qwen35-tiny-speed-mi250.json](qwen35-tiny-speed-mi250.json).
 
+The subsequent [GDN fusion experiments](qwen35-gdn.md) measure packed base
+projection and expand-at-unpack separately, then together against matched
+native/base controls. The rank-4 combined prototype adds 6.86%/6.44%/3.55% over
+the existing tiny profile at C1/8/32. Its kernel is a standalone benchmark
+prototype; the installed tiny-profile flag retains the behavior documented above.
+
 ## Sources
 
 - [Official Qwen3.5-0.8B config](https://huggingface.co/Qwen/Qwen3.5-0.8B/blob/main/config.json)
