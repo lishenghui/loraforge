@@ -213,3 +213,17 @@ measured control-to-base elapsed-time gap**, assuming the base timing remains a
 useful same-configuration reference. At rate 16, the 1.3x target (568.95 tokens/s)
 is already nearly the measured base rate (569.96). These observations constrain
 the target for this workload; they are not universal hardware speed limits.
+
+
+An isolated second screen, **23453892**, kept the frozen decode policy and used
+RowExpand for all supported prefill ranks instead of native expand above 16.
+It completed in **9m39s**, with 33 GPU checks and its own 150 single/three mixed
+eager–graph checks passing. Fixed-work throughput was **559.06 tokens/s**, only
+**1.0059x** the frozen control. Cross-policy CPU comparison found **135/150 exact
+single-request records**, **148/150 identical token sequences**, and maximum
+common-prefix logprob delta **0.0707774**. Token differences occurred for a02 at
+257 prompt tokens and a17 at 131. All 24 requests in the three mixed checks
+matched exactly. Its own eager–graph equality therefore does not establish
+parity with the frozen policy. This tiny timing increment and numerical change
+fail the screen; the process-local hook is not installed in the package, and
+no further repeat/grid or default promotion follows from it.
