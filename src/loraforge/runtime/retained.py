@@ -94,8 +94,17 @@ def read_rank_catalog(paths):
 
 def effective_rank(ranks, name, layer):
     targets = {
-        "qkv_proj": {"q_proj", "k_proj", "v_proj"},
-        "gate_up_proj": {"gate_proj", "up_proj"},
+        "qkv_proj": {"qkv_proj", "q_proj", "k_proj", "v_proj"},
+        "gate_up_proj": {"gate_up_proj", "gate_proj", "up_proj"},
+        "in_proj_qkvz": {
+            "in_proj_qkvz",
+            "in_proj_qkv",
+            "in_proj_q",
+            "in_proj_k",
+            "in_proj_v",
+            "in_proj_z",
+        },
+        "in_proj_ba": {"in_proj_ba", "in_proj_b", "in_proj_a"},
     }.get(name, {name})
     return max(
         (
@@ -126,7 +135,7 @@ class RetainedLayout:
             a.shape[0] != slots
             or capacity < 1
             or a.shape[1] % capacity
-            or not 1 <= a.shape[1] // capacity <= 3
+            or not 1 <= a.shape[1] // capacity <= 4
         ):
             raise ValueError("invalid fused A/B capacity")
         if not a.is_contiguous() or not b.is_contiguous():

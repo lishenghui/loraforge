@@ -1,5 +1,16 @@
 # Source provenance
 
+## Qwen3.5 GDN adaptation — 2026-11-04
+
+`integrations/_sglang_qwen35.py` is independently implemented against the
+inspected SGLang 0.5.22 model/loader interfaces and the official Qwen3.5 config.
+It copies no framework source. References and the exact compatibility boundary
+are in [qwen35.md](qwen35.md); validation artifacts record runtime file hashes.
+The four-slice RowExpand instantiation extends the existing project-owned
+kernel below, retaining its author/source notices and original three-slice
+shared-memory footprint. The synthetic adapters in the pilot are generated
+test data, not research model outputs or imported trained adapters.
+
 ## Foundation
 
 Created on 2026-10-31 as new packaging, documentation, and CPU checks under

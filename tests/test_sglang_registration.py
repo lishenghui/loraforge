@@ -11,6 +11,7 @@ from loraforge.integrations import sglang
 
 def test_disabled_plugin_is_inert(monkeypatch):
     monkeypatch.delenv("LORAFORGE_SGLANG", raising=False)
+    monkeypatch.delenv("LORAFORGE_SGLANG_QWEN35", raising=False)
     monkeypatch.setattr(
         sglang, "install_sglang_backend", lambda: pytest.fail("unexpected activation")
     )
@@ -50,10 +51,25 @@ def test_registration_idempotence_and_conflict(monkeypatch):
 
 def test_enabled_entrypoint(monkeypatch):
     calls = []
+    monkeypatch.delenv("LORAFORGE_SGLANG_QWEN35", raising=False)
     monkeypatch.setenv("LORAFORGE_SGLANG", "1")
     monkeypatch.setattr(sglang, "install_sglang_backend", lambda: calls.append(True))
     sglang.install()
     assert calls == [True]
+
+
+def test_hybrid_bridge_can_keep_native_backend(monkeypatch):
+    from loraforge.integrations import _sglang_qwen35
+
+    calls = []
+    monkeypatch.setenv("LORAFORGE_SGLANG_QWEN35", "1")
+    monkeypatch.setenv("LORAFORGE_SGLANG", "0")
+    monkeypatch.setattr(
+        _sglang_qwen35, "install_qwen35_lora", lambda: calls.append("bridge")
+    )
+    monkeypatch.setattr(sglang, "install_sglang_backend", lambda: calls.append("fleet"))
+    sglang.install()
+    assert calls == ["bridge"]
 
 
 @pytest.mark.parametrize("policy", ["compatible", "rank-aware", "fleet"])

@@ -247,3 +247,19 @@ full-model comparisons in job 23452964, but measured 0.9922x the frozen control.
 It remains disabled by default. The matched base-only job 23453345 and three
 sampled GPU windows now quantify the remaining headroom; 1.3x has not been
 demonstrated. See [the measurements and limitations](rowexpand.md).
+
+## Qwen3.5 hybrid extension — 2026-11-04
+
+The opt-in bridge now packs HF qkv+z and b+a adapter factors for dense Qwen3.5
+text models, and Fleet supports four-slice retained layouts and RowExpand.
+This is a new model adaptation; no probe research source or shared SGLang
+installation was modified. The conservative hybrid dispatch retains native
+shrink and prefill reductions after the first fast-policy pilot failed its
+declared numerical gate.
+
+Job 23457660 completed with 85 GPU checks and a full-model synthetic-adapter
+pilot: 20/20 native/Fleet sequences matched, max logprob difference 0.0159646.
+Matched median speedups were 1.032x/1.034x/1.009x at concurrency 1/8/32.
+These are modest pilot gains, not a trained-adapter quality claim or general
+hybrid certification. [Architecture, reproduction and limits](qwen35.md) and
+[both accepted and rejected measurements](qwen35-mi250.json) are retained.

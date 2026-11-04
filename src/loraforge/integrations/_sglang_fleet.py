@@ -17,9 +17,10 @@ from loraforge.runtime.retained import RetainedLayout, read_rank_catalog
 
 
 class FleetPolicy:
-    """Frozen MI250X profile: table-selected decode A, all decode B, low prefill B."""
+    """Dense MI250X table, with native A/prefill reductions for hybrid models."""
 
-    def __init__(self, table=None):
+    def __init__(self, table=None, *, hybrid=False):
+        self.hybrid = hybrid
         self.table = (
             json.loads(
                 (
@@ -31,6 +32,25 @@ class FleetPolicy:
         )
 
     def select(self, name, phase, tokens):
+        if self.hybrid:
+            # Hybrid recurrent states can amplify small rounding changes. The
+            # dense-model HIP-A and prefill-B profile is not a validated GDN
+            # profile. Keep those reductions native; optimize decode B only.
+            return dict(
+                a="native",
+                b="all" if phase == "decode" and name != "in_proj_ba" else "native",
+                nblocks=880,
+                threads=256,
+            )
+        if name in ("in_proj_qkvz", "out_proj"):
+            # Hybrid projections have different shapes from the dense-model
+            # tuning table. Keep native A; enable only shape-generic RowExpand.
+            return dict(
+                a="native",
+                b="all" if phase == "decode" else "low",
+                nblocks=880,
+                threads=256,
+            )
         points = self.table.get(phase, {}).get(name, {})
         if not points:
             return dict(a="native", b="native", nblocks=880, threads=256)
@@ -71,12 +91,13 @@ def _active_rank_classes(loaded, slots):
     return low, high
 
 
-def create_backend(catalog, *, active_prefill=False):
+def create_backend(catalog, *, active_prefill=False, hybrid=False):
     import torch
     from sglang.kernels.ops.lora.dense.chunked_sgmv_expand import (
         chunked_sgmv_lora_expand_forward as native_expand,
     )
     from sglang.srt.lora.backend.chunked_backend import ChunkedSgmvLoRABackend
+    from sglang.srt.lora.lora import LoRAAdapter
     from sglang.srt.lora.mem_pool import LoRAMemoryPool
 
     from loraforge.ops.rowexpand import direct_shrink, row_expand, rowexpand_extension
@@ -84,7 +105,10 @@ def create_backend(catalog, *, active_prefill=False):
     from ._sglang_rank_aware import shrink as rank_shrink
 
     a_entries, b_entries = weakref.WeakValueDictionary(), weakref.WeakValueDictionary()
-    policy = FleetPolicy()
+    # Explicit installer calls and plugin activation must select the same
+    # reduction policy, including adapters that target only the hybrid's MLP.
+    hybrid = hybrid or getattr(LoRAAdapter, "_loraforge_qwen35", False)
+    policy = FleetPolicy(hybrid=hybrid)
     if getattr(LoRAMemoryPool, "_loraforge_fleet", False):
         raise RuntimeError(
             "Fleet pool hooks already belong to another backend instance"
@@ -100,7 +124,15 @@ def create_backend(catalog, *, active_prefill=False):
         old_init(self, *args, **kwargs)
         self._loraforge_layouts = []
         for name, aa in self.A_buffer.items():
-            if name not in ("qkv_proj", "gate_up_proj", "o_proj", "down_proj"):
+            if name not in (
+                "qkv_proj",
+                "gate_up_proj",
+                "o_proj",
+                "down_proj",
+                "in_proj_qkvz",
+                "in_proj_ba",
+                "out_proj",
+            ):
                 raise ValueError(f"unsupported Fleet projection: {name}")
             for layer, (a, b) in enumerate(zip(aa, self.B_buffer[name], strict=True)):
                 if a is None or b is None:
@@ -146,6 +178,7 @@ def create_backend(catalog, *, active_prefill=False):
             self._fleet_decode = False
             self._fleet_hits = Counter()
             self._fleet_active_prefill = active_prefill
+            self._fleet_hybrid = hybrid
             self._fleet_prefill_slots = None
 
         def prepare_lora_batch(
@@ -224,7 +257,7 @@ def create_backend(catalog, *, active_prefill=False):
                 and info is self.batch_info
                 and (info.max_len or 16) <= 16
                 and cpu is not None
-                and 2 <= cpu.numel() <= 4
+                and 2 <= cpu.numel() <= 5
                 and z.dtype == torch.bfloat16
                 and z.is_contiguous()
                 and (base is None or (base.dtype == z.dtype and base.stride(1) == 1))
@@ -377,6 +410,7 @@ def create_backend(catalog, *, active_prefill=False):
             return dict(
                 policy="fleet",
                 active_prefill=self._fleet_active_prefill,
+                hybrid=self._fleet_hybrid,
                 python_capture_eager_calls=dict(self._fleet_hits),
                 modules=len(entries),
                 shadow_bytes=sum(
@@ -405,5 +439,7 @@ def backend_from_environment():
     if any(not p for p in paths):
         raise ValueError("every adapter must declare a local path")
     return create_backend(
-        read_rank_catalog(paths), active_prefill=active_prefill == "1"
+        read_rank_catalog(paths),
+        active_prefill=active_prefill == "1",
+        hybrid=os.environ.get("LORAFORGE_SGLANG_QWEN35") == "1",
     )

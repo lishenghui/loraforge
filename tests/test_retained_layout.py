@@ -77,6 +77,23 @@ def test_frozen_policy_preserves_profile_overrides():
     assert p.select("unknown", "decode", 1)["b"] == "native"
 
 
+def test_hybrid_keeps_native_shrink_and_prefill_reductions():
+    policy = FleetPolicy(hybrid=True)
+    for name in (
+        "qkv_proj",
+        "gate_up_proj",
+        "down_proj",
+        "in_proj_qkvz",
+        "in_proj_ba",
+        "out_proj",
+    ):
+        assert policy.select(name, "prefill", 128)["b"] == "native"
+        assert policy.select(name, "decode", 1)["a"] == "native"
+        assert policy.select(name, "decode", 32)["b"] == (
+            "native" if name == "in_proj_ba" else "all"
+        )
+
+
 def test_active_prefill_uses_live_slots_and_keeps_unknown_routes():
     loaded = {0: {"rank": 0}, 1: {"rank": 3}, 2: {"rank": 128}}
     assert _active_rank_classes(loaded, [0]) == (False, False)
@@ -101,6 +118,7 @@ def test_active_prefill_is_explicit_opt_in(tmp_path, monkeypatch, flag, enabled)
     manifest.write_text(json.dumps({"adapters": [{"path": "adapter"}]}))
     monkeypatch.setenv("LORAFORGE_SGLANG_MANIFEST", str(manifest))
     monkeypatch.delenv("LORAFORGE_SGLANG_ACTIVE_PREFILL", raising=False)
+    monkeypatch.delenv("LORAFORGE_SGLANG_QWEN35", raising=False)
     if flag is not None:
         monkeypatch.setenv("LORAFORGE_SGLANG_ACTIVE_PREFILL", flag)
     monkeypatch.setattr(fleet, "read_rank_catalog", lambda paths: paths)
@@ -109,7 +127,7 @@ def test_active_prefill_is_explicit_opt_in(tmp_path, monkeypatch, flag, enabled)
     )
     assert fleet.backend_from_environment() == (
         ["adapter"],
-        {"active_prefill": enabled},
+        {"active_prefill": enabled, "hybrid": False},
     )
     monkeypatch.setenv("LORAFORGE_SGLANG_ACTIVE_PREFILL", "yes")
     with pytest.raises(ValueError, match="must be 0 or 1"):

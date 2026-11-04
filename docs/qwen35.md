@@ -1,0 +1,164 @@
+# Qwen3.5 hybrid LoRA
+
+This experimental integration targets the **dense Qwen3.5 text decoder**, BF16,
+TP=1, synchronous adapter loading, and the inspected SGLang 0.5.22 implementation.
+Vision adapters, MoE, quantization, tensor parallelism and recurrent-state cache
+reuse across different adapters are outside the validated scope. Initial checks
+pass 119 CPU cases and 85 MI250X operator/framework GPU cases (job 23457660),
+including four slices, unequal output widths, strided output, rank/slot changes
+and graph replay. The full-model synthetic-adapter pilot passes the declared
+native/Fleet token/logprob gate; measured throughput and its limits are below.
+This does not establish trained-adapter task quality or general hybrid support.
+
+## What changes
+
+The official Qwen3.5-0.8B config has 24 decoder layers: 18 GatedDeltaNet linear
+attention layers and six gated full-attention layers, one per group of four.
+The text hidden size is 1024. LoRA still computes `scale * B @ A`; the changed
+boundary is how the model's projections are fused and how their factors are
+packed, rather than a different LoRA equation.
+
+| HF projection | SGLang projection | Output widths in 0.8B | LoRA A slices |
+| --- | --- | --- | --- |
+| `in_proj_qkv`, `in_proj_z` | `in_proj_qkvz` | 2048 / 2048 / 2048 / 2048 | shared qkv A repeated three times, separate z A |
+| `in_proj_b`, `in_proj_a` | `in_proj_ba` | 16 / 16 | two independent A blocks, b before a |
+| `out_proj` | `out_proj` | 1024 from 2048 inputs | one |
+| `q_proj`, `k_proj`, `v_proj` | `qkv_proj` | 4096 / 512 / 512 | three; Q includes its attention gate |
+| `gate_proj`, `up_proj` | `gate_up_proj` | 3584 / 3584 | two |
+| `o_proj`, `down_proj` | unchanged | 1024 | one each |
+
+The gate `z` is part of the four-slice input projection. The small `b/a`
+projections control the DeltaNet update and decay; dropping them is a correctness
+error when the adapter contains their weights. Convolution and recurrent-state
+updates remain native SGLang operations, with no LoRAForge replacement.
+
+## Native batching and compatibility bridge
+
+SGLang's LoRA manager maps each request's adapter ID to a fixed pool slot and
+refreshes slot ranks, scales and request routes. Its `csgmv` backend groups token
+rows by adapter and splits long segments into chunks (16 rows in this setup).
+Shrink computes A products per slice; expand adds the corresponding B product to
+the base projection. Decode graphs consume updated device metadata at fixed
+addresses. GDN layers use the same adapter routing as attention and MLP layers;
+their separate convolution/recurrent states still follow SGLang's request-state
+indices. Correct LoRA packing does not by itself prove recurrent-state isolation.
+
+The inspected runtime already has a generic four-slice merged-linear wrapper,
+but its LoRA normalizer handles independent q/k/v/z or fused qkvz, not HF's shared
+qkv plus z factors. It also lacks the complete b/a LoRA target/dimension/stacking
+path. The explicit `LORAFORGE_SGLANG_QWEN35=1` plugin switch installs a process-local
+bridge for these gaps. Both the **native csgmv baseline and Fleet** must use this
+same bridge when comparing HF-format adapters. Shared SGLang files stay intact.
+
+The bridge validates factor shapes, rejects overlapping formats, zero-fills
+missing projections, preserves global checkpoint scaling and adds b/a to target
+resolution. It supports fused and independently split factors too. This is an
+internal-version integration: it refuses a version other than 0.5.22 and refuses
+to overwrite a runtime already advertising b/a support. The tested framework
+file hashes must accompany measurements; a version string alone is insufficient.
+
+## Fleet changes
+
+The retained layout and RowExpand now accept four slices. The existing 1–3-slice
+kernel keeps its original shared-memory footprint; a separate instantiation
+stages four slices for GDN. Rank lookup includes both HF and fused aliases.
+Hybrid execution uses rank-aware native shrink and native prefill expansion for
+all projections. RowExpand handles supported decode ranks, including the new
+`in_proj_qkvz` and `out_proj`; the narrow b/a output stays native. Native shrink
+and prefill reductions avoid carrying the dense-model HIP-A/prefill-B choices
+into the hybrid's recurrent state. This is a separate dispatch policy, not a
+claim that the dense-model tuning table was measured on the new shapes.
+
+Use both switches in each worker for Fleet:
+
+```sh
+export SGLANG_PLUGINS=loraforge
+export LORAFORGE_SGLANG_QWEN35=1
+export LORAFORGE_SGLANG=1
+export LORAFORGE_SGLANG_POLICY=fleet
+export LORAFORGE_SGLANG_MANIFEST=/absolute/path/manifest.json
+```
+
+For native csgmv with the same format bridge, set `LORAFORGE_SGLANG=0`.
+Do not enable the Qwen3-specific stable-prefill hook for Qwen3.5.
+
+## Reproducible performance pilot
+
+`benchmarks/qwen35_hybrid.py prepare OUTPUT --model LOCAL_MODEL` prepares four
+deterministic, nonzero synthetic adapters. Their physical global rank is 64;
+their retained module ranks are 8/16/32/64 (b/a capped at 8). These are test
+factors with zero padding, **not trained adapters compressed at a measured quality
+budget**. The exact same padded factors and scaling go to native and Fleet.
+
+On an allocated GPU, `run OUTPUT` runs native, Fleet and base-only serially,
+validates repeated and mixed-adapter requests, warms each concurrency, and times
+96 requests with 128 input / 64 output tokens at concurrency 1/8/32, three repeats
+each. Decode uses graphs; prefill is eager. Prefix caching is disabled. Model
+loading, compilation and conditioning are untimed. `compare OUTPUT` is CPU-only.
+Every attempt is retained; the latest pointer identifies the selected run.
+
+The numerical gate requires identical native/Fleet generated token IDs and at
+most 0.05 logprob difference along their common prefix. Fixed-address load audits,
+actual graph execution and Fleet dispatch evidence must also be inspected.
+Base-only measures the available model throughput; it is not a quality baseline
+for a real fine-tuned adapter. A failed numerical gate must remain visible even
+if the throughput measurement is useful diagnostically.
+
+The first pilot (23457086, completed in 14m47s) used the dense profile on the
+existing projections and RowExpand on the new GDN projections. Its median
+native/Fleet/base output throughput was 118.03/127.08/183.54 at concurrency 1,
+770.03/828.77/1196.49 at 8, and 2127.46/2126.57/3137.19 at 32. These are
+**diagnostic speeds, not an accepted speedup**: 19/20 native/Fleet token sequences
+matched, but one diverged and the maximum common-prefix logprob difference was
+0.075245, exceeding the declared 0.05 gate. Adapter effects, graph execution and
+fixed-address loads were observed. The unchanged native and base results remain
+available; the conservative hybrid policy must pass this same gate before timing.
+
+The conservative policy completed the matched repeat in **job 23457660**,
+14m38s on one MI250X GCD. All **20/20** native/Fleet sequences (12 single-request
+cases and eight mixed requests, eight output tokens each) matched. The maximum
+common-prefix logprob difference was **0.0159646**, within the unchanged 0.05
+gate. Repeating requests after another adapter and repeating mixed batches were
+exact within each engine. All arms replayed decode graphs; adapter loads kept
+fixed buffer addresses; Fleet's RowExpand decode calls and nonzero ranks for
+all seven projection types were observed. The bridge's CPU factor-product
+checks independently cover packing; model parity is between the two engines
+using the same bridge, not a comparison against Transformers/PEFT generation.
+
+Three measurements per point, median output tokens/s, including the base model:
+
+| Concurrency | Native csgmv + bridge | Fleet + bridge | Base only | Fleet/native |
+| --- | ---: | ---: | ---: | ---: |
+| 1 | 119.54 | 123.34 | 185.24 | 1.032x |
+| 8 | 784.11 | 811.09 | 1224.81 | 1.034x |
+| 32 | 2145.60 | 2165.62 | 3162.24 | 1.009x |
+
+This is a short single-device pilot, not a broad workload/seed confidence
+interval. The high-concurrency difference is effectively near parity; Fleet
+retains about 66–68% of base-only throughput. The earlier 7.6% low-concurrency
+gain was rejected by the numerical gate. The accepted policy improves this
+workload only modestly and does not justify a 1.3x performance claim.
+
+The model is `Qwen/Qwen3.5-0.8B` revision
+`2fc06364715b967f1860aea9cf38778875588b17`. Framework/library fingerprints,
+adapter hashes, raw durations, numerical results and the rejected first pilot
+are in [qwen35-mi250.json](qwen35-mi250.json). A final installer-selection guard
+also enables the hybrid policy for explicit installer calls; the measured
+workers already selected that same policy through the environment switch.
+
+A specific follow-up worth measuring is reuse of the shared qkv A product:
+the four-slice representation currently computes three identical A products
+for an HF qkv+z adapter. GDN b/a projection fusion is another candidate. Neither
+has a measured speedup here; reducing mathematical work alone does not predict
+full-model throughput.
+
+## Sources
+
+- [Official Qwen3.5-0.8B config](https://huggingface.co/Qwen/Qwen3.5-0.8B/blob/main/config.json)
+- [SGLang Qwen3.5 model](https://github.com/sgl-project/sglang/blob/main/python/sglang/srt/models/qwen3_5.py)
+- [SGLang LoRA normalization](https://github.com/sgl-project/sglang/blob/main/python/sglang/srt/lora/lora.py)
+- [SGLang chunked LoRA backend](https://github.com/sgl-project/sglang/blob/main/python/sglang/srt/lora/backend/chunked_backend.py)
+
+The bridge is independent LoRAForge code written against these contracts; no
+framework source is vendored. Existing RowExpand provenance remains in
+[provenance.md](provenance.md).

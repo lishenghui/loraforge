@@ -5,6 +5,9 @@ separately from the existing `compatible` and `rank-aware` policies. It is an
 explicit opt-in on SGLang 0.5.22, BF16, TP=1, MI250X/gfx90a, dense qkv/o/gate-up/down
 projections, 16-token LoRA chunks and non-overlapping native adapter loading.
 It does not claim native-identical model outputs or task-quality equivalence.
+The experimental [Qwen3.5 GDN bridge](qwen35.md) adds four-slice input projections,
+the linear-attention output projection, and native retained-rank b/a gates.
+Its model validation and performance scope are recorded separately.
 
 ## Migrated components
 

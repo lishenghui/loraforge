@@ -57,6 +57,7 @@ import loraforge.ops.rowexpand
 import loraforge.runtime.retained
 import loraforge.adapters.sglang
 import loraforge.integrations._sglang_fleet
+import loraforge.integrations._sglang_qwen35
 print(json.dumps({'version': loraforge.__version__}))
 """
     result = subprocess.run(
