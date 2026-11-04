@@ -985,5 +985,834 @@
     "Synthetic nonzero adapters; no trained-adapter quality result.",
     "Base-only was not remeasured in the launch trial.",
     "Profile kernel sums and cache-warm operator timings are not service speedups."
-  ]
+  ],
+  "operator_study": {
+    "job": 23460210,
+    "scope": "Cache-warm operator study, not serving throughput",
+    "BA_B_excluded": "BA B comparison is excluded: synthetic slots used different random factors for the same retained checkpoint key, causing shared-region aliasing. BA B policy is unchanged and no candidate decision uses that comparison. A measurements and other B projections use distinct checkpoint keys.",
+    "cases": [
+      {
+        "projection": "in_proj_qkvz",
+        "tokens": 1,
+        "route_pattern": [
+          3
+        ],
+        "native_A_us": 5.134037509560585,
+        "HIP_A_us": 2.9190249741077423,
+        "HIP_A_unequal": 0,
+        "HIP_A_max_abs": 0.0,
+        "RowExpand_B_us": 4.824037477374077,
+        "native_rank_B_us": 8.267068862915039
+      },
+      {
+        "projection": "in_proj_qkvz",
+        "tokens": 8,
+        "route_pattern": [
+          1,
+          2,
+          3,
+          4
+        ],
+        "native_A_us": 5.324043706059456,
+        "HIP_A_us": 4.297037422657013,
+        "HIP_A_unequal": 1,
+        "HIP_A_max_abs": 4.76837158203125e-07,
+        "RowExpand_B_us": 6.901056319475174,
+        "native_rank_B_us": 12.716099619865417
+      },
+      {
+        "projection": "in_proj_qkvz",
+        "tokens": 32,
+        "route_pattern": [
+          1,
+          2,
+          3,
+          4
+        ],
+        "native_A_us": 5.352043733000755,
+        "HIP_A_us": 8.840075135231018,
+        "HIP_A_unequal": 0,
+        "HIP_A_max_abs": 0.0,
+        "RowExpand_B_us": 13.275106251239777,
+        "native_rank_B_us": 14.295105636119843
+      },
+      {
+        "projection": "in_proj_qkvz",
+        "tokens": 32,
+        "route_pattern": [
+          3
+        ],
+        "native_A_us": 5.288037657737732,
+        "HIP_A_us": 8.108069002628326,
+        "HIP_A_unequal": 1,
+        "HIP_A_max_abs": 3.814697265625e-06,
+        "RowExpand_B_us": 12.658099830150604,
+        "native_rank_B_us": 10.120081156492233
+      },
+      {
+        "projection": "in_proj_ba",
+        "tokens": 1,
+        "route_pattern": [
+          3
+        ],
+        "native_A_us": 5.103043839335442,
+        "HIP_A_us": 2.8340186923742294,
+        "HIP_A_unequal": 0,
+        "HIP_A_max_abs": 0.0,
+        "RowExpand_B_us": null,
+        "native_rank_B_us": null
+      },
+      {
+        "projection": "in_proj_ba",
+        "tokens": 8,
+        "route_pattern": [
+          1,
+          2,
+          3,
+          4
+        ],
+        "native_A_us": 5.166037380695343,
+        "HIP_A_us": 2.966024912893772,
+        "HIP_A_unequal": 0,
+        "HIP_A_max_abs": 0.0,
+        "RowExpand_B_us": null,
+        "native_rank_B_us": null
+      },
+      {
+        "projection": "in_proj_ba",
+        "tokens": 32,
+        "route_pattern": [
+          1,
+          2,
+          3,
+          4
+        ],
+        "native_A_us": 5.1430437713861465,
+        "HIP_A_us": 3.692031279206276,
+        "HIP_A_unequal": 0,
+        "HIP_A_max_abs": 0.0,
+        "RowExpand_B_us": null,
+        "native_rank_B_us": null
+      },
+      {
+        "projection": "in_proj_ba",
+        "tokens": 32,
+        "route_pattern": [
+          3
+        ],
+        "native_A_us": 5.181043595075607,
+        "HIP_A_us": 3.6320313811302185,
+        "HIP_A_unequal": 0,
+        "HIP_A_max_abs": 0.0,
+        "RowExpand_B_us": null,
+        "native_rank_B_us": null
+      },
+      {
+        "projection": "out_proj",
+        "tokens": 1,
+        "route_pattern": [
+          3
+        ],
+        "native_A_us": 7.99306258559227,
+        "HIP_A_us": 3.370025008916855,
+        "HIP_A_unequal": 0,
+        "HIP_A_max_abs": 0.0,
+        "RowExpand_B_us": 4.453037679195404,
+        "native_rank_B_us": 4.699037596583366
+      },
+      {
+        "projection": "out_proj",
+        "tokens": 8,
+        "route_pattern": [
+          1,
+          2,
+          3,
+          4
+        ],
+        "native_A_us": 8.119069039821625,
+        "HIP_A_us": 3.7220314145088196,
+        "HIP_A_unequal": 1,
+        "HIP_A_max_abs": 5.960464477539063e-08,
+        "RowExpand_B_us": 6.004050001502037,
+        "native_rank_B_us": 6.665050238370895
+      },
+      {
+        "projection": "out_proj",
+        "tokens": 32,
+        "route_pattern": [
+          1,
+          2,
+          3,
+          4
+        ],
+        "native_A_us": 8.135062456130981,
+        "HIP_A_us": 5.192043632268906,
+        "HIP_A_unequal": 1,
+        "HIP_A_max_abs": 7.62939453125e-06,
+        "RowExpand_B_us": 9.770075231790543,
+        "native_rank_B_us": 6.87805637717247
+      },
+      {
+        "projection": "out_proj",
+        "tokens": 32,
+        "route_pattern": [
+          3
+        ],
+        "native_A_us": 8.193062245845795,
+        "HIP_A_us": 4.810037463903427,
+        "HIP_A_unequal": 0,
+        "HIP_A_max_abs": 0.0,
+        "RowExpand_B_us": 9.446074813604355,
+        "native_rank_B_us": 5.480043590068817
+      },
+      {
+        "projection": "gate_up_proj",
+        "tokens": 1,
+        "route_pattern": [
+          3
+        ],
+        "native_A_us": 5.125037580728531,
+        "HIP_A_us": 2.8710249811410904,
+        "HIP_A_unequal": 0,
+        "HIP_A_max_abs": 0.0,
+        "RowExpand_B_us": 4.700037464499474,
+        "native_rank_B_us": 7.46106281876564
+      },
+      {
+        "projection": "gate_up_proj",
+        "tokens": 8,
+        "route_pattern": [
+          1,
+          2,
+          3,
+          4
+        ],
+        "native_A_us": 5.253037437796593,
+        "HIP_A_us": 3.609031066298485,
+        "HIP_A_unequal": 0,
+        "HIP_A_max_abs": 0.0,
+        "RowExpand_B_us": 6.498049944639206,
+        "native_rank_B_us": 11.9580939412117
+      },
+      {
+        "projection": "gate_up_proj",
+        "tokens": 32,
+        "route_pattern": [
+          1,
+          2,
+          3,
+          4
+        ],
+        "native_A_us": 5.266037583351135,
+        "HIP_A_us": 5.6540437042713165,
+        "HIP_A_unequal": 0,
+        "HIP_A_max_abs": 0.0,
+        "RowExpand_B_us": 11.475087702274323,
+        "native_rank_B_us": 13.708105683326721
+      },
+      {
+        "projection": "gate_up_proj",
+        "tokens": 32,
+        "route_pattern": [
+          3
+        ],
+        "native_A_us": 5.245037376880646,
+        "HIP_A_us": 4.9760375171899796,
+        "HIP_A_unequal": 0,
+        "HIP_A_max_abs": 0.0,
+        "RowExpand_B_us": 10.799087584018707,
+        "native_rank_B_us": 9.882081300020218
+      },
+      {
+        "projection": "down_proj",
+        "tokens": 1,
+        "route_pattern": [
+          3
+        ],
+        "native_A_us": 12.201093882322311,
+        "HIP_A_us": 4.172031208872795,
+        "HIP_A_unequal": 0,
+        "HIP_A_max_abs": 0.0,
+        "RowExpand_B_us": 4.423031210899353,
+        "native_rank_B_us": 4.699037596583366
+      },
+      {
+        "projection": "down_proj",
+        "tokens": 8,
+        "route_pattern": [
+          1,
+          2,
+          3,
+          4
+        ],
+        "native_A_us": 12.363094091415405,
+        "HIP_A_us": 4.628031328320503,
+        "HIP_A_unequal": 0,
+        "HIP_A_max_abs": 0.0,
+        "RowExpand_B_us": 5.999043583869934,
+        "native_rank_B_us": 6.668049842119217
+      },
+      {
+        "projection": "down_proj",
+        "tokens": 32,
+        "route_pattern": [
+          1,
+          2,
+          3,
+          4
+        ],
+        "native_A_us": 12.413100153207779,
+        "HIP_A_us": 6.659050285816193,
+        "HIP_A_unequal": 1,
+        "HIP_A_max_abs": 9.5367431640625e-07,
+        "RowExpand_B_us": 9.71808135509491,
+        "native_rank_B_us": 6.87805637717247
+      },
+      {
+        "projection": "down_proj",
+        "tokens": 32,
+        "route_pattern": [
+          3
+        ],
+        "native_A_us": 12.44509369134903,
+        "HIP_A_us": 5.745043605566025,
+        "HIP_A_unequal": 1,
+        "HIP_A_max_abs": 1.1920928955078125e-07,
+        "RowExpand_B_us": 9.41706895828247,
+        "native_rank_B_us": 5.4550375789403915
+      },
+      {
+        "projection": "qkv_proj",
+        "tokens": 1,
+        "route_pattern": [
+          3
+        ],
+        "native_A_us": 5.133043602108955,
+        "HIP_A_us": 2.889018692076206,
+        "HIP_A_unequal": 0,
+        "HIP_A_max_abs": 0.0,
+        "RowExpand_B_us": 4.755037650465965,
+        "native_rank_B_us": 5.832049995660782
+      },
+      {
+        "projection": "qkv_proj",
+        "tokens": 8,
+        "route_pattern": [
+          1,
+          2,
+          3,
+          4
+        ],
+        "native_A_us": 5.322043597698212,
+        "HIP_A_us": 3.744025155901909,
+        "HIP_A_unequal": 0,
+        "HIP_A_max_abs": 0.0,
+        "RowExpand_B_us": 6.861056387424469,
+        "native_rank_B_us": 9.475074708461761
+      },
+      {
+        "projection": "qkv_proj",
+        "tokens": 32,
+        "route_pattern": [
+          1,
+          2,
+          3,
+          4
+        ],
+        "native_A_us": 5.3610436618328094,
+        "HIP_A_us": 7.233062386512756,
+        "HIP_A_unequal": 0,
+        "HIP_A_max_abs": 0.0,
+        "RowExpand_B_us": 11.884094029664993,
+        "native_rank_B_us": 10.113081336021423
+      },
+      {
+        "projection": "qkv_proj",
+        "tokens": 32,
+        "route_pattern": [
+          3
+        ],
+        "native_A_us": 5.374037474393845,
+        "HIP_A_us": 6.647056341171265,
+        "HIP_A_unequal": 0,
+        "HIP_A_max_abs": 0.0,
+        "RowExpand_B_us": 11.618093401193619,
+        "native_rank_B_us": 7.548056542873383
+      }
+    ],
+    "script_sha256": "de0677c129499cf2e718bc95362602e1d657d075e531ed34800fb3d574e5a7c9",
+    "limitations": [
+      "42 isolated cache-warm cases; graph has 16 calls, 10 replays, three measurements.",
+      "A differences are not a substitute for full-model validation; BA B measurements excluded for invalid checkpoint aliasing.",
+      "Tested Triton tile variants and launch bounds did not improve on native A materially."
+    ]
+  },
+  "shaped_dispatch_trial": {
+    "job": 23461243,
+    "node": "nid005061",
+    "state": "complete",
+    "source_commit": "40fbcbd830a2f75bdfca0167de7fb8542c4caab3",
+    "profiles_sha256": {
+      "long": "e79b5a568f8690d4bce4db4e4b8a644f0f08856ada8468e735940103c87715fa",
+      "b_only": "55eb1aed000ef8795dad32815ec8c1457442da3eac231b9f9d14b4394836201a",
+      "shape": "05aad881ce1db7c89f4442a8540318d4a994d51039567136d4b0afa14027b28c"
+    },
+    "raw_archive_sha256": "d3620f22c40b9d653fa34013ef7c439c5c7481e33e5e476e01dd954360dc2cbe",
+    "profiles": {
+      "shape": "HIP A for down/out/o through C32 and gate/qkv through C8; native prefill and GDN input A.",
+      "long": "HIP A only for down/out/o through C32; native prefill.",
+      "b_only": "Native A throughout; native B for down/out/o/qkv at graph batch >=32 and at most four catalogued adapters. Other supported decode B uses RowExpand."
+    },
+    "protocol": {
+      "order": [
+        "native",
+        "shape rejected before timing",
+        "long rejected before timing",
+        "b_only",
+        "control"
+      ],
+      "prompt_tokens": 128,
+      "output_tokens": 64,
+      "requests_at_concurrency": {
+        "1": 32,
+        "8": 192,
+        "32": 384
+      },
+      "repeats": 3,
+      "model_gate": {
+        "cases": 52,
+        "tokens_per_case": 8,
+        "identical_ids": true,
+        "max_common_prefix_logprob_difference": 0.05
+      }
+    },
+    "gpu_suites": {
+      "tests-long-23461243.xml": {
+        "tests": 85,
+        "errors": 0,
+        "failures": 0,
+        "skipped": 0
+      },
+      "tests-b_only-23461243.xml": {
+        "tests": 85,
+        "errors": 0,
+        "failures": 0,
+        "skipped": 0
+      },
+      "tests-shape-23461243.xml": {
+        "tests": 85,
+        "errors": 0,
+        "failures": 0,
+        "skipped": 0
+      }
+    },
+    "arms": {
+      "native": {
+        "numerics": {
+          "cases": 52,
+          "same_token_cases": 52,
+          "same_tokens": true,
+          "max_common_prefix_logprob_difference": 0.0,
+          "numerical_pass": true
+        },
+        "measurements": [
+          {
+            "concurrency": 1,
+            "seconds": 17.027759565011365,
+            "requests": 32,
+            "output_tokens": 2048,
+            "tokens_per_second": 120.2741906344643,
+            "repeat": 0
+          },
+          {
+            "concurrency": 1,
+            "seconds": 17.107021824020194,
+            "requests": 32,
+            "output_tokens": 2048,
+            "tokens_per_second": 119.71692215440892,
+            "repeat": 1
+          },
+          {
+            "concurrency": 1,
+            "seconds": 17.03329599701101,
+            "requests": 32,
+            "output_tokens": 2048,
+            "tokens_per_second": 120.2350972095701,
+            "repeat": 2
+          },
+          {
+            "concurrency": 8,
+            "seconds": 15.57186581598944,
+            "requests": 192,
+            "output_tokens": 12288,
+            "tokens_per_second": 789.115456375336,
+            "repeat": 0
+          },
+          {
+            "concurrency": 8,
+            "seconds": 15.559067011985462,
+            "requests": 192,
+            "output_tokens": 12288,
+            "tokens_per_second": 789.7645784631113,
+            "repeat": 1
+          },
+          {
+            "concurrency": 8,
+            "seconds": 15.608145278005395,
+            "requests": 192,
+            "output_tokens": 12288,
+            "tokens_per_second": 787.2812420138055,
+            "repeat": 2
+          },
+          {
+            "concurrency": 32,
+            "seconds": 11.374634503008565,
+            "requests": 384,
+            "output_tokens": 24576,
+            "tokens_per_second": 2160.5968959705656,
+            "repeat": 0
+          },
+          {
+            "concurrency": 32,
+            "seconds": 11.347361784020904,
+            "requests": 384,
+            "output_tokens": 24576,
+            "tokens_per_second": 2165.7897639790917,
+            "repeat": 1
+          },
+          {
+            "concurrency": 32,
+            "seconds": 11.385706693981774,
+            "requests": 384,
+            "output_tokens": 24576,
+            "tokens_per_second": 2158.4957930622186,
+            "repeat": 2
+          }
+        ],
+        "audit": {
+          "counts": {
+            "EXTEND/eager": 511,
+            "DECODE/graph": 15477
+          },
+          "batches": {
+            "EXTEND/eager/1": 281,
+            "DECODE/graph/2": 7,
+            "DECODE/graph/1": 8323,
+            "EXTEND/eager/8": 113,
+            "DECODE/graph/8": 4802,
+            "EXTEND/eager/16": 4,
+            "DECODE/graph/31": 14,
+            "EXTEND/eager/7": 113,
+            "DECODE/graph/32": 2331
+          },
+          "backend": "ChunkedSgmvLoRABackend",
+          "fixed_addresses": true
+        }
+      },
+      "b_only": {
+        "numerics": {
+          "cases": 52,
+          "same_token_cases": 52,
+          "same_tokens": true,
+          "max_common_prefix_logprob_difference": 0.015964582562446594,
+          "numerical_pass": true
+        },
+        "measurements": [
+          {
+            "concurrency": 1,
+            "seconds": 16.5127009730204,
+            "requests": 32,
+            "output_tokens": 2048,
+            "tokens_per_second": 124.02574256907849,
+            "repeat": 0
+          },
+          {
+            "concurrency": 1,
+            "seconds": 16.511007092980435,
+            "requests": 32,
+            "output_tokens": 2048,
+            "tokens_per_second": 124.038466488861,
+            "repeat": 1
+          },
+          {
+            "concurrency": 1,
+            "seconds": 16.518521511985455,
+            "requests": 32,
+            "output_tokens": 2048,
+            "tokens_per_second": 123.98204031238625,
+            "repeat": 2
+          },
+          {
+            "concurrency": 8,
+            "seconds": 15.07467153298785,
+            "requests": 192,
+            "output_tokens": 12288,
+            "tokens_per_second": 815.1421391245715,
+            "repeat": 0
+          },
+          {
+            "concurrency": 8,
+            "seconds": 15.115015240997309,
+            "requests": 192,
+            "output_tokens": 12288,
+            "tokens_per_second": 812.9664313318431,
+            "repeat": 1
+          },
+          {
+            "concurrency": 8,
+            "seconds": 15.106402150995564,
+            "requests": 192,
+            "output_tokens": 12288,
+            "tokens_per_second": 813.4299535505335,
+            "repeat": 2
+          },
+          {
+            "concurrency": 32,
+            "seconds": 11.328191584005253,
+            "requests": 384,
+            "output_tokens": 24576,
+            "tokens_per_second": 2169.454834671041,
+            "repeat": 0
+          },
+          {
+            "concurrency": 32,
+            "seconds": 11.48285802299506,
+            "requests": 384,
+            "output_tokens": 24576,
+            "tokens_per_second": 2140.233724982508,
+            "repeat": 1
+          },
+          {
+            "concurrency": 32,
+            "seconds": 11.345640184008516,
+            "requests": 384,
+            "output_tokens": 24576,
+            "tokens_per_second": 2166.118403317553,
+            "repeat": 2
+          }
+        ],
+        "audit": {
+          "counts": {
+            "EXTEND/eager": 511,
+            "DECODE/graph": 15477
+          },
+          "batches": {
+            "EXTEND/eager/1": 281,
+            "DECODE/graph/2": 7,
+            "DECODE/graph/1": 8323,
+            "EXTEND/eager/8": 113,
+            "DECODE/graph/8": 4802,
+            "EXTEND/eager/16": 4,
+            "DECODE/graph/31": 14,
+            "EXTEND/eager/7": 113,
+            "DECODE/graph/32": 2331
+          },
+          "backend": "FleetBackend",
+          "fixed_addresses": true,
+          "dispatch": {
+            "rank_aware_shrink": 60306,
+            "rowexpand_decode": 1566,
+            "native_expand_decode/in_proj_ba": 324,
+            "native_expand_decode/out_proj": 54,
+            "native_expand_decode/down_proj": 72,
+            "native_expand_decode/qkv_proj": 18,
+            "native_expand_decode/o_proj": 18,
+            "native_expand_prefill/in_proj_qkvz": 9198,
+            "native_expand_prefill/in_proj_ba": 9198,
+            "native_expand_prefill/out_proj": 9198,
+            "native_expand_prefill/gate_up_proj": 12264,
+            "native_expand_prefill/down_proj": 12264,
+            "native_expand_prefill/qkv_proj": 3066,
+            "native_expand_prefill/o_proj": 3066
+          }
+        }
+      },
+      "control": {
+        "numerics": {
+          "cases": 52,
+          "same_token_cases": 52,
+          "same_tokens": true,
+          "max_common_prefix_logprob_difference": 0.015964582562446594,
+          "numerical_pass": true
+        },
+        "measurements": [
+          {
+            "concurrency": 1,
+            "seconds": 16.68299310700968,
+            "requests": 32,
+            "output_tokens": 2048,
+            "tokens_per_second": 122.75974621960933,
+            "repeat": 0
+          },
+          {
+            "concurrency": 1,
+            "seconds": 16.683313877001638,
+            "requests": 32,
+            "output_tokens": 2048,
+            "tokens_per_second": 122.75738591858652,
+            "repeat": 1
+          },
+          {
+            "concurrency": 1,
+            "seconds": 16.67214171998785,
+            "requests": 32,
+            "output_tokens": 2048,
+            "tokens_per_second": 122.83964678303447,
+            "repeat": 2
+          },
+          {
+            "concurrency": 8,
+            "seconds": 15.24600136099616,
+            "requests": 192,
+            "output_tokens": 12288,
+            "tokens_per_second": 805.9818249417441,
+            "repeat": 0
+          },
+          {
+            "concurrency": 8,
+            "seconds": 15.148644636006793,
+            "requests": 192,
+            "output_tokens": 12288,
+            "tokens_per_second": 811.1616778436183,
+            "repeat": 1
+          },
+          {
+            "concurrency": 8,
+            "seconds": 15.150026137009263,
+            "requests": 192,
+            "output_tokens": 12288,
+            "tokens_per_second": 811.0877096101004,
+            "repeat": 2
+          },
+          {
+            "concurrency": 32,
+            "seconds": 11.512007334997179,
+            "requests": 384,
+            "output_tokens": 24576,
+            "tokens_per_second": 2134.81448411586,
+            "repeat": 0
+          },
+          {
+            "concurrency": 32,
+            "seconds": 11.527599471999565,
+            "requests": 384,
+            "output_tokens": 24576,
+            "tokens_per_second": 2131.9269514606995,
+            "repeat": 1
+          },
+          {
+            "concurrency": 32,
+            "seconds": 11.498995317000663,
+            "requests": 384,
+            "output_tokens": 24576,
+            "tokens_per_second": 2137.230194681936,
+            "repeat": 2
+          }
+        ],
+        "audit": {
+          "counts": {
+            "EXTEND/eager": 511,
+            "DECODE/graph": 15477
+          },
+          "batches": {
+            "EXTEND/eager/1": 281,
+            "DECODE/graph/2": 7,
+            "DECODE/graph/1": 8323,
+            "EXTEND/eager/8": 113,
+            "DECODE/graph/8": 4802,
+            "EXTEND/eager/16": 4,
+            "DECODE/graph/31": 14,
+            "EXTEND/eager/7": 113,
+            "DECODE/graph/32": 2331
+          },
+          "backend": "FleetBackend",
+          "fixed_addresses": true,
+          "dispatch": {
+            "rank_aware_shrink": 60306,
+            "rowexpand_decode": 1728
+          }
+        }
+      }
+    },
+    "comparison": {
+      "selected": "b_only",
+      "job": "23461243",
+      "node": "nid005061",
+      "performance": [
+        {
+          "concurrency": 1,
+          "medians": {
+            "native": 120.2350972095701,
+            "b_only": 124.02574256907849,
+            "control": 122.75974621960933
+          },
+          "candidate_over_native": 1.0315269455215832,
+          "candidate_over_control": 1.010312797056491
+        },
+        {
+          "concurrency": 8,
+          "medians": {
+            "native": 789.115456375336,
+            "b_only": 813.4299535505335,
+            "control": 811.0877096101004
+          },
+          "candidate_over_native": 1.0308123443518415,
+          "candidate_over_control": 1.0028877813246104
+        },
+        {
+          "concurrency": 32,
+          "medians": {
+            "native": 2160.5968959705656,
+            "b_only": 2166.118403317553,
+            "control": 2134.81448411586
+          },
+          "candidate_over_native": 1.002555547199612,
+          "candidate_over_control": 1.0146635313909527
+        }
+      ],
+      "control_passed_extended_gate": true,
+      "rejected": [
+        {
+          "arm": "shape",
+          "profile": "shape",
+          "latest": {
+            "mode": "fleet",
+            "state": "failed",
+            "attempt": "/pfs/lustrep2/scratch/project_465003417/lishengh/loraforge-qwen35-shaped-20261104/shape/results/fleet-23461243-1793797763271517477",
+            "error": "AssertionError({'cases': 52, 'same_token_cases': 51, 'same_tokens': False, 'max_common_prefix_logprob_difference': 0.06544721126556396, 'numerical_pass': False})"
+          },
+          "numerics": {
+            "cases": 52,
+            "same_token_cases": 51,
+            "same_tokens": false,
+            "max_common_prefix_logprob_difference": 0.06544721126556396,
+            "numerical_pass": false
+          }
+        },
+        {
+          "arm": "long",
+          "profile": "long",
+          "latest": {
+            "mode": "fleet",
+            "state": "failed",
+            "attempt": "/pfs/lustrep2/scratch/project_465003417/lishengh/loraforge-qwen35-shaped-20261104/long/results/fleet-23461243-1793797851648057320",
+            "error": "AssertionError({'cases': 52, 'same_token_cases': 52, 'same_tokens': True, 'max_common_prefix_logprob_difference': 0.06544721126556396, 'numerical_pass': False})"
+          },
+          "numerics": {
+            "cases": 52,
+            "same_token_cases": 52,
+            "same_tokens": true,
+            "max_common_prefix_logprob_difference": 0.06544721126556396,
+            "numerical_pass": false
+          }
+        }
+      ]
+    },
+    "decision": "Neither HIP-A variant passed the model gate. B-only passed but is not adopted independently: its C32 gain over control is close to the drift also visible at C1, whose dispatch is unchanged. No new accepted service speedup.",
+    "limitations": [
+      "Single device, fixed arm order, three timed repetitions; no confidence interval.",
+      "No base-only arm in this follow-up.",
+      "Both native and Fleet use the same bridge; adapters are synthetic."
+    ]
+  }
 }

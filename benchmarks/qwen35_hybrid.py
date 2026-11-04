@@ -292,6 +292,11 @@ def numerical_check(reference, candidate):
         for a, b in zip(reference["serial"], candidate["serial"], strict=True)
     ]
     pairs += list(zip(reference["mixed"], candidate["mixed"], strict=True))
+    if "mixed32" in reference or "mixed32" in candidate:
+        assert "mixed32" in reference and "mixed32" in candidate, (
+            "validation cases differ"
+        )
+        pairs += list(zip(reference["mixed32"], candidate["mixed32"], strict=True))
     assert all(math.isfinite(x[0]) for a, b in pairs for seq in (a, b) for x in seq), (
         "nonfinite logprob"
     )
@@ -381,26 +386,22 @@ def run(root, modes, reference=None, validation_only=False):
                         )
                         assert a == b, "same-request state was not reset"
                         cases.append(dict(adapter=index, length=length, tokens=a))
-                mixed = [payload(m, mode, i, 65, 8, True) for i in range(8)]
-                batched = dict(
-                    mixed[0], input_ids=[body["input_ids"] for body in mixed]
-                )
-                if mode != "base":
-                    batched["lora_path"] = [body["lora_path"] for body in mixed]
-                outputs = request(url, batched)
-                repeat = request(url, batched)
-                assert [o["meta_info"]["output_token_logprobs"] for o in outputs] == [
-                    o["meta_info"]["output_token_logprobs"] for o in repeat
-                ], "mixed batch was not repeatable"
-                dump(
-                    attempt / "correctness.json",
-                    dict(
-                        serial=cases,
-                        mixed=[
-                            o["meta_info"]["output_token_logprobs"] for o in outputs
-                        ],
-                    ),
-                )
+                correctness = dict(serial=cases)
+                for count, key in ((8, "mixed"), (32, "mixed32")):
+                    mixed = [payload(m, mode, i, 65, 8, True) for i in range(count)]
+                    batched = dict(
+                        mixed[0], input_ids=[body["input_ids"] for body in mixed]
+                    )
+                    if mode != "base":
+                        batched["lora_path"] = [body["lora_path"] for body in mixed]
+                    outputs = request(url, batched)
+                    repeat = request(url, batched)
+                    values = [o["meta_info"]["output_token_logprobs"] for o in outputs]
+                    assert values == [
+                        o["meta_info"]["output_token_logprobs"] for o in repeat
+                    ], "mixed batch was not repeatable"
+                    correctness[key] = values
+                dump(attempt / "correctness.json", correctness)
                 if reference is not None and mode == "fleet":
                     check = numerical_check(
                         read(reference), read(attempt / "correctness.json")

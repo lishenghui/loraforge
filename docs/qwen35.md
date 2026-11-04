@@ -151,6 +151,15 @@ workers already selected that same policy through the environment switch.
 
 ## Where the initial gain went
 
+The earlier 1.17–1.22x result is a different workload: Qwen3-4B-Instruct-2507,
+50 real compressed adapters, and a fixed 1,000-request arrival trace. This pilot
+uses Qwen3.5-0.8B, four synthetic adapters, and closed-loop concurrency 1/8/32.
+Model size, architecture, rank distribution and batching all changed. With only
+four adapters, larger batches give native grouped matrix operations more rows
+per adapter; the operator study below directly observes that advantage on some
+outputs. These two studies do not isolate an architecture-only slowdown or a
+regression in the already validated dense-model path.
+
 Profiling job 23459047 sampled the accepted native/Fleet/base implementations
 at batch sizes 1, 8 and 32 on one MI250X GCD. Each separate 12-forward trace
 includes prefill; the following numbers select **decode GPU kernel durations**
@@ -189,6 +198,30 @@ concurrency 1/8/32. The change was reverted. Fewer empty thread blocks did not
 translate into faster service; this is not an accepted optimization.
 The same-card timings, numerical checks, sampled kernel costs and source hashes
 are retained in [qwen35-optimization-mi250.json](qwen35-optimization-mi250.json).
+
+The follow-up operator study (23460210) measured 42 cache-warm shape/rank/batch
+cases. Direct HIP A was faster for MLP down and output projections, but sometimes
+changed the last BF16 bits. At batch 32 with four adapters, grouped native B was
+faster for several narrower outputs; wide qkvz and gate/up still favored
+RowExpand. These are operator measurements, not service speedups. The small b/a
+B comparison is excluded because its synthetic fixture incorrectly assigned
+different weights to the same checkpoint key; no dispatch decision uses it.
+
+Job 23461243 tested these ideas with a stronger **52-case model gate**, adding a
+repeated mixed batch of 32 to the original 20 cases. The prefill reductions stayed
+native. HIP A on down/output projections plus small-batch gate/QKV passed 51/52
+token sequences; restricting HIP A to down/output projections passed 52/52.
+Both exceeded the unchanged logprob limit: **0.0654472 > 0.05**. Each passed the
+85 operator/framework tests, showing why those tests alone do not justify model
+parity. Both candidates were rejected before throughput timing.
+
+The native-A, B-only variant and conservative control passed all 52 cases, with
+maximum logprob difference 0.0159646. B-only measured 1.032x/1.031x/1.003x versus
+native at C1/8/32. Its gain over the conservative control was only
+1.03%/0.29%/1.47%; even C1, whose dispatch did not change, differed by 1.03%.
+That is insufficient evidence to adopt the B change independently. This trial
+used identical 32/192/384 request counts at C1/8/32 in all arms, three repetitions,
+on one card in fixed order. It did not measure a new base-only arm.
 
 ## Sources
 

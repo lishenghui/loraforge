@@ -48,3 +48,13 @@ def test_base_payload_omits_adapter_and_preserves_work():
     assert base == {k: v for k, v in native.items() if k != "lora_path"}
     assert len(base["input_ids"]) == 128
     assert base["sampling_params"]["max_new_tokens"] == 64
+
+
+def test_model_gate_requires_matching_large_batch_validation():
+    native = record([[-0.1, 1]])
+    candidate = dict(native, mixed32=[[[-0.1, 1]]] * 32)
+    with pytest.raises(AssertionError, match="cases differ"):
+        protocol.numerical_check(native, candidate)
+    native = dict(candidate)
+    candidate = dict(candidate, mixed32=[[[-0.1, 2]]] * 32)
+    assert not protocol.numerical_check(native, candidate)["numerical_pass"]
