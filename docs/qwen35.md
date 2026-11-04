@@ -233,13 +233,63 @@ neither passed the model gate, so neither was timed or adopted. Slurm reports
 numerical rejections; this is not a successful serving validation. Native A
 remains necessary under the declared gate even outside the GDN projections.
 
-The next implementation target is a faster shrink path that preserves the
-native matrix-dot accumulation behavior, rather than reusing the dense-model
-scalar HIP reduction. Shared-qkv A reuse and fusion of tiny projections may
-remove additional work, but the profile gives shared-qkv reuse limited
-headroom. The tested tile/staging settings and empty-grid bounds did not solve
-this. No further speedup, 1.3x result, or trained-adapter quality equivalence is
-claimed by these investigations; all four rejected HIP-A profiles stay disabled.
+One implementation target is a faster shrink path that preserves the native
+matrix-dot accumulation behavior, rather than reusing the dense-model scalar
+HIP reduction. B-side work decomposition also remains a target, as the paper
+reconciliation below shows. Shared-qkv A reuse has limited profiled headroom.
+The tested A tile/staging settings and empty-grid bounds did not solve this.
+No further speedup, 1.3x result, or trained-adapter quality equivalence is claimed
+by these investigations; none of the four rejected HIP-A profiles is enabled.
+
+## Reconciliation with the paper's RowExpand ablation
+
+The paper does not claim a universal decode-only RowExpand speedup. Recomputing
+its 256 archived cases gives native/staged-RowExpand geometric means of 1.238x
+overall and 1.540x for prefill at a 16-row limit, but only **0.995x for decode**.
+The decode aggregate reaches 1.074x with an 8-row limit. The 1.83x token-reuse and
+2.72x staging numbers compare RowExpand variants, not native CSGMV. These are
+cache-flushed operator results; the current warm operator study and profiled
+service traces are different measurement regimes. The installed native expand
+and tuning-config file hashes match the paper's archived hashes exactly.
+
+The Qwen3.5 batch-32 trace shows cancellation between shapes, not a universal
+loss of RowExpand's benefit. The ratios below use profiled B-kernel duration
+sums per decode step; values above one favor RowExpand:
+
+| Projection | Output width | Calls/step | Native / RowExpand |
+| --- | ---: | ---: | ---: |
+| GDN qkvz | 8192 | 18 | 1.244x |
+| MLP gate/up | 7168 | 24 | 1.368x |
+| GDN out | 1024 | 18 | 0.666x |
+| MLP down | 1024 | 24 | 0.704x |
+| Attention QKV | 5120 | 6 | 0.949x |
+| Attention o | 1024 | 6 | 0.629x |
+
+The two wider winners save about 215 microseconds per sampled decode step;
+the four losing projection types cost about 203 microseconds. Their aggregate
+therefore falls from 1410.238 to 1399.123 microseconds, only **1.008x**. The
+separate b/a path is native in both engines and must not be credited to
+RowExpand. Projection labels are inferred from the inspected serial model order,
+with exactly 114 alternating A/B pairs checked in each decode span. These are
+instrumented kernel sums, not end-to-end latency or a new serving speedup.
+
+There is a concrete parallelism concern in the narrow-output mapping. The
+prepared batch has 32 rows over four adapters, hence four 8-row chunks. At 256
+output threads, a 1024-wide output yields only `4 * ceil(1024 / 256) = 16` live
+work items, versus 112 for gate/up and 128 for qkvz. Launching 880 persistent
+blocks does not create additional live work. Native expand uses 64-output
+matrix tiles and also reuses B across token rows. This explains a plausible
+crossover between reuse, per-thread serial work and parallelism; no occupancy
+or bandwidth counters were collected to assign a causal percentage.
+
+The next B experiment should vary **output tile width and rows per work item**
+while preserving each token's reduction order: for example, 128 threads and
+2/4-row chunks for narrow outputs, with native B as a matched alternative.
+Changing the maximum from 16 to 8 alone cannot split an already 8-row chunk.
+The rejected empty-grid bound changed launch size, not the number of useful
+work items, so it does not settle this question. Wide-output RowExpand and
+native prefill remain separate decisions. This is an experiment direction,
+not an enabled optimization or a demonstrated gain.
 
 ## Sources
 

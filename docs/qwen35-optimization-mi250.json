@@ -2010,5 +2010,337 @@
       "Short numerical pilot, no task-quality evaluation.",
       "Do not relabel the FAILED allocation or rejected numerical gate as passed."
     ]
+  },
+  "paper_reconciliation": {
+    "scope": "CPU reconciliation of existing paper records and recorded full-model traces. No new GPU run.",
+    "paper_main_sha256": "6b819559b170418b2aacfb3f13f6d576c59d5881e57e18cd5a7320f603dcbdd3",
+    "paper_aggregate": [
+      {
+        "cache": "flushed",
+        "phase": "all",
+        "cases": 256,
+        "native_over_staged_t16": 1.2375858902847172,
+        "native_over_staged_t8": 1.2364235357541975
+      },
+      {
+        "cache": "flushed",
+        "phase": "decode",
+        "cases": 128,
+        "native_over_staged_t16": 0.9946027216941699,
+        "native_over_staged_t8": 1.0738313433209379
+      },
+      {
+        "cache": "flushed",
+        "phase": "prefill",
+        "cases": 128,
+        "native_over_staged_t16": 1.5399302680601081,
+        "native_over_staged_t8": 1.423634325143751
+      },
+      {
+        "cache": "warm",
+        "phase": "all",
+        "cases": 256,
+        "native_over_staged_t16": 1.3461905824609695,
+        "native_over_staged_t8": 1.3402689818462539
+      },
+      {
+        "cache": "warm",
+        "phase": "decode",
+        "cases": 128,
+        "native_over_staged_t16": 1.1085346926055546,
+        "native_over_staged_t8": 1.1929857074161514
+      },
+      {
+        "cache": "warm",
+        "phase": "prefill",
+        "cases": 128,
+        "native_over_staged_t16": 1.634796904774402,
+        "native_over_staged_t8": 1.5057355109390091
+      }
+    ],
+    "paper_decode_breakdowns": [
+      {
+        "dimension": "rank",
+        "value": 4,
+        "cases": 32,
+        "flushed": 0.9477171542245835,
+        "warm": 1.1001243692956133
+      },
+      {
+        "dimension": "rank",
+        "value": 16,
+        "cases": 32,
+        "flushed": 0.9327861688824516,
+        "warm": 1.0440993258459523
+      },
+      {
+        "dimension": "rank",
+        "value": 32,
+        "cases": 32,
+        "flushed": 1.0520206515000348,
+        "warm": 1.1805950403124472
+      },
+      {
+        "dimension": "rank",
+        "value": 64,
+        "cases": 32,
+        "flushed": 1.0522367568435802,
+        "warm": 1.113557384947797
+      },
+      {
+        "dimension": "active_adapters",
+        "value": 1,
+        "cases": 64,
+        "flushed": 0.910057412201577,
+        "warm": 0.9856960065405875
+      },
+      {
+        "dimension": "active_adapters",
+        "value": 8,
+        "cases": 64,
+        "flushed": 1.0870023811006946,
+        "warm": 1.24668169147086
+      },
+      {
+        "dimension": "M",
+        "value": 32,
+        "cases": 64,
+        "flushed": 0.9623682368327503,
+        "warm": 1.0838172416989997
+      },
+      {
+        "dimension": "M",
+        "value": 128,
+        "cases": 64,
+        "flushed": 1.0279168993119723,
+        "warm": 1.1338158477565266
+      }
+    ],
+    "profiled_B_by_projection": [
+      {
+        "batch": 1,
+        "projection": "in_proj_qkvz",
+        "calls_per_step": 18.0,
+        "native_us_per_step": 176.85636363636365,
+        "fleet_us_per_step": 146.22372727272725,
+        "native_over_fleet": 1.2094915574577192,
+        "savings_us_per_step": 30.632636363636408
+      },
+      {
+        "batch": 1,
+        "projection": "in_proj_ba",
+        "calls_per_step": 18.0,
+        "native_us_per_step": 154.13618181818183,
+        "fleet_us_per_step": 131.95454545454538,
+        "native_over_fleet": 1.168100585601103,
+        "savings_us_per_step": 22.181636363636443
+      },
+      {
+        "batch": 1,
+        "projection": "out_proj",
+        "calls_per_step": 18.0,
+        "native_us_per_step": 161.87518181818166,
+        "fleet_us_per_step": 141.6128181818181,
+        "native_over_fleet": 1.1430828359785092,
+        "savings_us_per_step": 20.262363636363546
+      },
+      {
+        "batch": 1,
+        "projection": "gate_up_proj",
+        "calls_per_step": 24.0,
+        "native_us_per_step": 228.3140909090912,
+        "fleet_us_per_step": 197.76727272727268,
+        "native_over_fleet": 1.1544584084139318,
+        "savings_us_per_step": 30.54681818181851
+      },
+      {
+        "batch": 1,
+        "projection": "down_proj",
+        "calls_per_step": 24.0,
+        "native_us_per_step": 199.1634545454546,
+        "fleet_us_per_step": 164.69045454545468,
+        "native_over_fleet": 1.2093199638992154,
+        "savings_us_per_step": 34.47299999999993
+      },
+      {
+        "batch": 1,
+        "projection": "qkv_proj",
+        "calls_per_step": 6.0,
+        "native_us_per_step": 63.61645454545455,
+        "fleet_us_per_step": 54.830999999999996,
+        "native_over_fleet": 1.1602278737475982,
+        "savings_us_per_step": 8.785454545454556
+      },
+      {
+        "batch": 1,
+        "projection": "o_proj",
+        "calls_per_step": 6.0,
+        "native_us_per_step": 53.566000000000024,
+        "fleet_us_per_step": 38.71490909090912,
+        "native_over_fleet": 1.383601337516202,
+        "savings_us_per_step": 14.851090909090907
+      },
+      {
+        "batch": 8,
+        "projection": "in_proj_qkvz",
+        "calls_per_step": 18.0,
+        "native_us_per_step": 359.91309090909056,
+        "fleet_us_per_step": 219.08418181818172,
+        "native_over_fleet": 1.6428072895184325,
+        "savings_us_per_step": 140.82890909090884
+      },
+      {
+        "batch": 8,
+        "projection": "in_proj_ba",
+        "calls_per_step": 18.0,
+        "native_us_per_step": 147.03836363636375,
+        "fleet_us_per_step": 118.51418181818177,
+        "native_over_fleet": 1.2406815908491213,
+        "savings_us_per_step": 28.524181818181987
+      },
+      {
+        "batch": 8,
+        "projection": "out_proj",
+        "calls_per_step": 18.0,
+        "native_us_per_step": 154.79190909090903,
+        "fleet_us_per_step": 175.3439090909091,
+        "native_over_fleet": 0.8827903398153132,
+        "savings_us_per_step": -20.552000000000078
+      },
+      {
+        "batch": 8,
+        "projection": "gate_up_proj",
+        "calls_per_step": 24.0,
+        "native_us_per_step": 462.12090909090944,
+        "fleet_us_per_step": 250.7865454545455,
+        "native_over_fleet": 1.8426862105115118,
+        "savings_us_per_step": 211.33436363636395
+      },
+      {
+        "batch": 8,
+        "projection": "down_proj",
+        "calls_per_step": 24.0,
+        "native_us_per_step": 207.76063636363622,
+        "fleet_us_per_step": 193.33018181818187,
+        "native_over_fleet": 1.0746414988582875,
+        "savings_us_per_step": 14.430454545454353
+      },
+      {
+        "batch": 8,
+        "projection": "qkv_proj",
+        "calls_per_step": 6.0,
+        "native_us_per_step": 82.32209090909095,
+        "fleet_us_per_step": 56.83881818181819,
+        "native_over_fleet": 1.4483427619088751,
+        "savings_us_per_step": 25.483272727272755
+      },
+      {
+        "batch": 8,
+        "projection": "o_proj",
+        "calls_per_step": 6.0,
+        "native_us_per_step": 53.44945454545455,
+        "fleet_us_per_step": 52.03818181818183,
+        "native_over_fleet": 1.027119946892142,
+        "savings_us_per_step": 1.411272727272717
+      },
+      {
+        "batch": 32,
+        "projection": "in_proj_qkvz",
+        "calls_per_step": 18.0,
+        "native_us_per_step": 391.8460000000002,
+        "fleet_us_per_step": 315.0066250000001,
+        "native_over_fleet": 1.2439293935484692,
+        "savings_us_per_step": 76.83937500000008
+      },
+      {
+        "batch": 32,
+        "projection": "in_proj_ba",
+        "calls_per_step": 18.0,
+        "native_us_per_step": 152.86462500000002,
+        "fleet_us_per_step": 126.22387500000005,
+        "native_over_fleet": 1.21105951627614,
+        "savings_us_per_step": 26.64074999999997
+      },
+      {
+        "batch": 32,
+        "projection": "out_proj",
+        "calls_per_step": 18.0,
+        "native_us_per_step": 158.66399999999987,
+        "fleet_us_per_step": 238.1252499999999,
+        "native_over_fleet": 0.666304812278412,
+        "savings_us_per_step": -79.46125000000004
+      },
+      {
+        "batch": 32,
+        "projection": "gate_up_proj",
+        "calls_per_step": 24.0,
+        "native_us_per_step": 512.040875,
+        "fleet_us_per_step": 374.28087500000026,
+        "native_over_fleet": 1.3680658275686666,
+        "savings_us_per_step": 137.75999999999976
+      },
+      {
+        "batch": 32,
+        "projection": "down_proj",
+        "calls_per_step": 24.0,
+        "native_us_per_step": 206.05774999999997,
+        "fleet_us_per_step": 292.79962500000005,
+        "native_over_fleet": 0.7037500474940839,
+        "savings_us_per_step": -86.74187500000008
+      },
+      {
+        "batch": 32,
+        "projection": "qkv_proj",
+        "calls_per_step": 6.0,
+        "native_us_per_step": 86.31475,
+        "fleet_us_per_step": 90.95537499999999,
+        "native_over_fleet": 0.9489791010151958,
+        "savings_us_per_step": -4.640624999999986
+      },
+      {
+        "batch": 32,
+        "projection": "o_proj",
+        "calls_per_step": 6.0,
+        "native_us_per_step": 55.31462500000001,
+        "fleet_us_per_step": 87.95499999999998,
+        "native_over_fleet": 0.6288968790858964,
+        "savings_us_per_step": -32.64037499999998
+      }
+    ],
+    "native_source_verification": {
+      "method": "Read-only sha256sum on the installed LUMI source, compared to the paper's expected-runtime.json on 2026-11-04.",
+      "same_as_paper": true,
+      "sha256": {
+        "kernels/ops/lora/dense/chunked_sgmv_expand.py": "65269d16a5724cf2a16b9a4de61866fde6e0c6630492b399d695b5346fca038d",
+        "kernels/ops/lora/dense/lora_tuning_config.py": "eaae23bd9ddbe5c6b68c71fec26aa06f78d2b897b01280bd9a0012f6e9830c99"
+      }
+    },
+    "batch32_work_items": {
+      "derivation": "Prepared profile request has 32 rows round-robin over four adapters; SGLang groups them into four 8-row chunks at max_len=16. Fleet's hybrid policy uses 256 output threads and 880 persistent blocks.",
+      "effective_items": {
+        "out_proj/down_proj/o_proj": 16,
+        "gate_up_proj": 112,
+        "in_proj_qkvz": 128
+      },
+      "formula": "live_segments * ceil(output_width / threads_per_block)",
+      "limitation": "Analytical work counts from request routing and code, not measured occupancy or bandwidth counters.",
+      "next_control": "For narrow output, test 128 output threads and 2/4-row segments. A cap of 8 alone cannot change an already 8-row segment. Compare native B by shape and retain the same per-token reduction order."
+    },
+    "limitations": [
+      "Paper ratios are equal-weight geometric means over synthetic operator cases; service traces are sums weighted by actual layer counts.",
+      "Projection labels are inferred from inspected serial model order after verifying 114 alternating A/B pairs per decode step; not explicit labels in the GPU trace.",
+      "Profiled kernel durations include profiler overhead and are not end-to-end serving latency.",
+      "Warm operator study, flushed paper ablations and full-model traces have different cache regimes; no cross-study percentage is a controlled causal effect."
+    ],
+    "paper_commit": "c07bfa13858b411480743557567cd4da790c2347",
+    "analysis_script_sha256": "73aac70f610ec38356be10802259f93ea230b19c3808da8a8bf3bd7bb6ffe0b6",
+    "trace_sha256": {
+      "raw/fleet-23459047/c1/qwen35-fleet-c1-TP-0.trace.json.gz": "b1814cdc116f3903f678badb13af99764be76d75973b15b8b5e86abca3002696",
+      "raw/fleet-23459047/c32/qwen35-fleet-c32-TP-0.trace.json.gz": "e991823c19a5068b09ec60d187f151e70bdf425c73156906c5244d8070495746",
+      "raw/fleet-23459047/c8/qwen35-fleet-c8-TP-0.trace.json.gz": "0a5d61ee7f699dadc196f7a01ab728f5492e8ddfcb23308c6da6aacb1ff62fc6",
+      "raw/native-23459047/c1/qwen35-native-c1-TP-0.trace.json.gz": "57928b5a68c7683671582e04422faf1fff8753431b6c8d7f156a20f2c7c7c181",
+      "raw/native-23459047/c32/qwen35-native-c32-TP-0.trace.json.gz": "5dd0de26882439bb198830cb6d2330a46b23776e875f60a45de060cc60d73f8a",
+      "raw/native-23459047/c8/qwen35-native-c8-TP-0.trace.json.gz": "b843fdded2d31e256675bacc927359784229c7712769d7071f97fc24966c13b2"
+    }
   }
 }
