@@ -1814,5 +1814,201 @@
       "No base-only arm in this follow-up.",
       "Both native and Fleet use the same bridge; adapters are synthetic."
     ]
+  },
+  "mlp_ablation": {
+    "job": 23461933,
+    "node": "nid005038",
+    "slurm_state": "FAILED",
+    "elapsed": "00:08:39",
+    "stop_reason": "Both predefined profiles failed the model gate; the driver stopped before candidate timing and before its conservative-control arm.",
+    "source_commit": "40fbcbd830a2f75bdfca0167de7fb8542c4caab3",
+    "profiles_sha256": {
+      "down": "841ea69870334d40db69cec1f0c66596237f4bc45ec0e586c8da19e053d5d85a",
+      "mlp": "f44c9a1f91a1be9d9ea97ef23877e9fda2b8d9b37ec122342ee501d93d1bb044"
+    },
+    "raw_archive_sha256": "13ca7eeb761d48adc4bcd545a52e7fcaaa7042a127e5f117805f57f476f1b461",
+    "profiles": {
+      "mlp": "HIP A only down_proj at graph batch <=32 and gate_up_proj <=8; native prefill and all attention/GDN A.",
+      "down": "HIP A only down_proj at graph batch <=32; all other A and prefill native."
+    },
+    "B_dispatch": "Same as b_only in shaped_dispatch_trial; unchanged from conservative B at batch 1, where the worst differences occur.",
+    "protocol": {
+      "model_gate_cases": 52,
+      "generated_tokens_per_case": 8,
+      "max_logprob_difference": 0.05,
+      "identical_generated_token_ids_required": true,
+      "adapters": "same four synthetic factors as baseline"
+    },
+    "gpu_suites": {
+      "tests-down-23461933.xml": {
+        "tests": 85,
+        "errors": 0,
+        "failures": 0,
+        "skipped": 0
+      },
+      "tests-mlp-23461933.xml": {
+        "tests": 85,
+        "errors": 0,
+        "failures": 0,
+        "skipped": 0
+      }
+    },
+    "rejected": [
+      {
+        "arm": "mlp",
+        "profile": "mlp",
+        "latest": {
+          "mode": "fleet",
+          "state": "failed",
+          "attempt": "/pfs/lustrep2/scratch/project_465003417/lishengh/loraforge-qwen35-mlp-20261104/mlp/results/fleet-23461933-1793799063227306653",
+          "error": "AssertionError({'cases': 52, 'same_token_cases': 51, 'same_tokens': False, 'max_common_prefix_logprob_difference': 0.06544721126556396, 'numerical_pass': False})"
+        },
+        "numerics": {
+          "cases": 52,
+          "same_token_cases": 51,
+          "same_tokens": false,
+          "max_common_prefix_logprob_difference": 0.06544721126556396,
+          "numerical_pass": false
+        }
+      },
+      {
+        "arm": "down",
+        "profile": "down",
+        "latest": {
+          "mode": "fleet",
+          "state": "failed",
+          "attempt": "/pfs/lustrep2/scratch/project_465003417/lishengh/loraforge-qwen35-mlp-20261104/down/results/fleet-23461933-1793799151377940394",
+          "error": "AssertionError({'cases': 52, 'same_token_cases': 52, 'same_tokens': True, 'max_common_prefix_logprob_difference': 0.06544721126556396, 'numerical_pass': False})"
+        },
+        "numerics": {
+          "cases": 52,
+          "same_token_cases": 52,
+          "same_tokens": true,
+          "max_common_prefix_logprob_difference": 0.06544721126556396,
+          "numerical_pass": false
+        }
+      }
+    ],
+    "serial_failures": {
+      "mlp": [
+        {
+          "case": 2,
+          "adapter": 0,
+          "prompt_length": 129,
+          "same_tokens": true,
+          "max_common_prefix_logprob_difference": 0.06544721126556396
+        },
+        {
+          "case": 5,
+          "adapter": 1,
+          "prompt_length": 129,
+          "same_tokens": true,
+          "max_common_prefix_logprob_difference": 0.059444963932037354
+        },
+        {
+          "case": 6,
+          "adapter": 2,
+          "prompt_length": 17,
+          "same_tokens": false,
+          "max_common_prefix_logprob_difference": 0.0
+        }
+      ],
+      "down": [
+        {
+          "case": 2,
+          "adapter": 0,
+          "prompt_length": 129,
+          "same_tokens": true,
+          "max_common_prefix_logprob_difference": 0.06544721126556396
+        },
+        {
+          "case": 5,
+          "adapter": 1,
+          "prompt_length": 129,
+          "same_tokens": true,
+          "max_common_prefix_logprob_difference": 0.059444963932037354
+        }
+      ]
+    },
+    "native_measurements": [
+      {
+        "concurrency": 1,
+        "seconds": 17.015938630000164,
+        "requests": 32,
+        "output_tokens": 2048,
+        "tokens_per_second": 120.35774484924669,
+        "repeat": 0
+      },
+      {
+        "concurrency": 1,
+        "seconds": 17.011141832999783,
+        "requests": 32,
+        "output_tokens": 2048,
+        "tokens_per_second": 120.39168329236433,
+        "repeat": 1
+      },
+      {
+        "concurrency": 1,
+        "seconds": 17.053727529999378,
+        "requests": 32,
+        "output_tokens": 2048,
+        "tokens_per_second": 120.09104733245816,
+        "repeat": 2
+      },
+      {
+        "concurrency": 8,
+        "seconds": 15.832804143999965,
+        "requests": 192,
+        "output_tokens": 12288,
+        "tokens_per_second": 776.1101500555534,
+        "repeat": 0
+      },
+      {
+        "concurrency": 8,
+        "seconds": 15.837180982000064,
+        "requests": 192,
+        "output_tokens": 12288,
+        "tokens_per_second": 775.8956605955361,
+        "repeat": 1
+      },
+      {
+        "concurrency": 8,
+        "seconds": 15.76717566500156,
+        "requests": 192,
+        "output_tokens": 12288,
+        "tokens_per_second": 779.3405909262307,
+        "repeat": 2
+      },
+      {
+        "concurrency": 32,
+        "seconds": 11.661903924999933,
+        "requests": 384,
+        "output_tokens": 24576,
+        "tokens_per_second": 2107.3745897799568,
+        "repeat": 0
+      },
+      {
+        "concurrency": 32,
+        "seconds": 11.40926820399909,
+        "requests": 384,
+        "output_tokens": 24576,
+        "tokens_per_second": 2154.03823983959,
+        "repeat": 1
+      },
+      {
+        "concurrency": 32,
+        "seconds": 11.246551387001091,
+        "requests": 384,
+        "output_tokens": 24576,
+        "tokens_per_second": 2185.203192901004,
+        "repeat": 2
+      }
+    ],
+    "decision": "No candidate adopted or timed. The failure is reproduced with only down-projection A changed at the offending single-request cases; keeping GDN A native is insufficient.",
+    "limits": [
+      "Native/Fleet model comparison is between the same format bridge, not Transformers/PEFT.",
+      "Short numerical pilot, no task-quality evaluation.",
+      "Do not relabel the FAILED allocation or rejected numerical gate as passed."
+    ]
   }
 }

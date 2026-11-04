@@ -223,6 +223,24 @@ That is insufficient evidence to adopt the B change independently. This trial
 used identical 32/192/384 request counts at C1/8/32 in all arms, three repetitions,
 on one card in fixed order. It did not measure a new base-only arm.
 
+The MLP-only ablation (23461933) kept every GDN and full-attention A reduction
+native. Enabling HIP A for down-projection through C32 and gate/up through C8
+still passed only 51/52 token sequences, with maximum logprob difference
+0.0654472. Enabling it for **down-projection alone** restored 52/52 token matches
+but left the same 0.0654472 maximum. Both variants passed 85 GPU tests each;
+neither passed the model gate, so neither was timed or adopted. Slurm reports
+`FAILED` after 8m39s because the bounded driver deliberately stopped after both
+numerical rejections; this is not a successful serving validation. Native A
+remains necessary under the declared gate even outside the GDN projections.
+
+The next implementation target is a faster shrink path that preserves the
+native matrix-dot accumulation behavior, rather than reusing the dense-model
+scalar HIP reduction. Shared-qkv A reuse and fusion of tiny projections may
+remove additional work, but the profile gives shared-qkv reuse limited
+headroom. The tested tile/staging settings and empty-grid bounds did not solve
+this. No further speedup, 1.3x result, or trained-adapter quality equivalence is
+claimed by these investigations; all four rejected HIP-A profiles stay disabled.
+
 ## Sources
 
 - [Official Qwen3.5-0.8B config](https://huggingface.co/Qwen/Qwen3.5-0.8B/blob/main/config.json)

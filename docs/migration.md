@@ -263,3 +263,14 @@ Matched median speedups were 1.032x/1.034x/1.009x at concurrency 1/8/32.
 These are modest pilot gains, not a trained-adapter quality claim or general
 hybrid certification. [Architecture, reproduction and limits](qwen35.md) and
 [both accepted and rejected measurements](qwen35-mi250.json) are retained.
+
+The follow-up numerical protocol includes a repeated mixed batch of 32 (52
+cases total). The conservative implementation passes this stronger gate in job
+23461243 with the same 0.0159646 maximum logprob difference. Profiling identifies
+native A and the smaller RowExpand advantage at large batches as the main
+remaining costs. Empty-grid bounds regressed service throughput; four selective
+HIP-A profiles failed the unchanged model gate, including MLP down alone.
+The B-only change was near the control and was not adopted. Source hashes,
+same-card timings and rejected attempts are recorded in
+[the optimization evidence](qwen35-optimization-mi250.json). The maintained
+runtime remains the conservative implementation; no new speedup is claimed.
