@@ -94,6 +94,46 @@ def test_hybrid_keeps_native_shrink_and_prefill_reductions():
         )
 
 
+def test_hybrid_b_tiles_leave_a_and_prefill_native():
+    policy = FleetPolicy(hybrid=True)
+    for name in ("out_proj", "down_proj", "o_proj"):
+        small = policy.select(name, "decode", 8, output_width=1024)
+        large = policy.select(name, "decode", 32, output_width=1024)
+        assert (small["row_tile"], small["threads"]) == (16, 128)
+        assert (large["row_tile"], large["threads"]) == (2, 128)
+        assert small["a"] == large["a"] == "native"
+        prefill = policy.select(name, "prefill", 32, output_width=1024)
+        assert prefill["a"] == prefill["b"] == "native"
+        assert (prefill["row_tile"], prefill["threads"]) == (16, 256)
+    qkv = policy.select("qkv_proj", "decode", 32, output_width=5120)
+    assert (qkv["a"], qkv["row_tile"], qkv["threads"]) == ("native", 4, 256)
+
+
+def test_hybrid_b_tiles_are_bounded_by_shape_and_batch():
+    policy = FleetPolicy(hybrid=True)
+    for name, width, tokens in (
+        ("out_proj", None, 32),
+        ("out_proj", 2048, 32),
+        ("down_proj", 1024, 0),
+        ("down_proj", 1024, 9),
+        ("down_proj", 1024, 15),
+        ("down_proj", 1024, 33),
+        ("qkv_proj", 5120, 8),
+        ("qkv_proj", 6144, 32),
+        ("qkv_proj", 5120, 64),
+        ("in_proj_qkvz", 8192, 32),
+        ("gate_up_proj", 7168, 32),
+        ("in_proj_ba", 32, 32),
+    ):
+        cfg = policy.select(name, "decode", tokens, output_width=width)
+        assert (cfg["row_tile"], cfg["threads"]) == (16, 256)
+    # Supplying a width cannot change the independently validated dense policy.
+    dense = FleetPolicy()
+    assert dense.select("qkv_proj", "decode", 32, output_width=5120) == dense.select(
+        "qkv_proj", "decode", 32
+    )
+
+
 def test_active_prefill_uses_live_slots_and_keeps_unknown_routes():
     loaded = {0: {"rank": 0}, 1: {"rank": 3}, 2: {"rank": 128}}
     assert _active_rank_classes(loaded, [0]) == (False, False)

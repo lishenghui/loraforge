@@ -31,17 +31,33 @@ class FleetPolicy:
             else table
         )
 
-    def select(self, name, phase, tokens):
+    def select(self, name, phase, tokens, *, output_width=None):
         if self.hybrid:
             # Hybrid recurrent states can amplify small rounding changes. The
             # dense-model HIP-A and prefill-B profile is not a validated GDN
             # profile. Keep those reductions native; optimize decode B only.
-            return dict(
+            cfg = dict(
                 a="native",
                 b="all" if phase == "decode" and name != "in_proj_ba" else "native",
                 nblocks=880,
                 threads=256,
+                row_tile=16,
             )
+            if phase == "decode":
+                # Qwen3.5-0.8B B-only profile. Output width is checked so larger
+                # hybrid models retain the original mapping. A stays native.
+                if output_width == 1024 and name in (
+                    "out_proj",
+                    "down_proj",
+                    "o_proj",
+                ):
+                    if 1 <= tokens <= 8:
+                        cfg["threads"] = 128
+                    elif 16 <= tokens <= 32:
+                        cfg.update(threads=128, row_tile=2)
+                elif output_width == 5120 and name == "qkv_proj" and 16 <= tokens <= 32:
+                    cfg["row_tile"] = 4
+            return cfg
         if name in ("in_proj_qkvz", "out_proj"):
             # Hybrid projections have different shapes from the dense-model
             # tuning table. Keep native A; enable only shape-generic RowExpand.
@@ -251,7 +267,9 @@ def create_backend(catalog, *, active_prefill=False, hybrid=False):
                     z, weights, info, offsets, max_slice, base, slice_offsets_cpu=cpu
                 )
             phase = "decode" if self._fleet_decode else "prefill"
-            cfg = policy.select(e.name, phase, z.shape[0])
+            cfg = policy.select(
+                e.name, phase, z.shape[0], output_width=weights.shape[1]
+            )
             eligible = (
                 cfg["b"] != "native"
                 and info is self.batch_info
@@ -315,6 +333,9 @@ def create_backend(catalog, *, active_prefill=False, hybrid=False):
             if not need_rowexpand:
                 return base
             self._fleet_hits[f"rowexpand_{phase}"] += 1
+            self._fleet_hits[
+                f"rowexpand_tile{cfg.get('row_tile', 16)}_threads{cfg['threads']}/{e.name}"
+            ] += 1
             return row_expand(
                 z,
                 e.store,
@@ -331,6 +352,7 @@ def create_backend(catalog, *, active_prefill=False, hybrid=False):
                 e.capacity,
                 blocks=cfg["nblocks"],
                 threads=cfg["threads"],
+                row_tile=cfg.get("row_tile", 16),
             )
 
         def run_lora_a_sgemm(

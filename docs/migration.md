@@ -272,5 +272,20 @@ remaining costs. Empty-grid bounds regressed service throughput; four selective
 HIP-A profiles failed the unchanged model gate, including MLP down alone.
 The B-only change was near the control and was not adopted. Source hashes,
 same-card timings and rejected attempts are recorded in
-[the optimization evidence](qwen35-optimization-mi250.json). The maintained
-runtime remains the conservative implementation; no new speedup is claimed.
+[the optimization evidence](qwen35-optimization-mi250.json). Those investigations
+did not establish an additional speedup.
+
+The B-only row-subdivision follow-up passed 93 GPU checks and 32 operator cases
+with bitwise agreement across every custom variant (23463508). It changes work
+ownership, preserving each token's rank reduction and native A batching.
+Model attempt 23464050 failed in the experiment's reference-path reader after
+passing the model comparisons; the corrected same-card repeat **23464674**
+completed in 13m07s. Both Fleet policies match native token IDs in 52/52 cases
+(maximum logprob difference 0.0159646), and new/old Fleet token-logprob records
+are exact. The shape/batch-bounded B profile improves old-Fleet throughput by
+0.61%/0.63%/1.53% at C1/8/32. Against native the ratios are
+1.0173x/1.0291x/0.9954x: high concurrency remains near parity. These are small,
+single-run synthetic-pilot gains, not 1.3x or trained-adapter quality equivalence.
+The implementation, limits and raw evidence are in [qwen35.md](qwen35.md) and
+[qwen35-rowtiles-mi250.json](qwen35-rowtiles-mi250.json). Current CPU checks total
+122; the original dense dispatch and hybrid native-A/prefill reductions remain.

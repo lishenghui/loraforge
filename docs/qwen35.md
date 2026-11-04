@@ -3,8 +3,9 @@
 This experimental integration targets the **dense Qwen3.5 text decoder**, BF16,
 TP=1, synchronous adapter loading, and the inspected SGLang 0.5.22 implementation.
 Vision adapters, MoE, quantization, tensor parallelism and recurrent-state cache
-reuse across different adapters are outside the validated scope. Initial checks
-pass 119 CPU cases and 85 MI250X operator/framework GPU cases (job 23457660),
+reuse across different adapters are outside the validated scope. Current checks
+pass 122 CPU cases and 93 MI250X operator/framework GPU cases (jobs 23463508 and
+23464050),
 including four slices, unequal output widths, strided output, rank/slot changes
 and graph replay. The full-model synthetic-adapter pilot passes the declared
 native/Fleet token/logprob gate; measured throughput and its limits are below.
@@ -68,6 +69,14 @@ all projections. RowExpand handles supported decode ranks, including the new
 and prefill reductions avoid carrying the dense-model HIP-A/prefill-B choices
 into the hybrid's recurrent state. This is a separate dispatch policy, not a
 claim that the dense-model tuning table was measured on the new shapes.
+
+The hybrid B profile also checks output width and decode batch shape. For
+1024-wide out/down/o, batches 1–8 use 128 threads with the original 16-row
+kernel; batches 16–32 use 128 threads and two-row work units. The 5120-wide
+QKV output uses four-row work units at batches 16–32. Other shapes/batches
+retain the original mapping. The measured qkvz/gate-up shapes remain unchanged.
+These choices are local to the opted-in hybrid policy; low-level `row_expand`
+still defaults to the original 16-row kernel. Full-model results are below.
 
 Use both switches in each worker for Fleet:
 
@@ -324,8 +333,41 @@ adapter and C64 results differ, reinforcing that output width alone is not a
 dispatch rule. Exact samples, framework/source hashes and numerical checks are
 in [qwen35-rowtiles-mi250.json](qwen35-rowtiles-mi250.json).
 
-The matched full-model trial is pending. These are accepted operator results,
-not an additional full-model speedup or a trained-adapter quality claim.
+The first model attempt, 23464050, passed 93 GPU tests and all 52 native model
+cases; its saved candidate/control token-logprob records are exactly equal.
+The experiment driver then failed before candidate timing because it passed a
+string environment path to a Path-only reader. This failed attempt is preserved.
+The path conversion was corrected and CPU-checked for both equal outputs and
+rejection of different outputs; runtime and policy source hashes did not change.
+
+The same-card repeat **23464674 completed in 13m07s**. Both old and retuned Fleet
+matched native token IDs in **52/52** cases, with maximum common-prefix logprob
+difference **0.0159646**. Retuned Fleet's token/logprob records were **exactly
+equal to old Fleet**, checked before timing. Fixed-address adapter loads, actual
+decode graph replay, two-row/four-row custom dispatch and native A were audited.
+The final readable policy matches the measured rule table over 24,768 CPU policy
+inputs; the rest of the integration module has an identical syntax tree.
+
+Median output tokens/s for the **complete model with LoRA**, three repeats,
+128 input / 64 output tokens, 32/192/384 requests at C1/8/32:
+
+| Concurrency | Native | Old Fleet | Retuned Fleet | Retuned / old | Retuned / native |
+| --- | ---: | ---: | ---: | ---: | ---: |
+| 1 | 119.147 | 120.478 | 121.208 | 1.0061x | 1.0173x |
+| 8 | 773.855 | 791.387 | 796.385 | 1.0063x | 1.0291x |
+| 32 | 2128.400 | 2086.737 | 2118.570 | 1.0153x | 0.9954x |
+
+The retuned samples all exceed the corresponding old-Fleet sample range in this
+run, but this remains one device and a fixed native/control/candidate order,
+not a confidence interval across runs or workloads. The gain over old Fleet is
+only **0.61%/0.63%/1.53%**; C32 remains effectively tied with native. Operator
+speedup therefore does not translate into a large full-model gain, and these
+results do not justify 1.3x. Native A, other projections and base-model work
+remain in the measured cost. There is no new base-only arm and the synthetic,
+eight-output-token numerical gate does not certify trained-adapter quality or
+long-generation equivalence. The bounded hybrid B profile is enabled on this
+evidence, with these limits; all raw timing samples and audits are in the linked
+RowExpand evidence file.
 
 ## Sources
 

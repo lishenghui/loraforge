@@ -1,5 +1,5 @@
 {
-  "scope": "B-only work subdivision; full model trial pending",
+  "scope": "B-only work subdivision and matched full-model synthetic-adapter pilot; MI250 gfx90a BF16 TP1",
   "job": "23463508",
   "node": "nid005049",
   "device": "_CudaDeviceProperties(name='AMD Instinct MI250X', major=9, minor=0, gcnArchName='gfx90a:sramecc+:xnack-', total_memory=65520MB, multi_processor_count=110, uuid=62633732-3032-6434-3364-633732343837, pci_bus_id=198, pci_device_id=0, pci_domain_id=0, L2_cache_size=8MB)",
@@ -6073,5 +6073,609 @@
         }
       }
     }
-  ]
+  ],
+  "full_model": {
+    "job": "23464674",
+    "node": "nid005048",
+    "order": [
+      "native",
+      "control",
+      "candidate"
+    ],
+    "scope": "Same-card Qwen3.5-0.8B synthetic-adapter pilot; no new base-only arm or trained-adapter quality claim",
+    "gpu_tests_job": 23464050,
+    "gpu_tests": {
+      "name": "pytest",
+      "errors": "0",
+      "failures": "0",
+      "skipped": "0",
+      "tests": "93",
+      "time": "76.521",
+      "timestamp": "2026-11-04T16:36:01.651142+02:00",
+      "hostname": "nid005059"
+    },
+    "selection": {
+      "rules": [
+        {
+          "projection": "out_proj",
+          "width": 1024,
+          "min_tokens": 1,
+          "max_tokens": 8,
+          "row_tile": 16,
+          "threads": 128
+        },
+        {
+          "projection": "out_proj",
+          "width": 1024,
+          "min_tokens": 16,
+          "max_tokens": 32,
+          "row_tile": 2,
+          "threads": 128
+        },
+        {
+          "projection": "down_proj",
+          "width": 1024,
+          "min_tokens": 1,
+          "max_tokens": 8,
+          "row_tile": 16,
+          "threads": 128
+        },
+        {
+          "projection": "down_proj",
+          "width": 1024,
+          "min_tokens": 16,
+          "max_tokens": 32,
+          "row_tile": 2,
+          "threads": 128
+        },
+        {
+          "projection": "o_proj",
+          "width": 1024,
+          "min_tokens": 1,
+          "max_tokens": 8,
+          "row_tile": 16,
+          "threads": 128
+        },
+        {
+          "projection": "o_proj",
+          "width": 1024,
+          "min_tokens": 16,
+          "max_tokens": 32,
+          "row_tile": 2,
+          "threads": 128
+        },
+        {
+          "projection": "qkv_proj",
+          "width": 5120,
+          "min_tokens": 16,
+          "max_tokens": 32,
+          "row_tile": 4,
+          "threads": 256
+        }
+      ],
+      "rationale": "Keep wide qkvz/gate unchanged at <=32 tokens. Narrow outputs use 128 threads; split B into 2-row work at larger tested graph batches. QKV uses 4-row work at larger graph batches. Original A, prefill and scalar rank-reduction order preserved."
+    },
+    "numerics": {
+      "control": {
+        "cases": 52,
+        "same_token_cases": 52,
+        "same_tokens": true,
+        "max_common_prefix_logprob_difference": 0.015964582562446594,
+        "numerical_pass": true
+      },
+      "candidate": {
+        "cases": 52,
+        "same_token_cases": 52,
+        "same_tokens": true,
+        "max_common_prefix_logprob_difference": 0.015964582562446594,
+        "numerical_pass": true
+      }
+    },
+    "candidate_exact_to_control": true,
+    "audits": {
+      "native": {
+        "counts": [
+          {
+            "EXTEND/eager": 511,
+            "DECODE/graph": 15477
+          }
+        ],
+        "batches": [
+          {
+            "EXTEND/eager/1": 281,
+            "DECODE/graph/2": 7,
+            "DECODE/graph/1": 8323,
+            "EXTEND/eager/8": 113,
+            "DECODE/graph/8": 4802,
+            "EXTEND/eager/16": 4,
+            "DECODE/graph/31": 14,
+            "EXTEND/eager/7": 113,
+            "DECODE/graph/32": 2331
+          }
+        ],
+        "loads": 5,
+        "all_fixed_addresses": true,
+        "capture_eager_dispatch": {}
+      },
+      "control": {
+        "counts": [
+          {
+            "EXTEND/eager": 511,
+            "DECODE/graph": 15478
+          }
+        ],
+        "batches": [
+          {
+            "EXTEND/eager/1": 281,
+            "DECODE/graph/1": 8325,
+            "DECODE/graph/2": 6,
+            "EXTEND/eager/8": 113,
+            "DECODE/graph/8": 4802,
+            "EXTEND/eager/16": 4,
+            "DECODE/graph/31": 14,
+            "EXTEND/eager/7": 113,
+            "DECODE/graph/32": 2331
+          }
+        ],
+        "loads": 5,
+        "all_fixed_addresses": true,
+        "capture_eager_dispatch": {
+          "rank_aware_shrink": 60306,
+          "rowexpand_decode": 1728
+        }
+      },
+      "candidate": {
+        "counts": [
+          {
+            "EXTEND/eager": 511,
+            "DECODE/graph": 15478
+          }
+        ],
+        "batches": [
+          {
+            "EXTEND/eager/1": 281,
+            "DECODE/graph/1": 8325,
+            "DECODE/graph/2": 6,
+            "EXTEND/eager/8": 113,
+            "DECODE/graph/8": 4802,
+            "EXTEND/eager/16": 4,
+            "DECODE/graph/31": 14,
+            "EXTEND/eager/7": 113,
+            "DECODE/graph/32": 2331
+          }
+        ],
+        "loads": 5,
+        "all_fixed_addresses": true,
+        "capture_eager_dispatch": {
+          "rank_aware_shrink": 60306,
+          "rowexpand_decode": 1728,
+          "rowexpand_tile16_threads256/in_proj_qkvz": 324,
+          "rowexpand_tile2_threads128/out_proj": 108,
+          "rowexpand_tile16_threads256/gate_up_proj": 432,
+          "rowexpand_tile2_threads128/down_proj": 144,
+          "rowexpand_tile4_threads256/qkv_proj": 36,
+          "rowexpand_tile2_threads128/o_proj": 36,
+          "rowexpand_tile16_threads128/out_proj": 216,
+          "rowexpand_tile16_threads128/down_proj": 288,
+          "rowexpand_tile16_threads256/qkv_proj": 72,
+          "rowexpand_tile16_threads128/o_proj": 72
+        }
+      }
+    },
+    "performance": [
+      {
+        "concurrency": 1,
+        "medians": {
+          "native": 119.14666146928744,
+          "control": 120.47751122751335,
+          "candidate": 121.207522134084
+        },
+        "samples": {
+          "native": [
+            119.14666146928744,
+            119.27024198215628,
+            119.0063912180357
+          ],
+          "control": [
+            120.47524531920206,
+            120.48096638783944,
+            120.47751122751335
+          ],
+          "candidate": [
+            121.1820246637535,
+            121.23902154345149,
+            121.207522134084
+          ]
+        },
+        "candidate_over_native": 1.0172968393690813,
+        "candidate_over_control": 1.0060593126396185
+      },
+      {
+        "concurrency": 8,
+        "medians": {
+          "native": 773.8548959884971,
+          "control": 791.3871135264721,
+          "candidate": 796.3849769846886
+        },
+        "samples": {
+          "native": [
+            773.8548959884971,
+            773.6996407555519,
+            774.4344368724101
+          ],
+          "control": [
+            789.3244643694956,
+            791.454201890472,
+            791.3871135264721
+          ],
+          "candidate": [
+            796.3849769846886,
+            796.6150595415382,
+            796.3566856351329
+          ]
+        },
+        "candidate_over_native": 1.0291140898803932,
+        "candidate_over_control": 1.0063153207485849
+      },
+      {
+        "concurrency": 32,
+        "medians": {
+          "native": 2128.400272588248,
+          "control": 2086.7372658321597,
+          "candidate": 2118.5699478973693
+        },
+        "samples": {
+          "native": [
+            2129.687210662398,
+            2128.400272588248,
+            2117.435201388286
+          ],
+          "control": [
+            2086.7372658321597,
+            2092.970726440493,
+            2074.815688231789
+          ],
+          "candidate": [
+            2123.4371850206153,
+            2118.5699478973693,
+            2117.17605775068
+          ]
+        },
+        "candidate_over_native": 0.9953813552753757,
+        "candidate_over_control": 1.015254762823491
+      }
+    ],
+    "raw_measurements": {
+      "native": [
+        {
+          "concurrency": 1,
+          "seconds": 17.188899585977197,
+          "requests": 32,
+          "output_tokens": 2048,
+          "tokens_per_second": 119.14666146928744,
+          "repeat": 0
+        },
+        {
+          "concurrency": 1,
+          "seconds": 17.171089501993265,
+          "requests": 32,
+          "output_tokens": 2048,
+          "tokens_per_second": 119.27024198215628,
+          "repeat": 1
+        },
+        {
+          "concurrency": 1,
+          "seconds": 17.209159768972313,
+          "requests": 32,
+          "output_tokens": 2048,
+          "tokens_per_second": 119.0063912180357,
+          "repeat": 2
+        },
+        {
+          "concurrency": 8,
+          "seconds": 15.878945864009438,
+          "requests": 192,
+          "output_tokens": 12288,
+          "tokens_per_second": 773.8548959884971,
+          "repeat": 0
+        },
+        {
+          "concurrency": 8,
+          "seconds": 15.882132228987757,
+          "requests": 192,
+          "output_tokens": 12288,
+          "tokens_per_second": 773.6996407555519,
+          "repeat": 1
+        },
+        {
+          "concurrency": 8,
+          "seconds": 15.867063001001952,
+          "requests": 192,
+          "output_tokens": 12288,
+          "tokens_per_second": 774.4344368724101,
+          "repeat": 2
+        },
+        {
+          "concurrency": 32,
+          "seconds": 11.539722771005472,
+          "requests": 384,
+          "output_tokens": 24576,
+          "tokens_per_second": 2129.687210662398,
+          "repeat": 0
+        },
+        {
+          "concurrency": 32,
+          "seconds": 11.546700268983841,
+          "requests": 384,
+          "output_tokens": 24576,
+          "tokens_per_second": 2128.400272588248,
+          "repeat": 1
+        },
+        {
+          "concurrency": 32,
+          "seconds": 11.606494491017656,
+          "requests": 384,
+          "output_tokens": 24576,
+          "tokens_per_second": 2117.435201388286,
+          "repeat": 2
+        }
+      ],
+      "control": [
+        {
+          "concurrency": 1,
+          "seconds": 16.999342849012464,
+          "requests": 32,
+          "output_tokens": 2048,
+          "tokens_per_second": 120.47524531920206,
+          "repeat": 0
+        },
+        {
+          "concurrency": 1,
+          "seconds": 16.998535630991682,
+          "requests": 32,
+          "output_tokens": 2048,
+          "tokens_per_second": 120.48096638783944,
+          "repeat": 1
+        },
+        {
+          "concurrency": 1,
+          "seconds": 16.999023129988927,
+          "requests": 32,
+          "output_tokens": 2048,
+          "tokens_per_second": 120.47751122751335,
+          "repeat": 2
+        },
+        {
+          "concurrency": 8,
+          "seconds": 15.567742487008218,
+          "requests": 192,
+          "output_tokens": 12288,
+          "tokens_per_second": 789.3244643694956,
+          "repeat": 0
+        },
+        {
+          "concurrency": 8,
+          "seconds": 15.525850984995486,
+          "requests": 192,
+          "output_tokens": 12288,
+          "tokens_per_second": 791.454201890472,
+          "repeat": 1
+        },
+        {
+          "concurrency": 8,
+          "seconds": 15.527167160005774,
+          "requests": 192,
+          "output_tokens": 12288,
+          "tokens_per_second": 791.3871135264721,
+          "repeat": 2
+        },
+        {
+          "concurrency": 32,
+          "seconds": 11.777237317990512,
+          "requests": 384,
+          "output_tokens": 24576,
+          "tokens_per_second": 2086.7372658321597,
+          "repeat": 0
+        },
+        {
+          "concurrency": 32,
+          "seconds": 11.74216136400355,
+          "requests": 384,
+          "output_tokens": 24576,
+          "tokens_per_second": 2092.970726440493,
+          "repeat": 1
+        },
+        {
+          "concurrency": 32,
+          "seconds": 11.844907544989837,
+          "requests": 384,
+          "output_tokens": 24576,
+          "tokens_per_second": 2074.815688231789,
+          "repeat": 2
+        }
+      ],
+      "candidate": [
+        {
+          "concurrency": 1,
+          "seconds": 16.900196259986842,
+          "requests": 32,
+          "output_tokens": 2048,
+          "tokens_per_second": 121.1820246637535,
+          "repeat": 0
+        },
+        {
+          "concurrency": 1,
+          "seconds": 16.892251140990993,
+          "requests": 32,
+          "output_tokens": 2048,
+          "tokens_per_second": 121.23902154345149,
+          "repeat": 1
+        },
+        {
+          "concurrency": 1,
+          "seconds": 16.896641099010594,
+          "requests": 32,
+          "output_tokens": 2048,
+          "tokens_per_second": 121.207522134084,
+          "repeat": 2
+        },
+        {
+          "concurrency": 8,
+          "seconds": 15.429723506997107,
+          "requests": 192,
+          "output_tokens": 12288,
+          "tokens_per_second": 796.3849769846886,
+          "repeat": 0
+        },
+        {
+          "concurrency": 8,
+          "seconds": 15.425267012993572,
+          "requests": 192,
+          "output_tokens": 12288,
+          "tokens_per_second": 796.6150595415382,
+          "repeat": 1
+        },
+        {
+          "concurrency": 8,
+          "seconds": 15.430271663004532,
+          "requests": 192,
+          "output_tokens": 12288,
+          "tokens_per_second": 796.3566856351329,
+          "repeat": 2
+        },
+        {
+          "concurrency": 32,
+          "seconds": 11.573688250995474,
+          "requests": 384,
+          "output_tokens": 24576,
+          "tokens_per_second": 2123.4371850206153,
+          "repeat": 0
+        },
+        {
+          "concurrency": 32,
+          "seconds": 11.600277830992127,
+          "requests": 384,
+          "output_tokens": 24576,
+          "tokens_per_second": 2118.5699478973693,
+          "repeat": 1
+        },
+        {
+          "concurrency": 32,
+          "seconds": 11.607915133005008,
+          "requests": 384,
+          "output_tokens": 24576,
+          "tokens_per_second": 2117.17605775068,
+          "repeat": 2
+        }
+      ]
+    },
+    "preflight": {
+      "passed": true,
+      "torch": "2.11.0+rocm7.2_lumi_aif_20260929120822",
+      "hip": "7.2.53211",
+      "framework_sha256": {
+        "srt/models/qwen3_5.py": "e3ced2f65d5fb8afa839c6550ab8f38f9b0d659a01c41d99516496438a6b2439",
+        "srt/lora/lora.py": "368221bec72a8c75e900e46b76fd80c6c15a1adf929b9e069684c159c89bacee",
+        "srt/lora/lora_manager.py": "e24f6bbffd0b844b509f568b718c178bbccd890dfcf2d571c4b24bf22d14cf73",
+        "srt/lora/layers.py": "ac84622c5712e8b75d56767f6984809c9ed8263ab9e1299ec33e59ee9baa5bbb",
+        "srt/lora/mem_pool.py": "92f50dbee269322127112bbc9567df91f7d7fa93ac62ee418a16e5020e24169f",
+        "srt/lora/utils.py": "2b198d405a427542f43b04a9281d656a93d9b323f23951b8b8245cbfa9f57fc4",
+        "srt/lora/backend/chunked_backend.py": "765e4f6d3f0cd6608ff40a3ae5c5fa3b9325fa7b40d3938740642c519d56af06"
+      },
+      "library_sha256": {
+        "loraforge/__init__.py": "2bf557e06002babd4e9746ab3cfbb3993c2d46a181d2178ed3996efa688ac3f4",
+        "loraforge/py.typed": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "loraforge/_version.py": "57be4cc1ee0a0f9be1feeebbefe897f1a24694e1261b979575a9659e90b89db7",
+        "loraforge/integrations/_sglang_rank_aware.py": "954859a70b48f3524474bd7d43f732de24155beba2a0c620b48c1ea8503617f4",
+        "loraforge/integrations/__init__.py": "15b66483ac55a6bf33c289e1f0c6b30829f61b02aae66d0e6bcc7d325b862d30",
+        "loraforge/integrations/_sglang_fleet.py": "dbbe6611f10018e78c7d3643a793c740a841b594dacde9674551a8f1d698012b",
+        "loraforge/integrations/_sglang_qwen35.py": "aad9e0a34e519dc791aaaff19c774d501f88524e7c865ee8815343fcf790a022",
+        "loraforge/integrations/_sglang_stable_prefill.py": "bcdf67a4f4ccba778bf61302a2dedf40aae1097b59864f2fdfee7d2f60639600",
+        "loraforge/integrations/sglang.py": "0d65ab2b4fde747a7ee6fa0d853d60ba4d0c7b9367765581197ab329e04a05bd",
+        "loraforge/ops/flashtsqr.py": "e7a5f1c92945460c7d10b821438b638adce36f4d13ee0fd7a69eced80a18e1b1",
+        "loraforge/ops/__init__.py": "dc3560e4dea257bee5d8ab6441c7a7bfeea2cdd7ac84ca08de4652c7b0c40486",
+        "loraforge/ops/gemv.py": "a06d3c425e1d580a908ee2777fb0107dea0b821d2e8596a565801d5d34eab0d7",
+        "loraforge/ops/_gemv_kernels.py": "fb4d65b454a7b416900658646a3e1bb91ecb7c174950066ff3710442c89faa4b",
+        "loraforge/ops/_extension.py": "bf6264e06a15fcec877349207e472e15d56678ca629c45013a5b40eedb8816df",
+        "loraforge/ops/rowexpand.py": "addd275cc920c7b74502afd81dadbddf5d857f1df032187105005c46fe57aba7",
+        "loraforge/runtime/gpu.py": "0e6e0e9764bd7d7476300790715e7246949ede55de504cf1d3eba090ea56f79c",
+        "loraforge/runtime/retained.py": "9fcf7a33152f8d0fae86af094c636b38f232abf2a468ec231d469e0d632736f9",
+        "loraforge/runtime/__init__.py": "990a315100079e3256d02454f589289e07f16dbd81c4df71e93ad6b15010748e",
+        "loraforge/runtime/slots.py": "1fc46d34c83b1aed15314facb784ba58cbf9cfbcd0437eb8bb0021b0cf67193b",
+        "loraforge/compression/quality.py": "27e931afcb51390e85f186c92a6ebab6888510de14205eae5c7f8f8ed1bdd503",
+        "loraforge/compression/__init__.py": "b7d741dc363a787724b8cf724f79b11293f220234da0714b5a50e230d0f16243",
+        "loraforge/compression/spectral.py": "d441b65c96edd6674dc38c17f0be09f5155a090ce1d003fba1958e2f0e8794d6",
+        "loraforge/compression/allocation.py": "d3b80fe4cb48ff127340ff3f702f62eb134447a1fa44ff60d2c655686fd8e486",
+        "loraforge/adapters/_config.py": "722412220a5386b0abdf63469b15ef4eeefd83d887fca5a13de153f8218efce1",
+        "loraforge/adapters/__init__.py": "6acbe7b3c8108387dc3bac946ff56fc9d9bb70dee4fd5ad82942e7fe0bfea6de",
+        "loraforge/adapters/sglang.py": "d4070b314dbfb5f48e320d45ef71d5329516b9a15d6e8ad44ac8008a99fe2996",
+        "loraforge/adapters/peft.py": "4cca6ef23cd8295a47b43654c12238b3e4807d43268a9e560b47ea0ef2a67adb",
+        "loraforge/integrations/data/mi250x_fleet_dispatch.json": "245318e64963720c2ba13034598a1aa815c7320aee52438519082b67bb5b63da",
+        "loraforge/ops/csrc/jacobi_eigh.cu": "82d0e9e71d0eb8dbb2eb75d0b0b083f3158245f9de39fa48b1e5d46a180e44c4",
+        "loraforge/ops/csrc/bindings.cpp": "e590fab0a6605049ce1136093e41bfd124a3e5853071059cd6bfe7f003ec412e",
+        "loraforge/ops/csrc/rowexpand.hip": "a7617bc6c167ccfb75608c329776f53fe141bdd5029e814819f6b024ccae057a",
+        "loraforge/ops/csrc/rowexpand.cu": "962b2b813ecb2eeaafc057ff26e866a5deecbae2c455fa6957c1c19914ce8bba",
+        "loraforge/ops/csrc/tsqr_full.cu": "a41b1396a248516e5a21947762cd8a168c03e2a6c59d129c56099206bb873a9c",
+        "loraforge/ops/csrc/tsqr_wide.cu": "e6e5f7a47296b0bd35ab655bedecb2d9eb9f86e1b3a2b0af421d2663f4b8c52b"
+      }
+    },
+    "tested_profile_sha256": {
+      "control": "dbbe6611f10018e78c7d3643a793c740a841b594dacde9674551a8f1d698012b",
+      "candidate": "6097f90fe0f966127c7208793aefbcfb7f4dd6cc9881ef3c685d7bda429caf15"
+    },
+    "policy_finalization": {
+      "policy_input_checks": 24768,
+      "all_equal": true,
+      "rest_of_module_ast_identical": true,
+      "final_sha256": "794963e8d47d819a96b4c15ef16138dc30d6117aadbf3fcd02e260512de1d52b",
+      "tested_overlay_sha256": "6097f90fe0f966127c7208793aefbcfb7f4dd6cc9881ef3c685d7bda429caf15"
+    },
+    "exact_reference_reader_cpu_check": {
+      "string_environment_path_passed": true,
+      "changed_output_rejected": true,
+      "benchmark_sha256": "2e64b40ce59ef7ae201d70ba86d2122d8f35d10bd8a29e591f770b0aa8d54cc4"
+    },
+    "runtime_and_policy_unchanged_from_gpu_checks": true,
+    "bundle_sha256": "ee10eb26c8672cfcb5d1eb833ccb9489d7dcec34612afd9ef1f797fed28907ed",
+    "slurm_state": "COMPLETED",
+    "elapsed": "00:13:07",
+    "exit_code": "0:0",
+    "framework_version": "SGLang 0.5.22",
+    "model_revision": "2fc06364715b967f1860aea9cf38778875588b17",
+    "protocol": {
+      "input_tokens": 128,
+      "output_tokens": 64,
+      "repeats": 3,
+      "requests_at_concurrency": {
+        "1": 32,
+        "8": 192,
+        "32": 384
+      },
+      "warmup_requests_per_point": 32,
+      "numerical_cases": 52,
+      "numerical_output_tokens_per_case": 8,
+      "logprob_limit": 0.05,
+      "synthetic_adapters": 4,
+      "padded_rank": 64
+    },
+    "interpretation": "Small single-run improvement over old Fleet; fixed mode order, no across-run confidence interval; C32 remains near native parity. No new base-only arm, trained-adapter quality, or 1.3x claim."
+  },
+  "failed_serving_attempt": {
+    "job": 23464050,
+    "slurm_state": "FAILED",
+    "elapsed": "00:11:12",
+    "reason": "Experiment exact-reference reader received str instead of Path after candidate native parity passed; stopped before candidate timing",
+    "candidate_native_cases": 52,
+    "candidate_max_logprob_difference": 0.015964582562446594,
+    "candidate_saved_output_exact_to_control": true,
+    "candidate_timed": false,
+    "bundle_sha256": "0c403a0a63143de8e3bd5686fb640c355eecc7c0455e764d0c525c1ac5b00a06"
+  },
+  "final_cpu_validation": {
+    "passed": 122,
+    "skipped": 3,
+    "gpu_deselected": 49,
+    "lint_format": "passed",
+    "wheel_sdist": "passed"
+  }
 }
