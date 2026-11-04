@@ -191,6 +191,16 @@ per adapter; the operator study below directly observes that advantage on some
 outputs. These two studies do not isolate an architecture-only slowdown or a
 regression in the already validated dense-model path.
 
+The mixed-rank fixture also differs substantially from the paper's retained
+budget. Its executed RowExpand module/adapter entries have mean rank **37.75**;
+**39.0625%** are still rank 64 after fused projections take their maximum rank.
+These are counts of positive entries, excluding native b/a, not latency- or
+parameter-weighted averages. The paper's Qwen50 spectral checkpoint contains
+457,866,752 / 5,946,605,568 parameters (**7.70%** of its own original fleet).
+The fixed rank-4/rank-8 protocol above tests much smaller factors while keeping
+native pool capacity equal to the checkpoint rank in both engines. It does not
+reproduce that heterogeneous, trained fleet or its task-quality budget.
+
 Profiling job 23459047 sampled the accepted native/Fleet/base implementations
 at batch sizes 1, 8 and 32 on one MI250X GCD. Each separate 12-forward trace
 includes prefill; the following numbers select **decode GPU kernel durations**
@@ -390,6 +400,55 @@ eight-output-token numerical gate does not certify trained-adapter quality or
 long-generation equivalence. The bounded hybrid B profile is enabled on this
 evidence, with these limits; all raw timing samples and audits are in the linked
 RowExpand evidence file.
+
+## Compact tiny-rank results
+
+Jobs **23465767** (rank 4, 9m09s) and **23466166** (rank 8, 9m05s) completed
+sequentially on one MI250X GCD each. They use the unchanged runtime from the
+B-tuning study with compact fixtures and matching pool capacities.
+Each rank's native/Fleet pair shares the exact checkpoint files, scaling,
+server options, input lengths and request counts. Each checkpoint stores its
+actual small rank; no rank-64 pool is retained in either engine.
+
+Both ranks pass all **52/52** token-ID comparisons. Rank 4's saved token/logprob
+records are exact; rank 8's maximum logprob difference is **0.0351560**, within
+the unchanged 0.05 limit. Repeated requests remain exact within each engine.
+Actual eager prefill, decode graph replay and fixed-address loads pass the
+audits. All **456** positive fused module/adapter entries have the selected
+rank and checkpoint rank. Thus the small gains are not caused by accidentally
+executing the old rank-64 fixture.
+
+Complete-model median output tokens/s, three repetitions per point:
+
+| Rank | Concurrency | Native | Fleet | Fleet/native |
+| --- | ---: | ---: | ---: | ---: |
+| 4 | 1 | 122.333 | 124.664 | 1.0191x |
+| 4 | 8 | 833.826 | 833.144 | 0.9992x |
+| 4 | 32 | 2207.800 | 2175.878 | 0.9855x |
+| 8 | 1 | 122.795 | 122.801 | 1.0001x |
+| 8 | 8 | 846.107 | 831.814 | 0.9831x |
+| 8 | 32 | 2250.762 | 2185.386 | 0.9710x |
+
+Reducing rank alone **does not restore the paper's runtime gain** in this
+hybrid policy. At a fixed uniform rank with a matching native pool, rank-aware
+A has no extra pool padding to remove; the hybrid still uses native A and
+prefill B reductions. Internal native kernel tile padding is a separate cost
+that this policy does not eliminate. Decode B is the main remaining custom
+path, and its current mixed-rank-tuned dispatch is not a universal tiny-rank
+speedup. These measurements do not isolate kernel launch cost, memory traffic,
+or a particular B variant as the cause; that requires a separate tiny-rank
+profile/dispatch experiment.
+
+The rank-4 C1 improvement, both C32 regressions and rank-8 C8 regression have
+disjoint within-run sample ranges, but each rank has one fixed native-before-Fleet
+ordering, not an across-run confidence interval. The two ranks ran on different
+nodes, so their absolute rates are not a paired rank-scaling experiment.
+No new custom-A policy is enabled by this study. These four random adapters do
+not measure trained compression quality, and the short numerical gate does not
+establish long-generation equivalence. Raw timing samples, input/runtime/model
+hashes, accounting and audit summaries are in
+[qwen35-tiny-rank-mi250.json](qwen35-tiny-rank-mi250.json); original attempt
+bundles and full correctness records are retained separately.
 
 ## Sources
 

@@ -295,3 +295,13 @@ Both engines now read the prepared pool capacity instead of using a hardcoded
 rank-64 pool, and the CPU comparison checks matching server options. These
 fixtures isolate small-rank execution; they do not validate trained compression
 quality. See [the tiny-rank protocol](qwen35.md).
+
+The compact full-model jobs **23465767** (rank 4) and **23466166** (rank 8)
+completed with 52/52 matching native/Fleet token sequences each. Rank 4's saved
+logprobs are exact; rank 8's maximum difference is 0.0351560, below 0.05.
+Matching pool capacity, all 456 positive fused entries, fixed addresses and
+decode graphs were audited. Fleet/native ratios at C1/8/32 are
+**1.0191x/0.9992x/0.9855x** for rank 4 and **1.0001x/0.9831x/0.9710x** for rank 8.
+Tiny ranks alone do not recover the paper's speedup under the conservative
+hybrid policy. Runtime code is unchanged; native A/prefill remain enabled.
+See [the evidence and limits](qwen35-tiny-rank-mi250.json).
