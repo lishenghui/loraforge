@@ -32,7 +32,9 @@ def read(path):
     return json.loads(path.read_text())
 
 
-def prepare(root, model):
+def prepare(root, model, rank=None):
+    if rank not in (None, 4, 8):
+        raise ValueError("fixed synthetic rank must be 4 or 8")
     import torch
     from safetensors.torch import save_file
     from transformers import AutoTokenizer
@@ -45,6 +47,8 @@ def prepare(root, model):
     value = config["linear_value_head_dim"] * config["linear_num_value_heads"]
     head, heads = config["head_dim"], config["linear_num_value_heads"]
     adapters, histogram = [], Counter()
+    physical_rank = 64 if rank is None else rank
+    physical_parameters = retained_parameters = rank64_parameters = 0
     for index in range(4):
         path = root / "adapters" / f"a{index}"
         path.mkdir(parents=True, exist_ok=False)
@@ -76,12 +80,16 @@ def prepare(root, model):
                     ("self_attn.o_proj", config["num_attention_heads"] * head, hidden),
                 ]
             for pos, (name, nin, nout) in enumerate(dims):
-                k = [8, 16, 32, 64][(layer + pos + index) % 4]
+                k = (
+                    rank
+                    if rank is not None
+                    else [8, 16, 32, 64][(layer + pos + index) % 4]
+                )
                 if name.endswith(("in_proj_a", "in_proj_b")):
                     k = min(k, 8)
                 prefix = f"base_model.model.model.language_model.layers.{layer}.{name}"
-                a = torch.zeros(64, nin, dtype=torch.bfloat16)
-                b = torch.zeros(nout, 64, dtype=torch.bfloat16)
+                a = torch.zeros(physical_rank, nin, dtype=torch.bfloat16)
+                b = torch.zeros(nout, physical_rank, dtype=torch.bfloat16)
                 a[:k] = torch.randn(k, nin) * 0.02
                 b[:, :k] = torch.randn(nout, k) * (0.04 / k**0.5)
                 weights[prefix + ".lora_A.weight"] = a
@@ -89,6 +97,9 @@ def prepare(root, model):
                 ranks[prefix + ".lora_A.weight"] = k
                 targets.add(name.rsplit(".", 1)[1])
                 histogram[k] += 1
+                physical_parameters += physical_rank * (nin + nout)
+                retained_parameters += k * (nin + nout)
+                rank64_parameters += 64 * (nin + nout)
         save_file(weights, str(path / "adapter_model.safetensors"))
         dump(
             path / "adapter_config.json",
@@ -96,8 +107,8 @@ def prepare(root, model):
                 peft_type="LORA",
                 task_type="CAUSAL_LM",
                 base_model_name_or_path=str(model),
-                r=64,
-                lora_alpha=64,
+                r=physical_rank,
+                lora_alpha=physical_rank,
                 lora_dropout=0.0,
                 bias="none",
                 target_modules=sorted(targets),
@@ -137,7 +148,17 @@ def prepare(root, model):
     manifest = dict(
         model=str(model),
         adapters=adapters,
-        max_lora_rank=64,
+        max_lora_rank=physical_rank,
+        fixture=dict(
+            kind="mixed_padded" if rank is None else "fixed_compact",
+            physical_rank=physical_rank,
+            fixed_retained_rank=rank,
+            physical_parameters=physical_parameters,
+            retained_parameters=retained_parameters,
+            rank64_parameters=rank64_parameters,
+            retained_fraction_of_rank64=retained_parameters / rank64_parameters,
+            scaling=1.0,
+        ),
         target_modules=[
             "qkv_proj",
             "o_proj",
@@ -153,7 +174,9 @@ def prepare(root, model):
         output_tokens=64,
         concurrencies=[1, 8, 32],
         repeats=3,
-        scope="BF16 TP1 text; synthetic nonzero padded adapters; no quality claim",
+        scope="BF16 TP1 text; synthetic nonzero "
+        + ("padded" if rank is None else f"compact rank-{rank}")
+        + " adapters; no trained compression or quality claim",
     )
     dump(root / "manifest.json", manifest)
 
@@ -222,6 +245,13 @@ def serve(root, mode, attempt, port):
         install_sglang_backend()
     observe(attempt)
     m = read(root / "manifest.json")
+    options = server_options(m, mode, port)
+    dump(attempt / "server-args.json", options)
+    launch_server(ServerArgs(**options))
+
+
+def server_options(m, mode, port):
+    """Use the prepared capacity in both backends, including compact tiny ranks."""
     options = dict(
         model_path=m["model"],
         host="127.0.0.1",
@@ -249,7 +279,7 @@ def serve(root, mode, attempt, port):
         options.update(
             lora_backend="csgmv",
             max_lora_chunk_size=16,
-            max_lora_rank=64,
+            max_lora_rank=m["max_lora_rank"],
             lora_target_modules=m["target_modules"],
             max_loras_per_batch=5,
             max_loaded_loras=5,
@@ -259,8 +289,7 @@ def serve(root, mode, attempt, port):
                 for a in m["adapters"]
             ],
         )
-    dump(attempt / "server-args.json", options)
-    launch_server(ServerArgs(**options))
+    return options
 
 
 def request(url, body=None, path="/generate"):
@@ -466,10 +495,10 @@ def run(root, modes, reference=None, validation_only=False):
                     server.wait()
 
 
-def compare(root):
-    reports = {
-        mode: read(root / f"{mode}-latest.json") for mode in ("native", "fleet", "base")
-    }
+def compare(root, modes=("native", "fleet", "base")):
+    if not {"native", "fleet"}.issubset(modes):
+        raise ValueError("comparison requires native and fleet")
+    reports = {mode: read(root / f"{mode}-latest.json") for mode in modes}
     assert all(r["state"] == "complete" for r in reports.values())
     # Attempt names are unique within this result bundle. Resolve beneath root
     # so a copied immutable bundle can be compared on a CPU-only machine too.
@@ -491,14 +520,20 @@ def compare(root):
                 concurrency=concurrency,
                 tokens_per_second=medians,
                 fleet_over_native=medians["fleet"] / medians["native"],
-                fleet_over_base=medians["fleet"] / medians["base"],
+                **(
+                    dict(fleet_over_base=medians["fleet"] / medians["base"])
+                    if "base" in medians
+                    else {}
+                ),
             )
         )
-    base = read(paths["base"] / "correctness.json")
-    adapter_effect_observed = any(
-        a["tokens"] != b["tokens"]
-        for a, b in zip(native["serial"], base["serial"], strict=True)
-    )
+    adapter_effect_observed = None
+    if "base" in paths:
+        base = read(paths["base"] / "correctness.json")
+        adapter_effect_observed = any(
+            a["tokens"] != b["tokens"]
+            for a, b in zip(native["serial"], base["serial"], strict=True)
+        )
     audits = {
         mode: [read(p) for p in path.glob("audit-*.json")]
         for mode, path in paths.items()
@@ -518,11 +553,21 @@ def compare(root):
         > 0
         for row in audits["fleet"]
     )
+    native_args = read(paths["native"] / "server-args.json")
+    fleet_args = read(paths["fleet"] / "server-args.json")
+    matched_server_options = (
+        native_args == fleet_args
+        and native_args["max_lora_rank"]
+        == read(root / "manifest.json")["max_lora_rank"]
+    )
+    audit_pass &= matched_server_options
     report = dict(
         scope=read(root / "manifest.json")["scope"],
         **numerics,
         adapter_effect_observed=adapter_effect_observed,
         execution_audit_pass=audit_pass,
+        matched_server_options=matched_server_options,
+        max_lora_rank=native_args["max_lora_rank"],
         performance=rows,
         attempts=reports,
     )
@@ -542,6 +587,12 @@ if __name__ == "__main__":
     parser.add_argument("action", choices=["prepare", "serve", "run", "compare"])
     parser.add_argument("root", type=Path)
     parser.add_argument("--model", type=Path)
+    parser.add_argument(
+        "--rank",
+        type=int,
+        choices=[4, 8],
+        help="Prepare compact fixed-rank synthetic adapters (default: mixed rank-64 fixture)",
+    )
     parser.add_argument("--mode", choices=["native", "fleet", "base"])
     parser.add_argument("--modes", nargs="+", default=["native", "fleet", "base"])
     parser.add_argument("--attempt", type=Path)
@@ -553,10 +604,10 @@ if __name__ == "__main__":
     args = parser.parse_args()
     args.root = args.root.resolve()
     if args.action == "prepare":
-        prepare(args.root.resolve(), args.model.resolve())
+        prepare(args.root.resolve(), args.model.resolve(), args.rank)
     elif args.action == "serve":
         serve(args.root, args.mode, args.attempt, args.port)
     elif args.action == "run":
         run(args.root, args.modes, args.reference, args.validation_only)
     else:
-        compare(args.root)
+        compare(args.root, args.modes)

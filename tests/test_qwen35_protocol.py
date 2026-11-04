@@ -3,6 +3,7 @@
 
 import importlib.util
 from pathlib import Path
+from types import SimpleNamespace
 
 import pytest
 
@@ -58,3 +59,114 @@ def test_model_gate_requires_matching_large_batch_validation():
     native = dict(candidate)
     candidate = dict(candidate, mixed32=[[[-0.1, 2]]] * 32)
     assert not protocol.numerical_check(native, candidate)["numerical_pass"]
+
+
+@pytest.mark.parametrize("rank", [4, 8, 64])
+def test_native_and_fleet_use_the_prepared_pool_capacity(rank):
+    manifest = dict(
+        model="local-model",
+        max_lora_rank=rank,
+        target_modules=["qkv_proj", "in_proj_qkvz"],
+        adapters=[dict(name=f"a{i}", path=f"local-adapter-{i}") for i in range(4)],
+    )
+    native = protocol.server_options(manifest, "native", 12345)
+    assert native == protocol.server_options(manifest, "fleet", 12345)
+    assert native["max_lora_rank"] == rank
+    assert native["max_loaded_loras"] == native["max_loras_per_batch"] == 5
+    assert "max_lora_rank" not in protocol.server_options(manifest, "base", 12345)
+
+
+@pytest.mark.parametrize("rank", [4, 8])
+def test_fixed_rank_fixture_has_compact_weights_and_unit_scaling(
+    tmp_path, monkeypatch, rank
+):
+    torch = pytest.importorskip("torch")
+    safetensors = pytest.importorskip("safetensors.torch")
+    transformers = pytest.importorskip("transformers")
+    monkeypatch.setattr(
+        transformers.AutoTokenizer,
+        "from_pretrained",
+        lambda _: SimpleNamespace(
+            apply_chat_template=lambda *a, **kw: "prompt",
+            encode=lambda *a, **kw: list(range(128)),
+        ),
+    )
+    model = tmp_path / "model"
+    model.mkdir()
+    protocol.dump(
+        model / "config.json",
+        dict(
+            text_config=dict(
+                model_type="qwen3_5_text",
+                hidden_size=8,
+                intermediate_size=16,
+                linear_key_head_dim=4,
+                linear_num_key_heads=2,
+                linear_value_head_dim=4,
+                linear_num_value_heads=2,
+                head_dim=4,
+                num_attention_heads=2,
+                num_key_value_heads=1,
+                layer_types=["linear_attention", "full_attention"],
+            )
+        ),
+    )
+    root = tmp_path / "fixture"
+    protocol.prepare(root, model, rank)
+    manifest = protocol.read(root / "manifest.json")
+    assert manifest["max_lora_rank"] == rank
+    assert set(manifest["retained_rank_histogram"]) == {str(rank)}
+    count = 0
+    for adapter in manifest["adapters"]:
+        path = Path(adapter["path"])
+        config = protocol.read(path / "adapter_config.json")
+        assert config["r"] == config["lora_alpha"] == rank
+        weights = safetensors.load_file(path / "adapter_model.safetensors")
+        for name, weight in weights.items():
+            assert weight.shape[0 if ".lora_A." in name else 1] == rank
+            assert weight.dtype == torch.bfloat16 and torch.count_nonzero(weight) > 0
+            count += weight.numel()
+    fixture = manifest["fixture"]
+    assert fixture["physical_parameters"] == fixture["retained_parameters"] == count
+    assert fixture["retained_fraction_of_rank64"] == rank / 64
+
+
+def test_prepare_rejects_invalid_fixed_rank_before_writing(tmp_path):
+    with pytest.raises(ValueError, match="rank must be 4 or 8"):
+        protocol.prepare(tmp_path / "fixture", tmp_path / "model", rank=0)
+    assert not (tmp_path / "fixture").exists()
+
+
+def test_two_arm_comparison_checks_equal_pool_capacity(tmp_path):
+    protocol.dump(
+        tmp_path / "manifest.json",
+        dict(concurrencies=[1], scope="test", max_lora_rank=4),
+    )
+    for mode, rate in (("native", 10), ("fleet", 12)):
+        attempt = tmp_path / "results" / mode
+        attempt.mkdir(parents=True)
+        protocol.dump(
+            tmp_path / f"{mode}-latest.json",
+            dict(state="complete", attempt=str(attempt)),
+        )
+        protocol.dump(attempt / "correctness.json", record([[-0.1, 1]]))
+        protocol.dump(attempt / "server-args.json", dict(max_lora_rank=4))
+        protocol.dump(
+            attempt / "measurements.json", [dict(concurrency=1, tokens_per_second=rate)]
+        )
+        protocol.dump(
+            attempt / "audit-test.json",
+            dict(
+                counts={"DECODE/graph": 1},
+                loads=[dict(fixed_addresses=True)],
+                fleet=dict(python_capture_eager_calls=dict(rowexpand_decode=1)),
+            ),
+        )
+    protocol.compare(tmp_path, ("native", "fleet"))
+    report = protocol.read(tmp_path / "comparison.json")
+    assert report["numerical_pass"] and report["execution_audit_pass"]
+    assert report["performance"][0]["fleet_over_native"] == 1.2
+    assert report["adapter_effect_observed"] is None
+    protocol.dump(tmp_path / "results/native/server-args.json", dict(max_lora_rank=64))
+    protocol.compare(tmp_path, ("native", "fleet"))
+    assert not protocol.read(tmp_path / "comparison.json")["execution_audit_pass"]

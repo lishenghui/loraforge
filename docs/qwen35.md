@@ -4,7 +4,7 @@ This experimental integration targets the **dense Qwen3.5 text decoder**, BF16,
 TP=1, synchronous adapter loading, and the inspected SGLang 0.5.22 implementation.
 Vision adapters, MoE, quantization, tensor parallelism and recurrent-state cache
 reuse across different adapters are outside the validated scope. Current checks
-pass 122 CPU cases and 93 MI250X operator/framework GPU cases (jobs 23463508 and
+pass 129 CPU cases and 93 MI250X operator/framework GPU cases (jobs 23463508 and
 23464050),
 including four slices, unequal output widths, strided output, rank/slot changes
 and graph replay. The full-model synthetic-adapter pilot passes the declared
@@ -115,6 +115,28 @@ actual graph execution and Fleet dispatch evidence must also be inspected.
 Base-only measures the available model throughput; it is not a quality baseline
 for a real fine-tuned adapter. A failed numerical gate must remain visible even
 if the throughput measurement is useful diagnostically.
+
+For a compact tiny-rank study, add `--rank 4` or `--rank 8` to `prepare` in a
+new output directory. Every A/B tensor then has that physical and retained rank,
+with `lora_alpha / r = 1`; both engines use the same weights and matching
+`max_lora_rank`. The manifest records actual parameter counts and their ratio
+to the same shapes at rank 64 (6.25% and 12.5%, respectively). These fixtures
+are generated directly at small rank, not compressed trained checkpoints.
+Omitting `--rank` preserves the original mixed-rank/padded fixture.
+
+```sh
+python benchmarks/qwen35_hybrid.py prepare OUTPUT --model LOCAL_MODEL --rank 4
+python benchmarks/qwen35_hybrid.py run OUTPUT --modes native
+python benchmarks/qwen35_hybrid.py run OUTPUT --modes fleet \
+  --reference OUTPUT/results/NATIVE_ATTEMPT/correctness.json
+python benchmarks/qwen35_hybrid.py compare OUTPUT --modes native fleet
+```
+
+Use the native attempt from `native-latest.json` as the reference. The Fleet
+run requires native parity before timing. Comparison checks equal native/Fleet
+server options and agreement with the prepared pool capacity. The optional
+two-arm comparison reports no base-only ratio or adapter-effect validation.
+The runtime policy stays unchanged, isolating rank from dispatch changes.
 
 The first pilot (23457086, completed in 14m47s) used the dense profile on the
 existing projections and RowExpand on the new GDN projections. Its median

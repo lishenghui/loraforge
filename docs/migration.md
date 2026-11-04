@@ -288,4 +288,10 @@ are exact. The shape/batch-bounded B profile improves old-Fleet throughput by
 single-run synthetic-pilot gains, not 1.3x or trained-adapter quality equivalence.
 The implementation, limits and raw evidence are in [qwen35.md](qwen35.md) and
 [qwen35-rowtiles-mi250.json](qwen35-rowtiles-mi250.json). Current CPU checks total
-122; the original dense dispatch and hybrid native-A/prefill reductions remain.
+129; the original dense dispatch and hybrid native-A/prefill reductions remain.
+
+The Qwen3.5 harness also prepares compact fixed rank-4/rank-8 synthetic fixtures.
+Both engines now read the prepared pool capacity instead of using a hardcoded
+rank-64 pool, and the CPU comparison checks matching server options. These
+fixtures isolate small-rank execution; they do not validate trained compression
+quality. See [the tiny-rank protocol](qwen35.md).
