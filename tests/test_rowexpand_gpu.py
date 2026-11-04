@@ -1,6 +1,7 @@
 # SPDX-License-Identifier: Apache-2.0
 """All Fleet projections, phases, unsupported ranks and real SGLang graph routing."""
 
+from itertools import accumulate
 from types import SimpleNamespace
 
 import pytest
@@ -13,7 +14,7 @@ pytestmark = [
 ]
 
 from loraforge.integrations._sglang_fleet import create_backend  # noqa: E402
-from loraforge.runtime.retained import RetainedLayout  # noqa: E402
+from loraforge.runtime.retained import RetainedLayout, packed_segment_capacity  # noqa: E402
 
 
 @pytest.fixture(
@@ -273,6 +274,135 @@ def test_four_slice_unequal_widths_and_strided_output():
                 zz.float() @ b[slot, start:end, :k].float().T
             ).bfloat16()
     torch.testing.assert_close(output, expected, rtol=0.03, atol=0.003)
+
+
+@pytest.mark.parametrize("tokens", [1, 8, 33])
+@pytest.mark.parametrize(
+    "slices,width,hidden",
+    [(1, 1024, 2048), (2, 7168, 1024), (3, 5120, 1024), (4, 8192, 1024)],
+)
+def test_bounded_launches_are_bitwise_equal_after_graph_route_changes(
+    tokens, slices, width, hidden
+):
+    from loraforge.integrations._sglang_rank_aware import shrink
+    from loraforge.ops.rowexpand import row_expand
+
+    torch.manual_seed(612)
+    kw = dict(device="cuda", dtype=torch.bfloat16)
+    a = torch.randn(4, slices * 64, hidden, **kw) / 20
+    b = torch.randn(4, width, 64, **kw) / 20
+    catalog = {
+        str(k): {"model.layers.0.proj.lora_A.weight": k} for k in (3, 16, 32, 64)
+    }
+    layout = RetainedLayout(a, b, "proj", 0, catalog)
+    raw_a = a.clone()
+    for slot, k in enumerate((0, 3, 32, 64)):
+        layout.load(str(k) if k else None, slot, 64 if k else 0)
+    x = torch.randn(tokens, hidden, **kw) / 10
+    base = torch.randn(tokens, width, **kw) / 10
+    info = SimpleNamespace(
+        use_cuda_graph=True,
+        max_len=16,
+        num_segments=0,
+        weight_indices=torch.zeros(128, device="cuda", dtype=torch.int32),
+        seg_indptr=torch.zeros(129, device="cuda", dtype=torch.int32),
+        permutation=torch.zeros(tokens, device="cuda", dtype=torch.int32),
+        lora_ranks=layout.rank,
+        scalings=torch.tensor([0.0, 0.75, 1.25, 0.5], device="cuda"),
+    )
+    nseg = torch.zeros((), device="cuda", dtype=torch.int32)
+    widths = [width // slices] * slices
+    widths[-1] += width - sum(widths)
+    offsets = torch.tensor(
+        [0] + list(accumulate(widths)),
+        device="cuda",
+        dtype=torch.int32,
+    )
+
+    def prepare(pattern):
+        routes = (pattern * tokens)[:tokens]
+        permutation, indptr, slots = [], [0], []
+        for slot in range(4):
+            rows = [i for i, s in enumerate(routes) if s == slot]
+            for start in range(0, len(rows), 16):
+                permutation.extend(rows[start : start + 16])
+                indptr.append(len(permutation))
+                slots.append(slot)
+        info.weight_indices.zero_()
+        info.weight_indices[: len(slots)].copy_(
+            torch.tensor(slots, device="cuda", dtype=torch.int32)
+        )
+        info.seg_indptr.fill_(tokens)
+        info.seg_indptr[: len(indptr)].copy_(
+            torch.tensor(indptr, device="cuda", dtype=torch.int32)
+        )
+        info.permutation.copy_(
+            torch.tensor(permutation, device="cuda", dtype=torch.int32)
+        )
+        nseg.fill_(len(slots))
+
+    def compute(bounded):
+        z = shrink(x, a, info, slices, limit_segments=bounded)
+        return row_expand(
+            z,
+            layout.store,
+            layout.boff,
+            layout.bucket,
+            base.clone(),
+            info.seg_indptr,
+            info.weight_indices,
+            info.permutation,
+            layout.rank,
+            info.scalings,
+            offsets,
+            nseg,
+            64,
+            blocks=(
+                min(
+                    880, packed_segment_capacity(tokens, 4, 16) * ((width + 255) // 256)
+                )
+                if bounded
+                else 880
+            ),
+        )
+
+    prepare([1])
+    torch.testing.assert_close(compute(True), compute(False), rtol=0, atol=0)
+    graph = torch.cuda.CUDAGraph()
+    with torch.cuda.graph(graph):
+        actual, reference = compute(True), compute(False)
+    pointers = [
+        t.data_ptr()
+        for t in (
+            info.weight_indices,
+            info.seg_indptr,
+            info.permutation,
+            layout.rank,
+            nseg,
+        )
+    ]
+    for k, routes in [(16, [0, 1, 2, 3]), (64, [1]), (3, [3, 2, 1, 0]), (0, [0])]:
+        a[1].copy_(raw_a[1])
+        layout.load(str(k) if k else None, 1, 64 if k else 0)
+        prepare(routes)
+        graph.replay()
+        torch.cuda.synchronize()
+        torch.testing.assert_close(actual, reference, rtol=0, atol=0)
+    if tokens == 33:
+        prepare([0] * 17 + [1] + [2] + [3] * 14)
+        graph.replay()
+        torch.cuda.synchronize()
+        torch.testing.assert_close(actual, reference, rtol=0, atol=0)
+    assert pointers == [
+        t.data_ptr()
+        for t in (
+            info.weight_indices,
+            info.seg_indptr,
+            info.permutation,
+            layout.rank,
+            nseg,
+        )
+    ]
 
 
 @pytest.mark.parametrize("rank", [1, 2, 4, 8, 16, 32, 64])
