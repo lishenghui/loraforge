@@ -6,7 +6,8 @@ LoRAForge is being developed as a reusable library from the
 [probe research repository](https://github.com/lishenghui/probe).
 The library provides GPU FlashTSQR and tensor-level spectral LoRA compression.
 It includes PEFT adapter I/O and compact export for linear LoRA and rsLoRA,
-and is in early development. Serving integrations remain planned; see
+and is in early development. An opt-in SGLang 0.5.22 decode integration is included; see
+[the integration contract](docs/sglang.md) and
 [the migration plan](docs/migration.md).
 
 ## Install from source

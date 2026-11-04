@@ -135,3 +135,115 @@ staging, per-load completion events, explicit read leases and PyTorch stream
 recording. Reload publishes freshly allocated compact factors rather than
 mutating old addresses. GPU graph replay and SGLang/vLLM registration remain
 outside the supported scope. Validation results are recorded in runtime docs.
+
+### Decode GEMV and SGLang integration (2026-11-03)
+
+Imported mathematical kernels: `tools/llm_fleet/sglang_plugin/probe_sglang_gemv/kernels.py`
+from probe commit `b217b17fac6cd6105cd3f04865962fb51d8a8ba3`, authored by Shenghui Li
+(file history commit `5ab76d171374d313ec7594dc7c24acfd5ccce796`). The working file is
+unchanged from this pinned revision. Source checksum is recorded in
+[gemv-source-hashes.json](gemv-source-hashes.json). The project-owned implementation
+is migrated under Apache-2.0 with retained authorship/source notices.
+
+Destination: `ops/_gemv_kernels.py` contains the three extracted shrink,
+reduce and expand kernels. `ops/gemv.py` supplies adapted lazy public wrappers.
+`integrations/sglang.py` is new orchestration implementing the source backend's
+decode/native-prefill boundary through SGLang's installed public method contract.
+No upstream SGLang implementation or source experiment/result trees are copied.
+
+Intentional differences from the source: remove import-time Torch/Triton loading
+from public modules, remove environment-driven tuning/global rank buckets, use
+one explicit flat split-K schedule, initialize shrink output to zero, validate
+shape/dtype/device contracts, and reject autograd. Kernel math, actual-rank A
+slice packing, max-rank B stride, FP32 accumulation and intermediate/delta rounding
+are retained. Compile specialization decorators and symbol names are simplified.
+Native SGLang buffers and loader/scheduler own fixed addresses and lifetimes;
+LoRAForge's independent runtime pools are not substituted into the framework.
+
+The inspected LUMI SGLang checkout reports version 0.5.22 and source commit
+`baa9befa381511cd4d56f83980951e5a45fffc6d`. The integration is version-gated and
+conflict-aware, opt-in per worker, and retains native eager prefill/pruned paths.
+Validation scope and commands live in [sglang.md](sglang.md).
+
+### BF16 decode numerical correction
+
+The original project-owned split-K/tree GEMV reduction failed full-model BF16
+parity despite passing operator tolerances. LoRAForge now implements separate
+BF16 routed-token matrix-dot kernels: shrink uses sequential K=256 blocks and
+16 output columns; expand uses sequential rank blocks of 16 and 64 output
+columns. Each uses FP32 accumulation and BF16 intermediate/delta rounding.
+These new kernels were implemented here against the observed SGLang 0.5.22
+default reduction contract, retaining native slot layout but no framework
+dependency. FP32/FP16 retain the extracted GEMV kernels. This is a correctness
+compatibility path; performance equivalence and tuned SGLang configurations
+are not claimed. Hardware/full-model results are tracked in sglang.md.
+
+### Probe rank-aware policy extraction (2026-11-03)
+
+`integrations/_sglang_rank_aware.py` extracts the non-split segmented shrink
+kernel from public probe commit `5fd6ae060d106066b306959f9a34b726a281ef4c`,
+`tools/llm_fleet/sglang_plugin/probe_sglang_gemv/rank_aware_shrink.py`.
+The source identifies itself as derived from SGLang 0.5.22's
+`sglang/kernels/ops/lora/dense/chunked_sgmv_shrink.py` (Apache-2.0), with Shenghui
+Li's actual-rank column-block early exit. This extraction retains that
+attribution and algorithm; it renames the kernel, omits the custom cache decorator
+and split-K/prefill tuning, and adds a narrow wrapper using installed native
+launch configuration. Native expand remains native. Explicit native split-K
+settings delegate back to native shrink. No Qwen-specific table, global config
+patch or Fleet adapter shadow pool is installed. The previous statement that
+no upstream implementation was copied describes the original GEMV extraction;
+this separately attributed extraction does include a derived SGLang kernel.
+
+Pinned probe source SHA-256: `0af480cc8ead0a7c40292dee1d20551232a6228c3a189758051f9c92bd56a92a`.
+
+### Isolated Fleet gate/up expansion experiment
+
+The benchmark-only `sglang_gate_expand_experiment.py` follows the compact B
+layout and device metadata design in public probe commit
+`5fd6ae060d106066b306959f9a34b726a281ef4c`,
+`tools/llm_fleet/sglang_plugin/probe_sglang_gemv/fast.py` and `fast_decode.cu`.
+Its Python wrapper was implemented here with fixed per-slot regions, only
+for gate/up, refreshed from native B buffers after native loading. It does
+not import the per-checkpoint manifest cache, Qwen tuning tables or prefill
+replacement. The explicitly supplied compiled HIP library remains external;
+its hash is recorded by the service pilot. No native source is copied into
+the installed package by this experiment. GPU/serving validation is recorded
+separately in the SGLang guide.
+
+### Complete Fleet / RowExpand extraction
+
+The opt-in `fleet` SGLang policy extracts the measured retained-rank path from
+probe commit `5fd6ae060d106066b306959f9a34b726a281ef4c`, under
+`tools/llm_fleet/sglang_plugin/probe_sglang_gemv/`. Attribution: Shenghui Li,
+Apache-2.0. The source ledger is:
+
+| Source | SHA-256 | Destination |
+| --- | --- | --- |
+| `fast_decode.cu` | `e26ca56e16945362cb9c96a2be6f01de78920e42eee63908161deeb226a87260` | `ops/csrc/rowexpand.cu` |
+| `fast.py` | `bd6a953ac82782dcdfafb05e4c4351ccc7f32109e0bf4cc19599b78312dfb1bc` | `runtime/retained.py`, `integrations/_sglang_fleet.py` |
+| `mi250x_qwen50_fleet_dispatch.json` | `245318e64963720c2ba13034598a1aa815c7320aee52438519082b67bb5b63da` | `integrations/data/mi250x_fleet_dispatch.json` (byte-identical) |
+| `stable_prefill.py` | `5cb43562ab9e53648ad024b31ed7bc9f8d68c2ce6cbb40b3b866f0b507e8d6a0` | `integrations/_sglang_stable_prefill.py` |
+
+Native arithmetic and the frozen profile are retained: table-selected decode A,
+all supported decode B ranks, prefill B only through rank 16, rank-aware native
+fallback elsewhere. The B fields in the historical tuning table do not override
+this measured profile. The native padded pool remains resident; compact B
+regions belong to known checkpoints, with per-slot device ranks and offsets.
+Fused A slices are repacked after native loading using effective module ranks.
+
+Intentional maintenance changes: package and lazily compile the extension;
+separate runtime layout from framework integration; use weak pointer registries
+and pool-owned entries; make the adapter catalog explicit; validate padded
+headers and nonzero tails before execution; reject unknown reloads before native
+mutation; add same-device/shape/dtype/stride guards and autograd rejection;
+separate launch statements for PyTorch HIPify parsing; replace probe environment
+names and remove implicit stable-prefill enablement. Qwen stable prefill remains
+an explicit, narrowly guarded hook; it is not enabled for Llama or by default.
+The frozen dispatch is currently gated to gfx90a. This does not claim CUDA Fleet
+validation, mixed-attention extensions, speculative/MoE/TP support or performance
+portability. Other exploratory probe backends are not part of this measured path.
+
+`adapters/sglang.py` is new integration glue: it explicitly pads compact PEFT
+exports, folds per-module scaling into BF16 B and publishes true module ranks.
+This is a recorded format/scaling conversion, not another compression algorithm.
+The conversion can introduce BF16 rounding and requires corresponding validation.

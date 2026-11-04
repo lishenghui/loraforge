@@ -1,0 +1,6 @@
+{
+  "repository": "https://github.com/lishenghui/probe",
+  "commit": "b217b17fac6cd6105cd3f04865962fb51d8a8ba3",
+  "source_path": "tools/llm_fleet/sglang_plugin/probe_sglang_gemv/kernels.py",
+  "sha256": "0fa8b7e22185586f53769a4b86f8cf9fd41f3218b14850d59e1447e886b0120e"
+}

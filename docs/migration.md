@@ -126,6 +126,56 @@ eviction/lifetime, byte-limit rejection and exception release.
 Fixed-address pools, graph replay, serving kernels, SGLang/vLLM and NVIDIA CUDA
 validation remain pending.
 
+## Decode operators and SGLang bridge — 2026-11-03
+
+Stage 5 now has extracted split-K GEMV shrink/reduce/expand operators and an
+opt-in SGLang 0.5.22 decode backend. It consumes native fixed-address padded
+buffers and device rank/scale/route metadata; it does not replace SGLang's
+scheduler or connect a competing pool. Eager prefill/pruned paths remain native.
+Source checksums, authorship and intentional changes are in provenance.
+
+Validation includes CPU registration/version/conflict contracts and isolated
+installed-wheel plugin discovery without framework imports. LUMI job `23425475`
+completed successfully: all 36 GPU cases passed, including raw numerics,
+fixed-address graph replay with updated occupants/ranks/routes, real SGLang
+batch preparation, dense projection methods and inherited native eager prefill.
+The environment was MI250X (gfx90a), Python 3.12.3, SGLang 0.5.22 at the recorded
+source revision, PyTorch 2.11.0+rocm7.2, Triton 3.6.0. Pytest took 49.11 seconds;
+Slurm elapsed time was 61 seconds. Local CPU validation passed 85 tests.
+Wheel/sdist and wheel-from-sdist builds, isolated-wheel lazy imports/plugin
+metadata and fresh-process native SGLang plugin discovery passed.
+The later full-model validation below covers native paging and loading in a
+limited configuration. Compact serving storage, prefill graphs, TP/MoE and
+performance benchmarking remain separate work.
+
+### Full-model protocol correction
+
+Job `23426358` reached real Llama-3.1-8B inference and passed two cycles of ten
+single-request cases. It stopped in native eager before custom execution because
+the original single-versus-two-request-batch assertion observed a 0.0572664
+logprob difference, exceeding 0.05. This is retained as a failed control run.
+Protocol version 2 reports cross-shape drift diagnostically, checks repeatability
+within single and mixed shapes, and compares backends at matching shapes with
+the unchanged 0.05 threshold. Regression checks retain rejection of above-limit
+matched-backend differences and reject stale protocols/nonfinite values. The
+updated CPU suite passed 91 checks. Rerun `23430057` uses a separate directory
+and the same cached inputs on one small-g GCD (40GB host memory, 20 minutes).
+Rerun `23430057` completed all four modes with real rank-changing slot reuse,
+stable addresses and eager/graph execution. Final matched-shape comparison
+failed: token IDs all matched, but native/custom logprob drift reached
+0.08525431156158447 > 0.05. Native eager/graph, custom eager/graph and base-only
+comparisons were exact. Isolated diagnostic job `23430621` completed: native-A/custom-B and
+custom-A/native-B still differed by 0.0617663 and 0.0992774 respectively, with
+identical generated tokens. A saved real shrink input demonstrates an FP32
+reduction-order difference crossing a BF16 rounding midpoint; native matches
+the rounded FP64 reference for that element. Replacing either operation alone
+was insufficient. BF16 now uses sequential matrix-dot reductions and explicit
+matrix-shaped store pointers. LUMI job `23431819` passed all 39 GPU checks and
+all four full-model service modes. The final CPU comparison passed with exact
+token IDs and maximum logprob difference **0.0** at matching batch shapes.
+Real rank-changing slot reuse, fixed addresses and eager/graph custom execution
+were observed. Scope and limitations are recorded in [sglang.md](sglang.md).
+
 ## NVIDIA CUDA validation — 2026-11-03
 
 Fixed the wide FlashTSQR kernels to check the actual per-block device shared
@@ -148,3 +198,52 @@ policy. Full/wide two-device QR guards, second-GPU LoRA reconstruction and
 per-device GPU residency tests all executed and passed; the compression example
 also succeeded. See [the NVIDIA guide](nvidia.md) for commands and scope.
 Dual-H100 and distributed execution remain unverified.
+
+## Isolated SGLang speed candidates
+
+The HIP-A/native-B service pilot (23438767) measured 1.1101x–1.1185x
+end-to-end speedup on one MI250X GCD. Selective gate/up HIP-B follow-up
+23439944 completed in 15m27s and measured 1.1169x–1.1233x. Cross-job
+incremental latency savings were below 1%, while gate shadows added 224 MiB.
+With a uniformly increased 256-token quality allowance, the 32-case medical
+pilot scored 15/32 native versus 14/32 candidate; one candidate answer looped
+until truncation. The small sample and changed allowance do not isolate the
+effect of the B optimization. These remain explicit benchmark experiments,
+not enabled library policies or quality certifications. Full measurements,
+numerical differences and limitations are in [sglang.md](sglang.md).
+
+## Complete retained-rank path extraction
+
+The optional `fleet` SGLang policy now packages RowExpand and direct shrink,
+per-module rank/A packing, checkpoint-compact B regions, the frozen MI250X
+decode dispatch, low-rank prefill, unsupported-rank fallback, loader updates,
+and graph metadata. The optional Qwen stable-prefill hook and a compact-PEFT to
+SGLang export bridge are also extracted. See [RowExpand](rowexpand.md) for the
+component checklist and limits. Job 23440720 passed 33 GPU checks, including
+21 exact old/new kernel comparisons. The earlier partial-path speedups do not
+validate this packaged path; its separate full-model result is recorded below.
+
+Full-model job 23440815 exposed a fused-projection keyword interface mismatch
+after native completed. QKV and gate/up now preserve SGLang's parameter names;
+integration tests exercise public keyword calls rather than private helpers.
+Retry 23441471 passed all 33 GPU regressions and completed both full-model modes
+in 15m58s. CPU analysis verified trace IDs and custom prefill/decode execution.
+The original-adapter batch-1/2 pilot measured 1.1126x–1.1251x versus native;
+medical quality was 15/32 native versus 14/32 Fleet, with one repeated-output
+truncation loss. Functional execution is verified in this scope, not native
+parity or quality equivalence. The failed attempt is retained separately.
+
+The compressed Qwen3 workload is now exercised in jobs 23451046 and 23452454:
+50 real retained-rank adapters, 144 layouts, 150 exact single-request eager/graph
+checks and three mixed batches. The repeated single-request records match
+exactly; 23451046 also matches the archived probe records. Fixed-work serving
+measured 1.1685x at offered rate 16 and 1.2012x–1.2207x at rate 32 against the
+same compressed native reference. That native job ended in cleanup `TIMEOUT`
+after its complete checks and timing points were saved; it is not reported as a
+clean completed allocation. These single-seed points do not certify task quality.
+
+An experimental eager-prefill empty-rank dispatch passed 45 GPU checks and exact
+full-model comparisons in job 23452964, but measured 0.9922x the frozen control.
+It remains disabled by default. The matched base-only job 23453345 and three
+sampled GPU windows now quantify the remaining headroom; 1.3x has not been
+demonstrated. See [the measurements and limitations](rowexpand.md).

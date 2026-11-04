@@ -9,6 +9,7 @@ from importlib import metadata, resources
 import loraforge
 import loraforge.adapters
 import loraforge.compression
+import loraforge.integrations.sglang
 import loraforge.ops
 import loraforge.runtime
 
@@ -16,8 +17,19 @@ import loraforge.runtime
 def test_distribution_metadata_and_package_data():
     assert loraforge.__version__ == metadata.version("loraforge")
     assert resources.files("loraforge").joinpath("py.typed").is_file()
+    assert (
+        resources.files("loraforge.integrations")
+        .joinpath("data/mi250x_fleet_dispatch.json")
+        .is_file()
+    )
     native = resources.files("loraforge.ops").joinpath("csrc")
-    for name in ("bindings.cpp", "tsqr_full.cu", "tsqr_wide.cu", "jacobi_eigh.cu"):
+    for name in (
+        "bindings.cpp",
+        "tsqr_full.cu",
+        "tsqr_wide.cu",
+        "jacobi_eigh.cu",
+        "rowexpand.cu",
+    ):
         assert native.joinpath(name).is_file()
 
 
@@ -39,7 +51,12 @@ import loraforge
 import loraforge.adapters
 import loraforge.ops
 import loraforge.runtime
+import loraforge.integrations.sglang
 import loraforge.compression
+import loraforge.ops.rowexpand
+import loraforge.runtime.retained
+import loraforge.adapters.sglang
+import loraforge.integrations._sglang_fleet
 print(json.dumps({'version': loraforge.__version__}))
 """
     result = subprocess.run(
