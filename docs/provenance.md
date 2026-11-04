@@ -258,3 +258,9 @@ portability. Other exploratory probe backends are not part of this measured path
 exports, folds per-module scaling into BF16 B and publishes true module ranks.
 This is a recorded format/scaling conversion, not another compression algorithm.
 The conversion can introduce BF16 rounding and requires corresponding validation.
+
+The Qwen3.5 bounded-grid experiment used SGLang 0.5.22's sorted adapter groups
+and fixed-size chunk contract. Its capacity bound and tests were new LoRAForge
+code; no new upstream kernel was copied. Although numerically unchanged, it
+regressed full-model service throughput and was reverted. It is recorded as
+a rejected experiment in the Qwen3.5 guide, not an enabled optimization.

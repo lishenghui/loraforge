@@ -1,0 +1,989 @@
+{
+  "schema_version": 1,
+  "model": "Qwen/Qwen3.5-0.8B",
+  "model_revision": "2fc06364715b967f1860aea9cf38778875588b17",
+  "baseline_evidence": "qwen35-mi250.json",
+  "hardware": "one MI250X gfx90a GCD",
+  "torch": "2.11.0+rocm7.2_lumi_aif_20260929120822",
+  "hip": "7.2.53211",
+  "sglang": "0.5.22 with recorded source files",
+  "framework_sha256": {
+    "srt/models/qwen3_5.py": "e3ced2f65d5fb8afa839c6550ab8f38f9b0d659a01c41d99516496438a6b2439",
+    "srt/lora/lora.py": "368221bec72a8c75e900e46b76fd80c6c15a1adf929b9e069684c159c89bacee",
+    "srt/lora/lora_manager.py": "e24f6bbffd0b844b509f568b718c178bbccd890dfcf2d571c4b24bf22d14cf73",
+    "srt/lora/layers.py": "ac84622c5712e8b75d56767f6984809c9ed8263ab9e1299ec33e59ee9baa5bbb",
+    "srt/lora/mem_pool.py": "92f50dbee269322127112bbc9567df91f7d7fa93ac62ee418a16e5020e24169f",
+    "srt/lora/utils.py": "2b198d405a427542f43b04a9281d656a93d9b323f23951b8b8245cbfa9f57fc4",
+    "srt/lora/backend/chunked_backend.py": "765e4f6d3f0cd6608ff40a3ae5c5fa3b9325fa7b40d3938740642c519d56af06"
+  },
+  "profile": {
+    "job": 23459047,
+    "scope": "Each trace is a 12-forward sample including prefill. Kernel-duration sums are not end-to-end throughput. Projection attribution is inferred from verified serial layer order, requiring exactly 114 shrink kernels per decode span.",
+    "samples": [
+      {
+        "trace": "base-23459047/c1/qwen35-base-c1-TP-0.trace.json.gz",
+        "batch_histogram": [
+          {
+            "mode": "DECODE",
+            "bs": 1,
+            "tokens": 1,
+            "count": 11
+          },
+          {
+            "mode": "EXTEND",
+            "bs": 1,
+            "tokens": 128,
+            "count": 1
+          }
+        ],
+        "decode_kernel_costs": [
+          {
+            "phase": "DECODE",
+            "category": "GDN_state_conv",
+            "count": 396,
+            "sum_us": 3675.8069999999975
+          },
+          {
+            "phase": "DECODE",
+            "category": "dense_gemm",
+            "count": 1331,
+            "sum_us": 37030.48399999997
+          },
+          {
+            "phase": "DECODE",
+            "category": "norm_position_activation",
+            "count": 1067,
+            "sum_us": 6099.476000000002
+          },
+          {
+            "phase": "DECODE",
+            "category": "unknown_other",
+            "count": 1650,
+            "sum_us": 6433.962999999971
+          }
+        ]
+      },
+      {
+        "trace": "base-23459047/c32/qwen35-base-c32-TP-0.trace.json.gz",
+        "batch_histogram": [
+          {
+            "mode": "DECODE",
+            "bs": 32,
+            "tokens": 32,
+            "count": 8
+          },
+          {
+            "mode": "EXTEND",
+            "bs": 8,
+            "tokens": 1024,
+            "count": 4
+          }
+        ],
+        "decode_kernel_costs": [
+          {
+            "phase": "DECODE",
+            "category": "GDN_state_conv",
+            "count": 288,
+            "sum_us": 11979.218
+          },
+          {
+            "phase": "DECODE",
+            "category": "dense_gemm",
+            "count": 968,
+            "sum_us": 29926.110000000044
+          },
+          {
+            "phase": "DECODE",
+            "category": "norm_position_activation",
+            "count": 776,
+            "sum_us": 4310.167999999998
+          },
+          {
+            "phase": "DECODE",
+            "category": "unknown_other",
+            "count": 1200,
+            "sum_us": 5631.829999999993
+          }
+        ]
+      },
+      {
+        "trace": "base-23459047/c8/qwen35-base-c8-TP-0.trace.json.gz",
+        "batch_histogram": [
+          {
+            "mode": "DECODE",
+            "bs": 8,
+            "tokens": 8,
+            "count": 11
+          },
+          {
+            "mode": "EXTEND",
+            "bs": 8,
+            "tokens": 1024,
+            "count": 1
+          }
+        ],
+        "decode_kernel_costs": [
+          {
+            "phase": "DECODE",
+            "category": "GDN_state_conv",
+            "count": 396,
+            "sum_us": 4806.861000000003
+          },
+          {
+            "phase": "DECODE",
+            "category": "dense_gemm",
+            "count": 1331,
+            "sum_us": 39818.99200000001
+          },
+          {
+            "phase": "DECODE",
+            "category": "norm_position_activation",
+            "count": 1067,
+            "sum_us": 6029.390000000018
+          },
+          {
+            "phase": "DECODE",
+            "category": "unknown_other",
+            "count": 1650,
+            "sum_us": 6667.417999999973
+          }
+        ]
+      },
+      {
+        "trace": "fleet-23459047/c1/qwen35-fleet-c1-TP-0.trace.json.gz",
+        "batch_histogram": [
+          {
+            "mode": "DECODE",
+            "bs": 1,
+            "tokens": 1,
+            "count": 11
+          },
+          {
+            "mode": "EXTEND",
+            "bs": 1,
+            "tokens": 128,
+            "count": 1
+          }
+        ],
+        "decode_kernel_costs": [
+          {
+            "phase": "DECODE",
+            "category": "GDN_state_conv",
+            "count": 396,
+            "sum_us": 3775.1749999999975
+          },
+          {
+            "phase": "DECODE",
+            "category": "dense_gemm",
+            "count": 1331,
+            "sum_us": 37497.09099999998
+          },
+          {
+            "phase": "DECODE",
+            "category": "lora_A",
+            "count": 1254,
+            "sum_us": 14856.38099999998
+          },
+          {
+            "phase": "DECODE",
+            "category": "lora_B_native",
+            "count": 198,
+            "sum_us": 1451.4999999999993
+          },
+          {
+            "phase": "DECODE",
+            "category": "lora_B_rowexpand",
+            "count": 1056,
+            "sum_us": 8182.241999999994
+          },
+          {
+            "phase": "DECODE",
+            "category": "norm_position_activation",
+            "count": 1067,
+            "sum_us": 6939.507000000013
+          },
+          {
+            "phase": "DECODE",
+            "category": "unknown_other",
+            "count": 1650,
+            "sum_us": 6586.91399999998
+          }
+        ]
+      },
+      {
+        "trace": "fleet-23459047/c32/qwen35-fleet-c32-TP-0.trace.json.gz",
+        "batch_histogram": [
+          {
+            "mode": "DECODE",
+            "bs": 32,
+            "tokens": 32,
+            "count": 8
+          },
+          {
+            "mode": "EXTEND",
+            "bs": 8,
+            "tokens": 1024,
+            "count": 4
+          }
+        ],
+        "decode_kernel_costs": [
+          {
+            "phase": "DECODE",
+            "category": "GDN_state_conv",
+            "count": 288,
+            "sum_us": 11661.948999999995
+          },
+          {
+            "phase": "DECODE",
+            "category": "dense_gemm",
+            "count": 968,
+            "sum_us": 31524.408000000043
+          },
+          {
+            "phase": "DECODE",
+            "category": "lora_A",
+            "count": 912,
+            "sum_us": 10849.944000000018
+          },
+          {
+            "phase": "DECODE",
+            "category": "lora_B_native",
+            "count": 144,
+            "sum_us": 1009.7910000000002
+          },
+          {
+            "phase": "DECODE",
+            "category": "lora_B_rowexpand",
+            "count": 768,
+            "sum_us": 11192.981999999995
+          },
+          {
+            "phase": "DECODE",
+            "category": "norm_position_activation",
+            "count": 776,
+            "sum_us": 4651.600000000003
+          },
+          {
+            "phase": "DECODE",
+            "category": "unknown_other",
+            "count": 1200,
+            "sum_us": 5661.118999999991
+          }
+        ]
+      },
+      {
+        "trace": "fleet-23459047/c8/qwen35-fleet-c8-TP-0.trace.json.gz",
+        "batch_histogram": [
+          {
+            "mode": "DECODE",
+            "bs": 8,
+            "tokens": 8,
+            "count": 11
+          },
+          {
+            "mode": "EXTEND",
+            "bs": 8,
+            "tokens": 1024,
+            "count": 1
+          }
+        ],
+        "decode_kernel_costs": [
+          {
+            "phase": "DECODE",
+            "category": "GDN_state_conv",
+            "count": 396,
+            "sum_us": 5160.474999999999
+          },
+          {
+            "phase": "DECODE",
+            "category": "dense_gemm",
+            "count": 1331,
+            "sum_us": 40911.20200000002
+          },
+          {
+            "phase": "DECODE",
+            "category": "lora_A",
+            "count": 1254,
+            "sum_us": 14938.807000000033
+          },
+          {
+            "phase": "DECODE",
+            "category": "lora_B_native",
+            "count": 198,
+            "sum_us": 1303.6560000000002
+          },
+          {
+            "phase": "DECODE",
+            "category": "lora_B_rowexpand",
+            "count": 1056,
+            "sum_us": 10421.640000000012
+          },
+          {
+            "phase": "DECODE",
+            "category": "norm_position_activation",
+            "count": 1067,
+            "sum_us": 6405.580000000004
+          },
+          {
+            "phase": "DECODE",
+            "category": "unknown_other",
+            "count": 1650,
+            "sum_us": 6643.054999999971
+          }
+        ]
+      },
+      {
+        "trace": "native-23459047/c1/qwen35-native-c1-TP-0.trace.json.gz",
+        "batch_histogram": [
+          {
+            "mode": "DECODE",
+            "bs": 1,
+            "tokens": 1,
+            "count": 11
+          },
+          {
+            "mode": "EXTEND",
+            "bs": 1,
+            "tokens": 128,
+            "count": 1
+          }
+        ],
+        "decode_kernel_costs": [
+          {
+            "phase": "DECODE",
+            "category": "GDN_state_conv",
+            "count": 396,
+            "sum_us": 3703.4969999999994
+          },
+          {
+            "phase": "DECODE",
+            "category": "dense_gemm",
+            "count": 1331,
+            "sum_us": 38102.84699999995
+          },
+          {
+            "phase": "DECODE",
+            "category": "lora_A",
+            "count": 1254,
+            "sum_us": 14563.259000000018
+          },
+          {
+            "phase": "DECODE",
+            "category": "lora_B_native",
+            "count": 1254,
+            "sum_us": 11412.80500000001
+          },
+          {
+            "phase": "DECODE",
+            "category": "norm_position_activation",
+            "count": 1067,
+            "sum_us": 6868.457999999999
+          },
+          {
+            "phase": "DECODE",
+            "category": "unknown_other",
+            "count": 1650,
+            "sum_us": 6669.6259999999775
+          }
+        ]
+      },
+      {
+        "trace": "native-23459047/c32/qwen35-native-c32-TP-0.trace.json.gz",
+        "batch_histogram": [
+          {
+            "mode": "DECODE",
+            "bs": 32,
+            "tokens": 32,
+            "count": 8
+          },
+          {
+            "mode": "EXTEND",
+            "bs": 8,
+            "tokens": 1024,
+            "count": 4
+          }
+        ],
+        "decode_kernel_costs": [
+          {
+            "phase": "DECODE",
+            "category": "GDN_state_conv",
+            "count": 288,
+            "sum_us": 11944.027999999997
+          },
+          {
+            "phase": "DECODE",
+            "category": "dense_gemm",
+            "count": 968,
+            "sum_us": 31457.23699999992
+          },
+          {
+            "phase": "DECODE",
+            "category": "lora_A",
+            "count": 912,
+            "sum_us": 10765.766000000003
+          },
+          {
+            "phase": "DECODE",
+            "category": "lora_B_native",
+            "count": 912,
+            "sum_us": 12504.821000000024
+          },
+          {
+            "phase": "DECODE",
+            "category": "norm_position_activation",
+            "count": 776,
+            "sum_us": 4923.924000000014
+          },
+          {
+            "phase": "DECODE",
+            "category": "unknown_other",
+            "count": 1200,
+            "sum_us": 5761.7589999999955
+          }
+        ]
+      },
+      {
+        "trace": "native-23459047/c8/qwen35-native-c8-TP-0.trace.json.gz",
+        "batch_histogram": [
+          {
+            "mode": "DECODE",
+            "bs": 8,
+            "tokens": 8,
+            "count": 11
+          },
+          {
+            "mode": "EXTEND",
+            "bs": 8,
+            "tokens": 1024,
+            "count": 1
+          }
+        ],
+        "decode_kernel_costs": [
+          {
+            "phase": "DECODE",
+            "category": "GDN_state_conv",
+            "count": 396,
+            "sum_us": 5053.422999999996
+          },
+          {
+            "phase": "DECODE",
+            "category": "dense_gemm",
+            "count": 1331,
+            "sum_us": 40806.05900000002
+          },
+          {
+            "phase": "DECODE",
+            "category": "lora_A",
+            "count": 1254,
+            "sum_us": 14902.61899999999
+          },
+          {
+            "phase": "DECODE",
+            "category": "lora_B_native",
+            "count": 1254,
+            "sum_us": 16141.361000000003
+          },
+          {
+            "phase": "DECODE",
+            "category": "norm_position_activation",
+            "count": 1067,
+            "sum_us": 6402.225000000005
+          },
+          {
+            "phase": "DECODE",
+            "category": "unknown_other",
+            "count": 1650,
+            "sum_us": 6740.040999999972
+          }
+        ]
+      }
+    ],
+    "projection_A": [
+      {
+        "trace": "fleet-23459047/c1/qwen35-fleet-c1-TP-0.trace.json.gz",
+        "decode_steps": 11,
+        "projection_A": {
+          "in_proj_qkvz": {
+            "count": 198,
+            "sum_us": 1734.5470000000005,
+            "us_per_step": 157.68609090909095,
+            "mean_us_per_call": 8.760338383838386
+          },
+          "in_proj_ba": {
+            "count": 198,
+            "sum_us": 1984.7819999999967,
+            "us_per_step": 180.43472727272697,
+            "mean_us_per_call": 10.024151515151498
+          },
+          "out_proj": {
+            "count": 198,
+            "sum_us": 2736.1589999999997,
+            "us_per_step": 248.74172727272725,
+            "mean_us_per_call": 13.818984848484847
+          },
+          "gate_up_proj": {
+            "count": 264,
+            "sum_us": 2337.8489999999997,
+            "us_per_step": 212.53172727272724,
+            "mean_us_per_call": 8.855488636363635
+          },
+          "down_proj": {
+            "count": 264,
+            "sum_us": 4604.761000000002,
+            "us_per_step": 418.6146363636366,
+            "mean_us_per_call": 17.442276515151523
+          },
+          "qkv_proj": {
+            "count": 66,
+            "sum_us": 611.3010000000003,
+            "us_per_step": 55.57281818181821,
+            "mean_us_per_call": 9.262136363636367
+          },
+          "o_proj": {
+            "count": 66,
+            "sum_us": 846.9820000000001,
+            "us_per_step": 76.99836363636365,
+            "mean_us_per_call": 12.833060606060608
+          }
+        },
+        "scope": "Projection attribution inferred from verified serial SGLang layer forward order, asserting exactly 114 A kernels per GPU model-forward span; not kernel-emitted projection labels."
+      },
+      {
+        "trace": "fleet-23459047/c32/qwen35-fleet-c32-TP-0.trace.json.gz",
+        "decode_steps": 8,
+        "projection_A": {
+          "in_proj_qkvz": {
+            "count": 144,
+            "sum_us": 1278.11,
+            "us_per_step": 159.76375,
+            "mean_us_per_call": 8.875763888888889
+          },
+          "in_proj_ba": {
+            "count": 144,
+            "sum_us": 1374.271999999999,
+            "us_per_step": 171.78399999999988,
+            "mean_us_per_call": 9.54355555555555
+          },
+          "out_proj": {
+            "count": 144,
+            "sum_us": 1904.1989999999992,
+            "us_per_step": 238.0248749999999,
+            "mean_us_per_call": 13.22360416666666
+          },
+          "gate_up_proj": {
+            "count": 192,
+            "sum_us": 1674.3889999999992,
+            "us_per_step": 209.2986249999999,
+            "mean_us_per_call": 8.720776041666662
+          },
+          "down_proj": {
+            "count": 192,
+            "sum_us": 3568.6560000000027,
+            "us_per_step": 446.08200000000033,
+            "mean_us_per_call": 18.586750000000013
+          },
+          "qkv_proj": {
+            "count": 48,
+            "sum_us": 452.2760000000001,
+            "us_per_step": 56.534500000000016,
+            "mean_us_per_call": 9.422416666666669
+          },
+          "o_proj": {
+            "count": 48,
+            "sum_us": 598.042,
+            "us_per_step": 74.75525,
+            "mean_us_per_call": 12.459208333333335
+          }
+        },
+        "scope": "Projection attribution inferred from verified serial SGLang layer forward order, asserting exactly 114 A kernels per GPU model-forward span; not kernel-emitted projection labels."
+      },
+      {
+        "trace": "fleet-23459047/c8/qwen35-fleet-c8-TP-0.trace.json.gz",
+        "decode_steps": 11,
+        "projection_A": {
+          "in_proj_qkvz": {
+            "count": 198,
+            "sum_us": 1853.2699999999988,
+            "us_per_step": 168.47909090909081,
+            "mean_us_per_call": 9.35994949494949
+          },
+          "in_proj_ba": {
+            "count": 198,
+            "sum_us": 1858.5529999999987,
+            "us_per_step": 168.95936363636352,
+            "mean_us_per_call": 9.386631313131307
+          },
+          "out_proj": {
+            "count": 198,
+            "sum_us": 2592.323000000001,
+            "us_per_step": 235.66572727272734,
+            "mean_us_per_call": 13.092540404040408
+          },
+          "gate_up_proj": {
+            "count": 264,
+            "sum_us": 2291.752999999999,
+            "us_per_step": 208.3411818181817,
+            "mean_us_per_call": 8.680882575757572
+          },
+          "down_proj": {
+            "count": 264,
+            "sum_us": 4889.256999999995,
+            "us_per_step": 444.47790909090867,
+            "mean_us_per_call": 18.51991287878786
+          },
+          "qkv_proj": {
+            "count": 66,
+            "sum_us": 629.2220000000001,
+            "us_per_step": 57.202000000000005,
+            "mean_us_per_call": 9.533666666666669
+          },
+          "o_proj": {
+            "count": 66,
+            "sum_us": 824.4290000000002,
+            "us_per_step": 74.94809090909092,
+            "mean_us_per_call": 12.491348484848487
+          }
+        },
+        "scope": "Projection attribution inferred from verified serial SGLang layer forward order, asserting exactly 114 A kernels per GPU model-forward span; not kernel-emitted projection labels."
+      }
+    ],
+    "archive_sha256": "b14489cde507aaf118147a73333f9805bbab39ea3deca1b5e0f3f611c08261b5"
+  },
+  "rejected_launch": {
+    "code_commit": "fdc5c5bb8d2a4e2b3f59bc2de7737135c65a820b",
+    "revert_commit": "bef1a59c764b7bf99d9d955334543cdd42a93666",
+    "job": 23459326,
+    "slurm_state": "COMPLETED",
+    "elapsed": "00:19:23",
+    "protocol": {
+      "order": [
+        "native",
+        "control",
+        "candidate"
+      ],
+      "requests_at_concurrency": {
+        "1": 96,
+        "8": 192,
+        "32": 384
+      },
+      "repeats": 3,
+      "prompt_tokens": 128,
+      "output_tokens": 64,
+      "warmup_requests": 32,
+      "concurrency": [
+        1,
+        8,
+        32
+      ],
+      "base_only_remeasured": false
+    },
+    "comparison": {
+      "job": "23459326",
+      "node": "nid005034",
+      "numerical_pass": true,
+      "performance": [
+        {
+          "concurrency": 1,
+          "medians": {
+            "native": 117.98218996997466,
+            "control": 120.06405088109798,
+            "candidate": 118.89629618810011
+          },
+          "candidate_over_native": 1.0077478322648366,
+          "candidate_over_control": 0.9902739022677627,
+          "control_over_native": 1.0176455523639045
+        },
+        {
+          "concurrency": 8,
+          "medians": {
+            "native": 771.3368218446824,
+            "control": 789.6539697282568,
+            "candidate": 779.3537592223263
+          },
+          "candidate_over_native": 1.0103935623849398,
+          "candidate_over_control": 0.9869560454315514,
+          "control_over_native": 1.0237472753339691
+        },
+        {
+          "concurrency": 32,
+          "medians": {
+            "native": 2094.946863444904,
+            "control": 2088.9671719768353,
+            "candidate": 2055.1031093954816
+          },
+          "candidate_over_native": 0.9809810192589306,
+          "candidate_over_control": 0.9837890881984003,
+          "control_over_native": 0.9971456596000551
+        }
+      ]
+    },
+    "candidate_control_tokens_logprobs_exactly_equal": true,
+    "numerics": {
+      "native": {
+        "cases": 20,
+        "same_token_cases": 20,
+        "same_tokens": true,
+        "max_common_prefix_logprob_difference": 0.0,
+        "numerical_pass": true
+      },
+      "control": {
+        "cases": 20,
+        "same_token_cases": 20,
+        "same_tokens": true,
+        "max_common_prefix_logprob_difference": 0.015964582562446594,
+        "numerical_pass": true
+      },
+      "candidate": {
+        "cases": 20,
+        "same_token_cases": 20,
+        "same_tokens": true,
+        "max_common_prefix_logprob_difference": 0.015964582562446594,
+        "numerical_pass": true
+      }
+    },
+    "raw_measurements": {
+      "native": [
+        {
+          "concurrency": 1,
+          "seconds": 52.05088833000627,
+          "requests": 96,
+          "output_tokens": 6144,
+          "tokens_per_second": 118.03833127777975,
+          "repeat": 0
+        },
+        {
+          "concurrency": 1,
+          "seconds": 52.2502019359963,
+          "requests": 96,
+          "output_tokens": 6144,
+          "tokens_per_second": 117.58806229162657,
+          "repeat": 1
+        },
+        {
+          "concurrency": 1,
+          "seconds": 52.075656517001335,
+          "requests": 96,
+          "output_tokens": 6144,
+          "tokens_per_second": 117.98218996997466,
+          "repeat": 2
+        },
+        {
+          "concurrency": 8,
+          "seconds": 15.930783610994695,
+          "requests": 192,
+          "output_tokens": 12288,
+          "tokens_per_second": 771.3368218446824,
+          "repeat": 0
+        },
+        {
+          "concurrency": 8,
+          "seconds": 15.928591213014442,
+          "requests": 192,
+          "output_tokens": 12288,
+          "tokens_per_second": 771.4429880001001,
+          "repeat": 1
+        },
+        {
+          "concurrency": 8,
+          "seconds": 15.985502830997575,
+          "requests": 192,
+          "output_tokens": 12288,
+          "tokens_per_second": 768.6964951876441,
+          "repeat": 2
+        },
+        {
+          "concurrency": 32,
+          "seconds": 11.731085131003056,
+          "requests": 384,
+          "output_tokens": 24576,
+          "tokens_per_second": 2094.946863444904,
+          "repeat": 0
+        },
+        {
+          "concurrency": 32,
+          "seconds": 11.729099454008974,
+          "requests": 384,
+          "output_tokens": 24576,
+          "tokens_per_second": 2095.3015273137607,
+          "repeat": 1
+        },
+        {
+          "concurrency": 32,
+          "seconds": 11.820285737980157,
+          "requests": 384,
+          "output_tokens": 24576,
+          "tokens_per_second": 2079.137555958908,
+          "repeat": 2
+        }
+      ],
+      "control": [
+        {
+          "concurrency": 1,
+          "seconds": 51.165975348994834,
+          "requests": 96,
+          "output_tokens": 6144,
+          "tokens_per_second": 120.07979830527555,
+          "repeat": 0
+        },
+        {
+          "concurrency": 1,
+          "seconds": 51.17268620300456,
+          "requests": 96,
+          "output_tokens": 6144,
+          "tokens_per_second": 120.06405088109798,
+          "repeat": 1
+        },
+        {
+          "concurrency": 1,
+          "seconds": 51.21793047201936,
+          "requests": 96,
+          "output_tokens": 6144,
+          "tokens_per_second": 119.95799016823808,
+          "repeat": 2
+        },
+        {
+          "concurrency": 8,
+          "seconds": 15.549764102994232,
+          "requests": 192,
+          "output_tokens": 12288,
+          "tokens_per_second": 790.2370684603407,
+          "repeat": 0
+        },
+        {
+          "concurrency": 8,
+          "seconds": 15.56124640800408,
+          "requests": 192,
+          "output_tokens": 12288,
+          "tokens_per_second": 789.6539697282568,
+          "repeat": 1
+        },
+        {
+          "concurrency": 8,
+          "seconds": 15.566896823991556,
+          "requests": 192,
+          "output_tokens": 12288,
+          "tokens_per_second": 789.367343982254,
+          "repeat": 2
+        },
+        {
+          "concurrency": 32,
+          "seconds": 11.768425435002428,
+          "requests": 384,
+          "output_tokens": 24576,
+          "tokens_per_second": 2088.2997590233645,
+          "repeat": 0
+        },
+        {
+          "concurrency": 32,
+          "seconds": 11.759778105973965,
+          "requests": 384,
+          "output_tokens": 24576,
+          "tokens_per_second": 2089.8353505084756,
+          "repeat": 1
+        },
+        {
+          "concurrency": 32,
+          "seconds": 11.764665491005871,
+          "requests": 384,
+          "output_tokens": 24576,
+          "tokens_per_second": 2088.9671719768353,
+          "repeat": 2
+        }
+      ],
+      "candidate": [
+        {
+          "concurrency": 1,
+          "seconds": 51.67528507599491,
+          "requests": 96,
+          "output_tokens": 6144,
+          "tokens_per_second": 118.89629618810011,
+          "repeat": 0
+        },
+        {
+          "concurrency": 1,
+          "seconds": 51.581125130003784,
+          "requests": 96,
+          "output_tokens": 6144,
+          "tokens_per_second": 119.11333815450546,
+          "repeat": 1
+        },
+        {
+          "concurrency": 1,
+          "seconds": 51.675340197980404,
+          "requests": 96,
+          "output_tokens": 6144,
+          "tokens_per_second": 118.8961693616508,
+          "repeat": 2
+        },
+        {
+          "concurrency": 8,
+          "seconds": 15.723993054998573,
+          "requests": 192,
+          "output_tokens": 12288,
+          "tokens_per_second": 781.4808844687012,
+          "repeat": 0
+        },
+        {
+          "concurrency": 8,
+          "seconds": 15.902712798007997,
+          "requests": 192,
+          "output_tokens": 12288,
+          "tokens_per_second": 772.6983538015738,
+          "repeat": 1
+        },
+        {
+          "concurrency": 8,
+          "seconds": 15.766909256024519,
+          "requests": 192,
+          "output_tokens": 12288,
+          "tokens_per_second": 779.3537592223263,
+          "repeat": 2
+        },
+        {
+          "concurrency": 32,
+          "seconds": 11.95852406998165,
+          "requests": 384,
+          "output_tokens": 24576,
+          "tokens_per_second": 2055.1031093954816,
+          "repeat": 0
+        },
+        {
+          "concurrency": 32,
+          "seconds": 12.090453594981227,
+          "requests": 384,
+          "output_tokens": 24576,
+          "tokens_per_second": 2032.6780800185652,
+          "repeat": 1
+        },
+        {
+          "concurrency": 32,
+          "seconds": 11.953203140001278,
+          "requests": 384,
+          "output_tokens": 24576,
+          "tokens_per_second": 2056.017931943,
+          "repeat": 2
+        }
+      ]
+    },
+    "validation": {
+      "cpu_tests": 120,
+      "numerical_gate": "Same token IDs in 20 cases; max logprob difference <= 0.05; request reset and mixed batch repeatability",
+      "gpu_tests_passed": 97,
+      "installed_wheel_cpu_tests_passed": 120
+    },
+    "source_sha256": {
+      "loraforge/integrations/_sglang_fleet.py": "1ced209f4c47323431f440f52506390821c6001a9ae2e24ae97f2eb0f6e72576",
+      "loraforge/integrations/_sglang_rank_aware.py": "db2b84bec76dff589d5cfaf7c9d12cfa1427b8735007ff1cf593d2885870ec7b",
+      "loraforge/runtime/retained.py": "0f8be3374178dc47321b434338870deae1b89e404b1760e9341368133d8d0cac",
+      "loraforge/ops/csrc/rowexpand.cu": "1ed6e4a1343e1d67bf50b36418861c859f006c4e82f0b6819cb0c5d7059ee47e"
+    },
+    "archive_sha256": "c8e3d33c17f7aa8125301c36b647a9a1812a626177332fe7cae05bd421279ce5",
+    "decision": "Rejected and reverted. Across C1/8/32 the candidate achieved 0.9903/0.9870/0.9838 of the previous Fleet throughput on the same card."
+  },
+  "limits": [
+    "Short single-node matched pilot, fixed order native/control/candidate; no randomized order or confidence interval across independent runs.",
+    "Synthetic nonzero adapters; no trained-adapter quality result.",
+    "Base-only was not remeasured in the launch trial.",
+    "Profile kernel sums and cache-warm operator timings are not service speedups."
+  ]
+}

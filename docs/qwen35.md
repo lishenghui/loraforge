@@ -96,6 +96,9 @@ validates repeated and mixed-adapter requests, warms each concurrency, and times
 each. Decode uses graphs; prefill is eager. Prefix caching is disabled. Model
 loading, compilation and conditioning are untimed. `compare OUTPUT` is CPU-only.
 Every attempt is retained; the latest pointer identifies the selected run.
+An optional `requests_at_concurrency` manifest mapping overrides the request
+count for each concurrency, allowing longer high-concurrency measurements
+without lengthening the serial point. Use identical counts in every arm.
 
 The numerical gate requires identical native/Fleet generated token IDs and at
 most 0.05 logprob difference along their common prefix. Fixed-address load audits,
@@ -146,11 +149,46 @@ are in [qwen35-mi250.json](qwen35-mi250.json). A final installer-selection guard
 also enables the hybrid policy for explicit installer calls; the measured
 workers already selected that same policy through the environment switch.
 
-A specific follow-up worth measuring is reuse of the shared qkv A product:
-the four-slice representation currently computes three identical A products
-for an HF qkv+z adapter. GDN b/a projection fusion is another candidate. Neither
-has a measured speedup here; reducing mathematical work alone does not predict
-full-model throughput.
+## Where the initial gain went
+
+Profiling job 23459047 sampled the accepted native/Fleet/base implementations
+at batch sizes 1, 8 and 32 on one MI250X GCD. Each separate 12-forward trace
+includes prefill; the following numbers select **decode GPU kernel durations**
+only and must not be read as end-to-end service latency:
+
+| Batch | Native A, ms/step | Fleet A, ms/step | Native B, ms/step | Fleet B, ms/step |
+| --- | ---: | ---: | ---: | ---: |
+| 1 | 1.324 | 1.351 | 1.037 | 0.876 |
+| 8 | 1.355 | 1.358 | 1.467 | 1.066 |
+| 32 | 1.346 | 1.356 | 1.563 | 1.525 |
+
+There are 114 A and 114 B calls per decode step. LoRA still accounts for about
+30–31% of Fleet's summed decode kernel time. Preserving native A reductions
+leaves that cost essentially unchanged; at batch 32, B alone saves very little.
+This explains the modest initial speedup more directly than assuming that all
+remaining time belongs to the base model. These samples include profiler
+overhead and do not predict the speed of an unprofiled optimization.
+
+The four-slice representation repeats the shared HF qkv A product three times,
+but the entire qkvz A projection accounts for only about 12% of A kernel time;
+deduplicating qkv alone can save less than that. Down-projection A takes about
+31–33%, and the two output-projection types together take about 23–24%. This
+projection breakdown is inferred from the verified serial layer order after
+checking exactly 114 A kernels in every decode span, not from explicit kernel
+projection labels. It motivates first removing wasted launch work across all
+projections. Shared-A reuse and small GDN b/a fusion remain possible follow-ups,
+without a measured speedup claim here.
+
+A bounded-launch experiment removed provably empty chunks using
+`G + floor((N - G) / 16)`, where `G = min(N, number_of_slots)`, and capped
+RowExpand's fixed 880-block grid at the corresponding output-tile bound.
+Job 23459326 passed 97 GPU tests and all 20 full-model numerical cases; the
+candidate's tokens and logprobs were exactly equal to the previous Fleet.
+However, matched service medians regressed by 0.97%, 1.30% and 1.62% at
+concurrency 1/8/32. The change was reverted. Fewer empty thread blocks did not
+translate into faster service; this is not an accepted optimization.
+The same-card timings, numerical checks, sampled kernel costs and source hashes
+are retained in [qwen35-optimization-mi250.json](qwen35-optimization-mi250.json).
 
 ## Sources
 
