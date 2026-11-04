@@ -306,3 +306,16 @@ and fixed-size chunk contract. Its capacity bound and tests were new LoRAForge
 code; no new upstream kernel was copied. Although numerically unchanged, it
 regressed full-model service throughput and was reverted. It is recorded as
 a rejected experiment in the Qwen3.5 guide, not an enabled optimization.
+
+### Qwen3.5 prefill and metadata reuse prototypes
+
+`benchmarks/qwen35_prefill_fused.py`, `qwen35_decode_silu.py` and
+`qwen35_metadata_cache.py` are new
+LoRAForge research implementations. They use SGLang 0.5.22's native sorted
+16-token segment/pool contracts and the attributed Fleet retained-rank layout;
+no additional upstream kernel is copied. The two-dot prefill implementation
+keeps BF16 intermediates; B-at-SiLU preserves the tested native BF16 activation
+rounding. The cache reuses only consecutive static decode metadata, scoped to
+Fleet TP1/no-overlap workers and non-DP execution. These benchmark helpers do
+not replace the installed backend. Their check programs and source comparison
+receipts are documented in `docs/qwen35-high-concurrency.md`.

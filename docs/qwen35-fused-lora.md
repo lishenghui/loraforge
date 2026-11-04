@@ -216,7 +216,9 @@ After fusion, further rank arithmetic reductions have limited measured leverage:
 shared A already showed little latency benefit, while specialization keeps the
 same launch count. Potential next experiments are correction-at-consumer for
 residual/RMSNorm and gate/up activation, preserving the BF16 correction before
-the nonlinear operation. Their benefits have not been measured here.
+the nonlinear operation. Gate/up prefill and consecutive decode metadata reuse are now evaluated in
+the [high-concurrency follow-up](qwen35-high-concurrency.md); decode grouped
+gate/up fusion regresses in its operator screen.
 
 At batch32, gate/up retains RowExpand because duplicating A per output tile
 regresses in the operator screen. A grouped fusion that preserves B reuse across

@@ -344,3 +344,15 @@ control-before/specialized/native/control-after serving. Ratios are
 gain over the two fused controls, 52/52 token sequences and zero new saved
 logprob difference. These remain benchmark prototypes; the native strict gate
 and broader quality/hardware validation remain outside the measured speed claim.
+
+The [high-concurrency follow-up](qwen35-high-concurrency.md) adds standalone
+capacity-four prefill A+B and B-at-SiLU prototypes plus a consecutive-decode
+metadata cache candidate. The first MI250 screen rejects grouped decode
+gate/up fusion and narrow prefill fusion, retaining only measured wide
+128/1024-token candidates. CPU checks total134, including14 cache invalidation
+transitions. Cache-only passes64 exact model sequences. The initial prefill model attempt
+keeps64 token sequences but stops at its incremental logprob gate0.086396;
+its timings are not reported. A per-row decode consumer subsequently passes
+32 exact eager/changed-metadata graph cases and improves the operator segment
+1.39–1.73x at batch32. Matched C32 whole-model timing is pending; none of those
+operator ratios is an installed service speedup claim.
