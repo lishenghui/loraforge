@@ -535,6 +535,18 @@ native/base controls. The rank-4 combined prototype adds 6.86%/6.44%/3.55% over
 the existing tiny profile at C1/8/32. Its kernel is a standalone benchmark
 prototype; the installed tiny-profile flag retains the behavior documented above.
 
+The [tiny-LoRA fusion follow-up](qwen35-fused-lora.md) tests shared A, combined
+A+B, and direct GDN A+B+unpack. Its first full-model rank-4 candidate reaches
+1.2680x/1.1928x/1.1244x native at C1/8/32 on one matched allocation, with exact
+saved outputs versus the preceding combined GDN prototype. These additional
+changes remain standalone benchmark prototypes.
+
+The final capacity-4 narrow specialization in that study adds 1.17–3.21%
+over its matched fused controls. Its whole-model/native ratios are
+1.2975x/1.2503x/1.1345x, with zero new saved logprob difference versus those
+controls. Native strict drift remains; C1 sits near 1.30x, without a reliable
+above-1.3x result. Both studies retain before/after controls and their drift.
+
 ## Sources
 
 - [Official Qwen3.5-0.8B config](https://huggingface.co/Qwen/Qwen3.5-0.8B/blob/main/config.json)

@@ -323,3 +323,24 @@ All 456 positive fused entries, graphs, fixed addresses, HIP A and prefill/decod
 RowExpand were audited. CPU checks total **133**. This is a synthetic pilot,
 not a trained-quality or 1.3x claim; see [results and limits](qwen35.md) and
 [the recorded evidence](qwen35-tiny-speed-mi250.json).
+
+The later [tiny-LoRA fusion experiments](qwen35-fused-lora.md) add standalone
+benchmark kernels and curated evidence, without changing the installed tiny
+profile. Shared A has little rank-4 latency benefit. Narrow A+B, wide A+B and
+direct GDN A+B+unpack retain intermediate BF16 rounding and are checked on
+MI250X, including null routes and graph metadata updates. Selected rank-4
+full-model fusion reaches 1.2993x/1.2093x/1.1175x matched native throughput at
+C1/8/32; before/after controls drift by 2.61%/1.30%/0.79%. All 52 native token
+sequences match, with zero new saved logprob difference versus the preceding
+combined prototype; the existing strict native logprob failure remains.
+These research hooks are not installed by library flags. Benchmark native
+sources now accompany the sdist so its Python operator checks can compile them.
+
+The capacity-4 narrow specialization then fixes K/tile/layout constants,
+unrolls the original input accumulation and vectorizes B reads. Job **23474915**
+passes 30 exact operator/metadata-changing graph cases and completes matched
+control-before/specialized/native/control-after serving. Ratios are
+**1.2975x/1.2503x/1.1345x** native at C1/8/32, with **1.17–3.21%** incremental
+gain over the two fused controls, 52/52 token sequences and zero new saved
+logprob difference. These remain benchmark prototypes; the native strict gate
+and broader quality/hardware validation remain outside the measured speed claim.

@@ -34,6 +34,25 @@ GDN consumer. It copies no upstream kernel. Its functions match the measured
 prototype AST; [the experiment report](qwen35-gdn.md) records GPU checks,
 framework hashes, whole-model controls and remaining scope limits.
 
+The new benchmark-only `qwen35_tiny_fused.cu` and `qwen35_wide_fused.cu` retain
+the attributed `ops/csrc/rowexpand.cu` HIP shrink reduction, BF16 conversion
+helpers and original probe source notice. Their shared-A, fused A+B and direct
+GDN unpack scheduling are new LoRAForge experiment code; no additional upstream
+kernel is imported. `qwen35_fused_lora.py` supplies explicit lazy ROCm loaders,
+and `check_qwen35_wide_fusion.py` is a portable operator check against the
+existing HIP/RowExpand/consumer implementations. Both native source files are
+byte-identical to the GPU-study sources. Benchmark `.cu` files accompany the
+source archive, alongside their Python callers; they do not become installed
+runtime operators. [The follow-up report](qwen35-fused-lora.md) records numerical
+checks, shape exclusions and whole-model controls.
+
+`benchmarks/qwen35_rank4_fused.cu` specializes the same attributed HIP reduction
+and BF16 conversion helpers to capacity 4 and the two measured narrow input
+widths, with unrolled chunks and vector B loads. Its lazy loader and portable
+30-case operator check are new experiment code. Live retained ranks and routes
+remain GPU metadata, with mixed-rank and changed-metadata graph equality checks.
+This source is also a benchmark prototype, not an installed library kernel.
+
 ## Foundation
 
 Created on 2026-10-31 as new packaging, documentation, and CPU checks under

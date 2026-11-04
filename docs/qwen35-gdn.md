@@ -110,6 +110,11 @@ shared qkvz and fully independent formats need their own structural treatment.
 
 ## Reproduction boundary and evidence
 
+The subsequent [tiny-LoRA fusion study](qwen35-fused-lora.md) measures the
+shared-A contraction directly, then extends fusion to narrow/wide A+B and the
+complete GDN A+B+unpack segment. Shared A alone gives little rank-4 latency
+benefit and is not adopted by that full-model candidate.
+
 The benchmark kernel's function AST is identical to the GPU-tested prototype;
 only its module documentation, formatting and an output-pointer lint annotation
 differ. Library defaults and the existing tiny-profile flag do not install these
