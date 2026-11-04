@@ -305,3 +305,21 @@ decode graphs were audited. Fleet/native ratios at C1/8/32 are
 Tiny ranks alone do not recover the paper's speedup under the conservative
 hybrid policy. Runtime code is unchanged; native A/prefill remain enabled.
 See [the evidence and limits](qwen35-tiny-rank-mi250.json).
+
+The subsequent tiny-rank profile is a separate opt-in,
+`LORAFORGE_SGLANG_QWEN35_TINY=1`, bounded to the measured Qwen3.5-0.8B shapes,
+pool capacities 4/8 and batch ranges. It uses HIP A in decode, native narrow B,
+and shape-selected prefill B; existing kernels are unchanged. Default hybrid
+reductions remain conservative. The benchmark's explicit
+`--allow-logprob-drift` permits token-matched speed studies without changing
+the meaning of the strict numerical result.
+
+Job **23469847** completed rank-4/rank-8 native/fast pairs on one MI250X GCD.
+Fast/native ratios at C1/8/32 are **1.1428x/1.0848x/1.0586x** and
+**1.1528x/1.0824x/1.0625x**, including base-model computation. Each rank keeps
+52/52 token sequences, but maximum logprob differences **0.1187558/0.0909806**
+exceed 0.05; these are reported separately from the authorized timing checks.
+All 456 positive fused entries, graphs, fixed addresses, HIP A and prefill/decode
+RowExpand were audited. CPU checks total **133**. This is a synthetic pilot,
+not a trained-quality or 1.3x claim; see [results and limits](qwen35.md) and
+[the recorded evidence](qwen35-tiny-speed-mi250.json).

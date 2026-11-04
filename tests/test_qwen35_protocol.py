@@ -36,6 +36,18 @@ def test_model_gate_rejects_nonfinite_and_changed_cases():
         protocol.numerical_check(native, record([[-0.1, 1], [-0.2, 2]], adapter=1))
 
 
+def test_timing_opt_in_preserves_failed_logprob_gate_and_rejects_changed_tokens():
+    native = record([[-0.1, 1], [-0.2, 2]])
+    drift = protocol.numerical_check(native, record([[-0.1, 1], [-0.4, 2]]))
+    assert not protocol.timing_allowed(drift)
+    assert protocol.timing_allowed(drift, allow_logprob_drift=True)
+    assert not drift["numerical_pass"]
+    changed = protocol.numerical_check(native, record([[-0.1, 1], [-0.2, 3]]))
+    assert not protocol.timing_allowed(changed, allow_logprob_drift=True)
+    empty = protocol.numerical_check(record([]), record([]))
+    assert not protocol.timing_allowed(empty, allow_logprob_drift=True)
+
+
 def test_base_payload_omits_adapter_and_preserves_work():
     manifest = dict(
         prompt=list(range(128)), adapters=[dict(name=f"a{i}") for i in range(4)]

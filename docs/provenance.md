@@ -20,6 +20,13 @@ new project code; no additional probe or framework implementation is copied.
 MI250 validation and cache-regime timings are recorded in
 [qwen35-rowtiles-mi250.json](qwen35-rowtiles-mi250.json).
 
+The opt-in Qwen3.5 tiny-rank dispatch is new LoRAForge policy code derived
+from the project's rank-4/rank-8 operator and full-model experiments. It selects
+the already attributed HIP shrink, RowExpand and native implementations;
+no new probe or framework kernel is imported. Its separate timing opt-in
+preserves the original strict logprob result while allowing token-matched
+performance measurements. See [qwen35.md](qwen35.md) for scope and results.
+
 ## Foundation
 
 Created on 2026-10-31 as new packaging, documentation, and CPU checks under

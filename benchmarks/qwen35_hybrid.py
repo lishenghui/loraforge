@@ -346,7 +346,19 @@ def numerical_check(reference, candidate):
     )
 
 
-def run(root, modes, reference=None, validation_only=False):
+def timing_allowed(check, *, allow_logprob_drift=False):
+    """A timing opt-in must never relabel the strict numerical result as passed."""
+    if allow_logprob_drift:
+        return (
+            check["same_tokens"]
+            and check["max_common_prefix_logprob_difference"] is not None
+        )
+    return check["numerical_pass"]
+
+
+def run(
+    root, modes, reference=None, validation_only=False, *, allow_logprob_drift=False
+):
     m = read(root / "manifest.json")
     for mode in modes:
         attempt = (
@@ -435,8 +447,12 @@ def run(root, modes, reference=None, validation_only=False):
                     check = numerical_check(
                         read(reference), read(attempt / "correctness.json")
                     )
+                    check["allow_logprob_drift_for_timing"] = allow_logprob_drift
+                    check["timing_allowed"] = timing_allowed(
+                        check, allow_logprob_drift=allow_logprob_drift
+                    )
                     dump(attempt / "native-comparison.json", check)
-                    assert check["numerical_pass"], check
+                    assert check["timing_allowed"], check
                 if validation_only:
                     request(url, payload(m, mode, 0, 9, 1))
                     status["state"] = "validated"
@@ -601,6 +617,11 @@ if __name__ == "__main__":
         "--reference", type=Path, help="Require native parity before timing"
     )
     parser.add_argument("--validation-only", action="store_true")
+    parser.add_argument(
+        "--allow-logprob-drift",
+        action="store_true",
+        help="Time matching token sequences even if the 0.05 logprob gate fails; record both results",
+    )
     args = parser.parse_args()
     args.root = args.root.resolve()
     if args.action == "prepare":
@@ -608,6 +629,12 @@ if __name__ == "__main__":
     elif args.action == "serve":
         serve(args.root, args.mode, args.attempt, args.port)
     elif args.action == "run":
-        run(args.root, args.modes, args.reference, args.validation_only)
+        run(
+            args.root,
+            args.modes,
+            args.reference,
+            args.validation_only,
+            allow_logprob_drift=args.allow_logprob_drift,
+        )
     else:
         compare(args.root, args.modes)

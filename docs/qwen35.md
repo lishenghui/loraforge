@@ -4,10 +4,10 @@ This experimental integration targets the **dense Qwen3.5 text decoder**, BF16,
 TP=1, synchronous adapter loading, and the inspected SGLang 0.5.22 implementation.
 Vision adapters, MoE, quantization, tensor parallelism and recurrent-state cache
 reuse across different adapters are outside the validated scope. Current checks
-pass 129 CPU cases and 93 MI250X operator/framework GPU cases (jobs 23463508 and
+pass 133 CPU cases and 93 MI250X operator/framework GPU cases (jobs 23463508 and
 23464050),
 including four slices, unequal output widths, strided output, rank/slot changes
-and graph replay. The full-model synthetic-adapter pilot passes the declared
+and graph replay. The conservative full-model synthetic-adapter pilot passes the declared
 native/Fleet token/logprob gate; measured throughput and its limits are below.
 This does not establish trained-adapter task quality or general hybrid support.
 
@@ -63,7 +63,7 @@ file hashes must accompany measurements; a version string alone is insufficient.
 The retained layout and RowExpand now accept four slices. The existing 1–3-slice
 kernel keeps its original shared-memory footprint; a separate instantiation
 stages four slices for GDN. Rank lookup includes both HF and fused aliases.
-Hybrid execution uses rank-aware native shrink and native prefill expansion for
+By default, hybrid execution uses rank-aware native shrink and native prefill expansion for
 all projections. RowExpand handles supported decode ranks, including the new
 `in_proj_qkvz` and `out_proj`; the narrow b/a output stays native. Native shrink
 and prefill reductions avoid carrying the dense-model HIP-A/prefill-B choices
@@ -77,6 +77,19 @@ QKV output uses four-row work units at batches 16–32. Other shapes/batches
 retain the original mapping. The measured qkvz/gate-up shapes remain unchanged.
 These choices are local to the opted-in hybrid policy; low-level `row_expand`
 still defaults to the original 16-row kernel. Full-model results are below.
+
+The separate `LORAFORGE_SGLANG_QWEN35_TINY=1` opt-in enables a tiny-rank
+profile. It checks physical pool capacity **4 or 8**, input/output widths and
+slice count against the seven 0.8B projection shapes above. Decode batches
+1–32 use HIP A; 1024-wide out/down/o B uses native expansion. Wide qkvz,
+gate-up and QKV prefill uses RowExpand at 128–1024 tokens, while 1024-wide
+prefill uses it only at 1024 tokens. b/a B always remains native. Other shapes,
+pool capacities and batch ranges retain the conservative profile.
+
+This opt-in changes A/prefill reduction order and does **not** pass the strict
+0.05 logprob gate in this pilot. The diagnostic rank-4 full profile retained
+all 52 token sequences but reached 0.1187558 maximum logprob difference.
+The switch defaults to zero and leaves dense-model dispatch unchanged.
 
 Use both switches in each worker for Fleet:
 
@@ -115,6 +128,14 @@ actual graph execution and Fleet dispatch evidence must also be inspected.
 Base-only measures the available model throughput; it is not a quality baseline
 for a real fine-tuned adapter. A failed numerical gate must remain visible even
 if the throughput measurement is useful diagnostically.
+
+For a speed study that permits logprob drift, explicitly pass
+`--allow-logprob-drift` to `run` alongside `--reference`. Timing still requires
+identical generated token IDs and finite logprobs. The saved comparison keeps
+`numerical_pass` at its original strict meaning and records `timing_allowed`
+separately; `compare` does not relabel a strict failure as numerical success.
+Enable `LORAFORGE_SGLANG_QWEN35_TINY=1` for the fast Fleet worker when studying
+the tiny-rank profile.
 
 For a compact tiny-rank study, add `--rank 4` or `--rank 8` to `prepare` in a
 new output directory. Every A/B tensor then has that physical and retained rank,
@@ -401,7 +422,7 @@ long-generation equivalence. The bounded hybrid B profile is enabled on this
 evidence, with these limits; all raw timing samples and audits are in the linked
 RowExpand evidence file.
 
-## Compact tiny-rank results
+## Compact tiny-rank results with the conservative policy
 
 Jobs **23465767** (rank 4, 9m09s) and **23466166** (rank 8, 9m05s) completed
 sequentially on one MI250X GCD each. They use the unchanged runtime from the
@@ -449,6 +470,64 @@ establish long-generation equivalence. Raw timing samples, input/runtime/model
 hashes, accounting and audit summaries are in
 [qwen35-tiny-rank-mi250.json](qwen35-tiny-rank-mi250.json); original attempt
 bundles and full correctness records are retained separately.
+
+## Opt-in tiny-rank performance
+
+The follow-up operator/profile job **23467018** explains why rank reduction
+alone was insufficient. Rank-4 A with native reductions still takes about **1.30–1.38 ms** per
+sampled decode step. At batch 32, the old Fleet B path takes **0.860 ms** versus
+native's **0.757 ms**, including its native b/a part. These are profiled sums
+of GPU kernel durations, not service latencies. Sixty rank/shape/phase operator
+cases motivate enabling HIP A, using native narrow B, and selecting prefill B
+by shape. A separate compact shared-Z prototype passed 64 exact cases and 192
+graph replays but improved operator timing by only about 0–2%; it was not adopted.
+
+Strict screening in **23469297** kept 52/52 generated token sequences for each
+candidate, but full/decode-only/B-only policies reached logprob differences
+**0.1187558 / 0.0563851 / 0.1187558**. All exceeded 0.05, so that run collected
+no candidate throughput. The subsequent speed study explicitly permits this
+logprob drift while retaining the token and execution checks. The strict
+failures remain recorded.
+
+Job **23469847** completed in **15m27s** on **nid005107**, one MI250X GCD. It
+uses the actual packaged, opt-in policy, with matching native/Fleet weights,
+pool capacity and server arguments. It ran rank-4 native/fast, then rank-8
+native/fast, on the same allocation. Each point has three repeats, 128 input
+tokens and 64 forced output tokens; C1/8/32 use 32/192/384 requests respectively.
+The following throughput includes base-model computation and serving overhead:
+
+| Rank | Concurrency | Native tokens/s | Tiny fast tokens/s | Fast/native |
+| --- | ---: | ---: | ---: | ---: |
+| 4 | 1 | 122.810 | 140.352 | 1.1428x |
+| 4 | 8 | 844.085 | 915.695 | 1.0848x |
+| 4 | 32 | 2271.468 | 2404.562 | 1.0586x |
+| 8 | 1 | 121.527 | 140.099 | 1.1528x |
+| 8 | 8 | 843.420 | 912.898 | 1.0824x |
+| 8 | 32 | 2251.456 | 2392.244 | 1.0625x |
+
+Both ranks retain **52/52** native token sequences; their maximum logprob
+differences are **0.1187558** and **0.0909806**. Consequently `numerical_pass`
+remains **false** under the strict 0.05 definition, while the explicitly opted-in
+`timing_allowed` is true. Each rank's 456 positive fused entries match its
+physical/checkpoint rank. Audits confirm HIP A, RowExpand in prefill and decode,
+actual decode graphs, repeated-request consistency and fixed-address loads.
+The runtime source matches the measured wheel byte-for-byte.
+
+To measure this policy against an already completed native reference:
+
+```sh
+LORAFORGE_SGLANG_QWEN35_TINY=1 python benchmarks/qwen35_hybrid.py run OUTPUT \
+  --modes fleet --reference OUTPUT/results/NATIVE_ATTEMPT/correctness.json \
+  --allow-logprob-drift
+```
+
+These are **5.9–15.3%** single-run gains over matched native serving, not 1.3x.
+The numerical samples generate eight tokens; throughput samples generate 64.
+Four synthetic adapters, one native-before-fast ordering per rank, and no fresh
+base-only arm do not establish trained-adapter quality, long-generation parity,
+or the paper's 50-adapter workload result. Default hybrid behavior remains
+conservative. Timings, strict failures, hardware/source hashes and audits are in
+[qwen35-tiny-speed-mi250.json](qwen35-tiny-speed-mi250.json).
 
 ## Sources
 

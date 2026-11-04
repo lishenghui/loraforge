@@ -134,6 +134,60 @@ def test_hybrid_b_tiles_are_bounded_by_shape_and_batch():
     )
 
 
+@pytest.mark.parametrize("capacity", [4, 8])
+def test_tiny_hybrid_requires_opt_in_and_complete_geometry(capacity):
+    old = FleetPolicy(hybrid=True)
+    fast = FleetPolicy(hybrid=True, hybrid_tiny=True)
+    shapes = {
+        "in_proj_qkvz": (1024, 8192, 4),
+        "in_proj_ba": (1024, 32, 2),
+        "out_proj": (2048, 1024, 1),
+        "o_proj": (2048, 1024, 1),
+        "gate_up_proj": (1024, 7168, 2),
+        "down_proj": (3584, 1024, 1),
+        "qkv_proj": (1024, 5120, 3),
+    }
+    for name, (nin, nout, slices) in shapes.items():
+        shape = dict(
+            input_width=nin, output_width=nout, slices=slices, rank_capacity=capacity
+        )
+        assert old.select(name, "decode", 32, **shape)["a"] == "native"
+        assert fast.select(name, "decode", 32, **shape)["a"] == "hip"
+        assert fast.select(name, "decode", 32, **shape)["b"] == (
+            "native" if nout <= 1024 else "all"
+        )
+        assert fast.select(name, "prefill", 1024, **shape)["a"] == "native"
+        assert fast.select(name, "prefill", 1024, **shape)["b"] == (
+            "native" if name == "in_proj_ba" else "all"
+        )
+        for override in (
+            dict(rank_capacity=None),
+            dict(rank_capacity=16),
+            dict(rank_capacity=64),
+            dict(input_width=nin + 8),
+            dict(output_width=nout + 8),
+            dict(slices=slices + 1),
+        ):
+            other = dict(shape, **override)
+            for phase, tokens in (("decode", 32), ("prefill", 1024)):
+                assert fast.select(name, phase, tokens, **other) == old.select(
+                    name, phase, tokens, **other
+                )
+        for phase, tokens in (
+            ("decode", 0),
+            ("decode", 33),
+            ("prefill", 127),
+            ("prefill", 1025),
+        ):
+            assert fast.select(name, phase, tokens, **shape) == old.select(
+                name, phase, tokens, **shape
+            )
+        if nout <= 1024:
+            assert fast.select(name, "prefill", 128, **shape)["b"] == "native"
+    with pytest.raises(ValueError, match="requires.*hybrid"):
+        FleetPolicy(hybrid_tiny=True)
+
+
 def test_active_prefill_uses_live_slots_and_keeps_unknown_routes():
     loaded = {0: {"rank": 0}, 1: {"rank": 3}, 2: {"rank": 128}}
     assert _active_rank_classes(loaded, [0]) == (False, False)
@@ -159,6 +213,7 @@ def test_active_prefill_is_explicit_opt_in(tmp_path, monkeypatch, flag, enabled)
     monkeypatch.setenv("LORAFORGE_SGLANG_MANIFEST", str(manifest))
     monkeypatch.delenv("LORAFORGE_SGLANG_ACTIVE_PREFILL", raising=False)
     monkeypatch.delenv("LORAFORGE_SGLANG_QWEN35", raising=False)
+    monkeypatch.delenv("LORAFORGE_SGLANG_QWEN35_TINY", raising=False)
     if flag is not None:
         monkeypatch.setenv("LORAFORGE_SGLANG_ACTIVE_PREFILL", flag)
     monkeypatch.setattr(fleet, "read_rank_catalog", lambda paths: paths)
@@ -167,10 +222,31 @@ def test_active_prefill_is_explicit_opt_in(tmp_path, monkeypatch, flag, enabled)
     )
     assert fleet.backend_from_environment() == (
         ["adapter"],
-        {"active_prefill": enabled, "hybrid": False},
+        {"active_prefill": enabled, "hybrid": False, "hybrid_tiny": False},
     )
     monkeypatch.setenv("LORAFORGE_SGLANG_ACTIVE_PREFILL", "yes")
     with pytest.raises(ValueError, match="must be 0 or 1"):
+        fleet.backend_from_environment()
+
+
+def test_tiny_hybrid_environment_is_explicit(tmp_path, monkeypatch):
+    import json
+
+    from loraforge.integrations import _sglang_fleet as fleet
+
+    manifest = tmp_path / "manifest.json"
+    manifest.write_text(json.dumps({"adapters": [{"path": "adapter"}]}))
+    monkeypatch.setenv("LORAFORGE_SGLANG_MANIFEST", str(manifest))
+    monkeypatch.setenv("LORAFORGE_SGLANG_QWEN35", "1")
+    monkeypatch.setenv("LORAFORGE_SGLANG_QWEN35_TINY", "1")
+    monkeypatch.setenv("LORAFORGE_SGLANG_ACTIVE_PREFILL", "0")
+    monkeypatch.setattr(fleet, "read_rank_catalog", lambda paths: paths)
+    monkeypatch.setattr(fleet, "create_backend", lambda catalog, **kwargs: kwargs)
+    assert fleet.backend_from_environment() == dict(
+        active_prefill=False, hybrid=True, hybrid_tiny=True
+    )
+    monkeypatch.setenv("LORAFORGE_SGLANG_QWEN35_TINY", "yes")
+    with pytest.raises(ValueError, match="QWEN35_TINY must be 0 or 1"):
         fleet.backend_from_environment()
 
 
