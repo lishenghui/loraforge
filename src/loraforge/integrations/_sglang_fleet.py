@@ -52,7 +52,26 @@ def _masked(info, ranks):
     return result
 
 
-def create_backend(catalog):
+def _active_rank_classes(loaded, slots):
+    """Return (low, high) from the current CPU slot records, conservatively.
+
+    Loading owns these records and the matching device masks. Never read a
+    device rank here: that would synchronize every projection in eager prefill.
+    """
+    low = high = False
+    for slot in slots:
+        entry = loaded.get(slot)
+        if entry is None:
+            return True, True
+        rank = entry["rank"]
+        low |= 0 < rank <= 16
+        high |= rank > 16
+        if low and high:
+            break
+    return low, high
+
+
+def create_backend(catalog, *, active_prefill=False):
     import torch
     from sglang.kernels.ops.lora.dense.chunked_sgmv_expand import (
         chunked_sgmv_lora_expand_forward as native_expand,
@@ -126,11 +145,40 @@ def create_backend(catalog):
             )
             self._fleet_decode = False
             self._fleet_hits = Counter()
+            self._fleet_active_prefill = active_prefill
+            self._fleet_prefill_slots = None
 
-        def prepare_lora_batch(self, forward_batch, *args, **kwargs):
-            super().prepare_lora_batch(forward_batch, *args, **kwargs)
+        def prepare_lora_batch(
+            self,
+            forward_batch,
+            weight_indices,
+            lora_ranks,
+            scalings,
+            use_cuda_graph,
+            use_prefill_cuda_graph=False,
+        ):
+            # Invalidate first, including graph preparation and failed prepares.
+            self._fleet_prefill_slots = None
+            super().prepare_lora_batch(
+                forward_batch,
+                weight_indices,
+                lora_ranks,
+                scalings,
+                use_cuda_graph,
+                use_prefill_cuda_graph,
+            )
             self._fleet_segments.fill_(self.batch_info.num_segments)
             self._fleet_decode = forward_batch.forward_mode.is_decode()
+            if (
+                self._fleet_active_prefill
+                and forward_batch.forward_mode.is_extend()
+                and not use_cuda_graph
+                and not use_prefill_cuda_graph
+                and not torch.cuda.is_current_stream_capturing()
+                and isinstance(weight_indices, (list, tuple))
+                and all(type(slot) is int for slot in weight_indices)
+            ):
+                self._fleet_prefill_slots = tuple(dict.fromkeys(weight_indices))
 
         def _a(self, x, weights, info, slices):
             x = x.contiguous()
@@ -204,7 +252,24 @@ def create_backend(catalog):
                     cpu.tolist(), device=z.device, dtype=torch.int32
                 )
             low = cfg["b"] == "low"
-            if e.has_high if low else e.has_unsupported:
+            need_native = e.has_high if low else e.has_unsupported
+            need_rowexpand = True
+            if (
+                low
+                and self._fleet_prefill_slots is not None
+                and not torch.cuda.is_current_stream_capturing()
+            ):
+                # A captured graph must contain both rank classes: replay can
+                # change slots/ranks without executing this Python dispatch.
+                need_rowexpand, active_high = _active_rank_classes(
+                    e.loaded, self._fleet_prefill_slots
+                )
+                if need_native and not active_high:
+                    need_native = False
+                    self._fleet_hits["skipped_native_high_prefill"] += 1
+                if not need_rowexpand:
+                    self._fleet_hits["skipped_rowexpand_low_prefill"] += 1
+            if need_native:
                 base = native_expand(
                     z,
                     weights,
@@ -214,6 +279,8 @@ def create_backend(catalog):
                     base,
                     slice_offsets_cpu=cpu,
                 )
+            if not need_rowexpand:
+                return base
             self._fleet_hits[f"rowexpand_{phase}"] += 1
             return row_expand(
                 z,
@@ -309,6 +376,7 @@ def create_backend(catalog):
             entries = list(a_entries.values())
             return dict(
                 policy="fleet",
+                active_prefill=self._fleet_active_prefill,
                 python_capture_eager_calls=dict(self._fleet_hits),
                 modules=len(entries),
                 shadow_bytes=sum(
@@ -328,9 +396,14 @@ def create_backend(catalog):
 
 
 def backend_from_environment():
+    active_prefill = os.environ.get("LORAFORGE_SGLANG_ACTIVE_PREFILL", "0")
+    if active_prefill not in ("0", "1"):
+        raise ValueError("LORAFORGE_SGLANG_ACTIVE_PREFILL must be 0 or 1")
     manifest = Path(os.environ["LORAFORGE_SGLANG_MANIFEST"])
     data = json.loads(manifest.read_text())
     paths = [a.get("path", a.get("source")) for a in data["adapters"]]
     if any(not p for p in paths):
         raise ValueError("every adapter must declare a local path")
-    return create_backend(read_rank_catalog(paths))
+    return create_backend(
+        read_rank_catalog(paths), active_prefill=active_prefill == "1"
+    )

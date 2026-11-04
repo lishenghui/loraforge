@@ -16,15 +16,15 @@ from loraforge.integrations._sglang_fleet import create_backend  # noqa: E402
 from loraforge.runtime.retained import RetainedLayout  # noqa: E402
 
 
-@pytest.fixture(scope="module")
-def fleet_class():
+@pytest.fixture(scope="module", params=[False, True], ids=["frozen", "active-prefill"])
+def fleet_class(request):
     from sglang.srt.lora.mem_pool import LoRAMemoryPool
 
     from loraforge.ops.rowexpand import rowexpand_extension
 
     init, load = LoRAMemoryPool.init_buffers, LoRAMemoryPool.load_lora_weight_to_buffer
     rowexpand_extension()
-    cls = create_backend({})
+    cls = create_backend({}, active_prefill=request.param)
     yield cls
     LoRAMemoryPool.init_buffers, LoRAMemoryPool.load_lora_weight_to_buffer = init, load
     del LoRAMemoryPool._loraforge_fleet
@@ -140,6 +140,64 @@ def test_all_projection_paths(fleet_class, monkeypatch, name, slices, decode, to
             torch.testing.assert_close(actual, oracle(), rtol=0.03, atol=0.003)
     else:
         torch.testing.assert_close(compute(), oracle(), rtol=0.03, atol=0.003)
+        mixed = routes[:]
+        for active in ([1], [2], [3], [0], mixed):
+            routes[:] = (active * tokens)[:tokens]
+            prepare()
+            slots = backend._fleet_prefill_slots
+            backend._fleet_prefill_slots = None
+            reference = compute()
+            backend._fleet_prefill_slots = slots
+            torch.testing.assert_close(compute(), reference, rtol=0, atol=0)
+        # Replace the same active slot across both rank classes and inactive.
+        routes[:] = [1] * tokens
+        for k in (16, 32, 0, 3):
+            a[1].copy_(raw_a[1])
+            e.load(str(k) if k else None, 1, 128 if k else 0)
+            prepare()
+            slots = backend._fleet_prefill_slots
+            backend._fleet_prefill_slots = None
+            reference = compute()
+            backend._fleet_prefill_slots = slots
+            torch.testing.assert_close(compute(), reference, rtol=0, atol=0)
+        if backend._fleet_active_prefill:
+            assert backend._fleet_hits["skipped_native_high_prefill"] > 0
+            assert backend._fleet_hits["skipped_rowexpand_low_prefill"] > 0
+        # Capture with only low-rank requests, then replay high/mixed/null routes.
+        # Both expand branches must remain in the real static prefill buffers.
+        backend.init_prefill_cuda_graph_batch_info(tokens, tokens)
+
+        def prepare_graph():
+            backend.prepare_lora_batch(
+                fb,
+                routes,
+                [0, 128, 128, 128],
+                scales,
+                use_cuda_graph=False,
+                use_prefill_cuda_graph=True,
+            )
+            assert backend._fleet_prefill_slots is None
+
+        prepare_graph()
+        compute()
+        torch.cuda.synchronize()
+        # The capture guard is also safe if an external caller has retained
+        # eager metadata before beginning capture.
+        backend._fleet_prefill_slots = (1,)
+        skipped = backend._fleet_hits["skipped_native_high_prefill"]
+        graph = torch.cuda.CUDAGraph()
+        with torch.cuda.graph(graph):
+            actual = compute()
+        assert backend._fleet_hits["skipped_native_high_prefill"] == skipped
+        for active in ([2], [3], [0], mixed, [1]):
+            routes[:] = (active * tokens)[:tokens]
+            a[1].copy_(raw_a[1])
+            e.load("64", 1, 128)
+            prepare_graph()
+            graph.replay()
+            torch.cuda.synchronize()
+            torch.testing.assert_close(actual, compute(), rtol=0, atol=0)
+            torch.testing.assert_close(actual, oracle(), rtol=0.03, atol=0.003)
     hits = backend.fleet_snapshot()["python_capture_eager_calls"]
     assert hits["rowexpand_decode" if decode else "rowexpand_prefill"] > 0
     if not decode:

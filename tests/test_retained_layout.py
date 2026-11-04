@@ -4,7 +4,10 @@ from types import SimpleNamespace
 import pytest
 
 torch = pytest.importorskip("torch")
-from loraforge.integrations._sglang_fleet import FleetPolicy  # noqa: E402
+from loraforge.integrations._sglang_fleet import (  # noqa: E402
+    FleetPolicy,
+    _active_rank_classes,
+)
 from loraforge.runtime.retained import RetainedLayout, effective_rank  # noqa: E402
 
 
@@ -72,6 +75,45 @@ def test_frozen_policy_preserves_profile_overrides():
     assert p.select("qkv_proj", "decode", 17)["a"] == "native"
     assert p.select("gate_up_proj", "decode", 17)["a"] == "hip"
     assert p.select("unknown", "decode", 1)["b"] == "native"
+
+
+def test_active_prefill_uses_live_slots_and_keeps_unknown_routes():
+    loaded = {0: {"rank": 0}, 1: {"rank": 3}, 2: {"rank": 128}}
+    assert _active_rank_classes(loaded, [0]) == (False, False)
+    assert _active_rank_classes(loaded, [0, 1]) == (True, False)
+    assert _active_rank_classes(loaded, [2]) == (False, True)
+    assert _active_rank_classes(loaded, [1, 2]) == (True, True)
+    assert _active_rank_classes(loaded, [1, 3]) == (True, True)
+    # Reusing a slot must change the decision without a stale per-slot cache.
+    loaded[1] = {"rank": 32}
+    assert _active_rank_classes(loaded, [1]) == (False, True)
+    loaded[1] = {"rank": 16}
+    assert _active_rank_classes(loaded, [1]) == (True, False)
+
+
+@pytest.mark.parametrize("flag,enabled", [(None, False), ("0", False), ("1", True)])
+def test_active_prefill_is_explicit_opt_in(tmp_path, monkeypatch, flag, enabled):
+    import json
+
+    from loraforge.integrations import _sglang_fleet as fleet
+
+    manifest = tmp_path / "manifest.json"
+    manifest.write_text(json.dumps({"adapters": [{"path": "adapter"}]}))
+    monkeypatch.setenv("LORAFORGE_SGLANG_MANIFEST", str(manifest))
+    monkeypatch.delenv("LORAFORGE_SGLANG_ACTIVE_PREFILL", raising=False)
+    if flag is not None:
+        monkeypatch.setenv("LORAFORGE_SGLANG_ACTIVE_PREFILL", flag)
+    monkeypatch.setattr(fleet, "read_rank_catalog", lambda paths: paths)
+    monkeypatch.setattr(
+        fleet, "create_backend", lambda catalog, **kwargs: (catalog, kwargs)
+    )
+    assert fleet.backend_from_environment() == (
+        ["adapter"],
+        {"active_prefill": enabled},
+    )
+    monkeypatch.setenv("LORAFORGE_SGLANG_ACTIVE_PREFILL", "yes")
+    with pytest.raises(ValueError, match="must be 0 or 1"):
+        fleet.backend_from_environment()
 
 
 def test_serving_export_retained_ranks_and_scaling(tmp_path, monkeypatch):

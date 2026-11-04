@@ -64,8 +64,30 @@ For the original Qwen3 small-prefill profile, additionally set
 `LORAFORGE_STABLE_PREFILL=vllm` and `LORAFORGE_STABLE_PREFILL_MAX_TOKENS=256`.
 The mode name refers to the inherited normalization path, not a vLLM serving
 backend. This hook has explicit Qwen3/BF16/TP=1/hardware and normalization guards;
-leave it disabled for Llama. Its extraction alone does not establish full-model
-prefill-graph correctness in this package.
+leave it disabled for Llama. Compressed Qwen3 eager/prefill-graph validation is recorded below; other
+models and configurations require separate validation.
+
+## Experimental active-batch prefill dispatch
+
+`LORAFORGE_SGLANG_ACTIVE_PREFILL=1` opts the `fleet` policy into skipping an
+expand branch when no request in the current eager prefill batch uses that rank
+class. The default is `0`. Low ranks (1–16) still use RowExpand; higher ranks
+still use native expand. This changes dispatch only, not their arithmetic.
+
+The decision uses CPU slot records owned by the existing synchronized loader,
+without reading GPU ranks. Unknown routes keep both branches. Graph preparation
+and capture keep both branches because subsequent replay may change the routes
+or reuse a slot at another rank. Snapshot counters report skipped native-high
+and RowExpand-low prefill calls; capture/eager counters are not GPU replay counts.
+
+LUMI job **23452964** passed **45 GPU checks** on one MI250X GCD, including
+zero-tolerance comparisons with the unchanged path for low/high/mixed/inactive
+batches, slot rank replacement, and prefill graph replay from low-only capture
+to high/mixed/inactive routes. The job completed in 7m28s; its 150 single-request
+and three mixed eager/graph records also matched the frozen Fleet control
+exactly. At offered rate 32, all 1,000 requests completed at **551.48 tokens/s**,
+versus **555.79** for control 23452454 (0.9922x). This single-run screen shows no
+gain; the switch remains disabled by default. Do not promote it as a speed fix.
 
 ## Validation status
 
@@ -119,3 +141,75 @@ serving validation remain outstanding; no automatic backend promotion follows.
 The previous 1.11x–1.12x pilot used partial experimental paths. Those measurements
 must not be labeled as results of this complete migrated runtime. vLLM integration
 remains separate work. Source checksums and behavior changes are in provenance.md.
+
+
+## Compressed Qwen3 serving and headroom diagnostic
+
+The compressed Fleet workload uses Qwen3-4B-Instruct-2507 and 50 retained-rank
+adapters from the paper export, with TP=1/BF16 on one MI250X GCD. Each point
+replays the same 1,000 prompts, arrivals and per-request completion lengths
+(55,965 output tokens), after a full 1,000-request conditioning run. KV capacity
+is fixed at 86,000 tokens, prefill chunks at 8,192, prefill/decode interval at 4,
+and maximum running requests at 256. Startup and profiling are excluded.
+
+| Execution | Offered requests/s | Output tokens/s | Relative to compressed native |
+| --- | ---: | ---: | ---: |
+| Native, 23451543 | 16 | 437.65 | 1.0000x |
+| Packaged Fleet, 23451046 | 16 | 511.39 | 1.1685x |
+| Native, 23451543 | 32 | 455.33 | 1.0000x |
+| Packaged Fleet, 23451046 | 32 | 546.93 | 1.2012x |
+| Packaged Fleet control repeat, 23452454 | 32 | 555.79 | 1.2207x |
+| Empty-rank prefill candidate, 23452964 | 32 | 551.48 | 1.2112x |
+| Base only, 23453345 | 16 | 569.96 | 1.3023x |
+| Base only, 23453345 | 32 | 648.25 | 1.4237x |
+
+These are single-seed measurements on separate allocations, not paired timing
+confidence intervals or the paper's three-seed aggregate. Native job 23451543
+ended in Slurm `TIMEOUT` during cleanup: both complete timing points, numerical
+checks and route audit were already written. Its allocation is not relabeled as
+completed. Fresh probe comparison job 23451544 failed the startup timeout before
+measurement, so it supplies no speed ratio.
+
+Both packaged Fleet jobs passed 150 matched single-request eager/graph checks
+(50 adapters, prompt lengths 131/255/257, eight output tokens) and three mixed
+batches. All 150 single-request records matched exactly across those two jobs;
+job 23451046 also matched the archived probe records exactly. The model had
+144 retained layouts, custom RowExpand prefill/decode calls and actual graph
+execution. These finite synthetic checks do not establish natural-EOS quality
+or overturn the Llama quality limits above.
+
+Job **23452454 completed in 19m45s** and captured three 32-step GPU windows in a
+separate replay. CPU analysis found LoRA kernels at **14.82% / 16.30% / 15.26%**
+of summed kernel time. Native high-rank prefill expand accounted for **2.88% /
+4.21% / 0%**; tail decode RowExpand accounted for **9.69%**, with actual tail
+batches of 25–28. Of 1,584 sampled eager-prefill projection calls, 1,148 (72.47%)
+had no active high rank. Call fractions are not time savings. GPU overlap is
+removed for busy-time analysis; CPU/GPU inclusive spans are not added together.
+The profiled replay took 106.87s versus the unprofiled control's 100.69s, so its
+throughput is not used. There was no after-profile control.
+
+The 1.3x target at offered rate 32 is 591.92 output tokens/s against this native
+reference: 6.50% above the latest control, or 6.10% less elapsed time. Skipping
+empty prefill branches is a bounded first candidate; these sampled fractions do
+not establish that it can achieve the whole target. Historical token tiling,
+rank-cap specialization and split-rank launches did not deliver a material
+serving gain and should not be promoted from microbenchmarks alone.
+
+
+Base-only retry **23453345 completed in 6m16s**, with three single-request and
+three mixed eager/graph checks, and both 1,000-request timing points completed
+without failures. CPU comparison verified the same model/runtime, timed server
+options, prompts, arrivals, prompt-token counts and per-request output lengths.
+Only adapter execution was removed. The initial base job **23452455** failed
+before timing because the batch harness sent a list of null adapter names to a
+LoRA-disabled server. The isolated retry omits the adapter field altogether;
+a CPU payload regression covers both base and adapter requests. Old artifacts
+remain preserved. The retry and candidate use the runtime's existing checkpoint
+prefetch option for untimed startup, with full conditioning still required.
+
+At offered rate 32, the latest frozen Fleet control reaches **85.74% of base
+throughput**. Reaching 1.3x native would require removing about **42.80% of the
+measured control-to-base elapsed-time gap**, assuming the base timing remains a
+useful same-configuration reference. At rate 16, the 1.3x target (568.95 tokens/s)
+is already nearly the measured base rate (569.96). These observations constrain
+the target for this workload; they are not universal hardware speed limits.

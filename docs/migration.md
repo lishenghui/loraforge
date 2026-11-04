@@ -231,5 +231,19 @@ in 15m58s. CPU analysis verified trace IDs and custom prefill/decode execution.
 The original-adapter batch-1/2 pilot measured 1.1126x–1.1251x versus native;
 medical quality was 15/32 native versus 14/32 Fleet, with one repeated-output
 truncation loss. Functional execution is verified in this scope, not native
-parity or quality equivalence. Qwen prefill graphs and the compressed-fleet
-workload remain outstanding. The failed attempt is retained separately.
+parity or quality equivalence. The failed attempt is retained separately.
+
+The compressed Qwen3 workload is now exercised in jobs 23451046 and 23452454:
+50 real retained-rank adapters, 144 layouts, 150 exact single-request eager/graph
+checks and three mixed batches. The repeated single-request records match
+exactly; 23451046 also matches the archived probe records. Fixed-work serving
+measured 1.1685x at offered rate 16 and 1.2012x–1.2207x at rate 32 against the
+same compressed native reference. That native job ended in cleanup `TIMEOUT`
+after its complete checks and timing points were saved; it is not reported as a
+clean completed allocation. These single-seed points do not certify task quality.
+
+An experimental eager-prefill empty-rank dispatch passed 45 GPU checks and exact
+full-model comparisons in job 23452964, but measured 0.9922x the frozen control.
+It remains disabled by default. The matched base-only job 23453345 and three
+sampled GPU windows now quantify the remaining headroom; 1.3x has not been
+demonstrated. See [the measurements and limitations](rowexpand.md).

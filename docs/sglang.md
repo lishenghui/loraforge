@@ -508,3 +508,12 @@ MI250X dispatch. This is distinct from the partial experimental hooks above.
 See [the component checklist and validation status](rowexpand.md). Benchmark
 `--fleet-expand full` selects this installed path without an external probe
 library, records its source hashes and requires custom prefill/decode evidence.
+
+Compressed Qwen3 serving now passes the scoped single/mixed eager–graph checks
+with the original stable-prefill settings. Matched fixed-work measurements,
+base-only rates and sampled GPU costs are recorded in [RowExpand](rowexpand.md).
+They reach 1.1685x at offered rate 16 and 1.2012x–1.2207x at rate 32 versus
+compressed native in single-seed runs, with the native cleanup-timeout caveat
+documented there. They do not establish a 1.3x gain or general task-quality
+equivalence. The new `LORAFORGE_SGLANG_ACTIVE_PREFILL=1` experiment passes exact
+finite-set checks but showed no serving gain; it remains off by default.
