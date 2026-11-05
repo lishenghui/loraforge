@@ -455,3 +455,28 @@ The optional `--compile-backend cudagraphs` path calls Torch's installed AOT/
 graph backend through its public compile interface; it vendors no compiler or
 graph implementation. Backend-managed capture warnings and failed native gates
 are retained rather than relabeled as consumer-kernel improvements.
+
+### Native-autograd graph isolation
+
+`benchmarks/qwen35_training_graph.py` is new LoRAForge benchmark glue around
+Torch's installed `torch.cuda.make_graphed_callables` API. No Torch graph,
+Transformers model, FLA or causal-convolution implementation is copied or edited.
+It keeps original trainable Parameters and independent base projections, binds
+fixed-shape loss execution, disables AMP weight caching during capture, and
+owns the static input copy. Capture/replay counters instrument only graph
+objects constructed in this worker and restore the original factory after
+capture. The separate Dynamo-eager, AOT-eager and AOT graph-backend controls call
+Torch's installed compiler backends; they are not LoRAForge compiler or kernel
+implementations. The optimizer remains outside graph capture and updates real
+FP32 LoRA masters. Changed-input, timed-loss and per-parameter acceptance checks
+remain explicit in the standalone model training experiment.
+
+`benchmarks/qwen35_training_mask.py` is new fixed-scenario registration glue
+for Transformers 5.10.1. It reuses the original SDPA attention callable under
+a distinct interface key and guards the unpadded, unpacked, uncached causal
+contract. It copies no attention/mask/packing implementation. The explicit
+three rotary-position axes equal the native text model's four-axis default
+after its `[1:]` selection; removing the separate automatic packing axis is
+scoped to the benchmark's known single contiguous sequence. Original framework
+files and the `sdpa` registry entry remain unchanged. Native source hashes and
+rejected automatic-packing guard attempts are retained with the experiment.

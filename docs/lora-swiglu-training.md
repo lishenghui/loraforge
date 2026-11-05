@@ -169,3 +169,9 @@ gate with expansion-only fusion but shows no robust speedup. The graph-backend
 control shows larger short-sequence experimental gains while still failing
 native gradient/update gates and slowing down at 4096 tokens. Neither is
 selected as a production training replacement.
+
+The [fixed-causal native-autograd graph follow-up](qwen35-training-autograd.md)
+subsequently passes exact original-PEFT checks at 128/1024/4096 tokens, including
+live updates and changed inputs. Its verified short-sequence gain comes from
+preserving native SDPA/GQA and reducing scheduling overhead, without this
+packed/custom MLP. Long sequences remain essentially at native speed.

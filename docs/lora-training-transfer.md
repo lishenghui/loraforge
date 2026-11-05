@@ -176,3 +176,7 @@ The complete BF16 Qwen3.5 follow-up is recorded in
 consumer ablations and native-operator graph-backend controls, with full
 gradient/update failures and timing regressions retained. Those results remain
 separate from this NF4 projection experiment.
+
+The model guide now links a verified fixed-causal graph path with exact native
+PEFT comparisons and short-sequence gains. It is still BF16 rank-four training,
+not a combined NF4 result or a rank-compression comparison.

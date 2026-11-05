@@ -10,7 +10,9 @@ import gc
 import hashlib
 import json
 import statistics
+import sys
 import time
+from contextlib import nullcontext
 from pathlib import Path
 
 
@@ -30,6 +32,7 @@ def main() -> None:
             "native-activation",
             "native-consumer",
             "native-expand",
+            "native-graph",
         ],
         required=True,
     )
@@ -42,8 +45,12 @@ def main() -> None:
     p.add_argument("--emulate-precision-casts", action="store_true")
     p.add_argument("--recompile-limit", type=int)
     p.add_argument(
-        "--compile-backend", choices=["inductor", "cudagraphs"], default="inductor"
+        "--compile-backend",
+        choices=["inductor", "cudagraphs", "eager", "aot_eager"],
+        default="inductor",
     )
+    p.add_argument("--check-input-change", action="store_true")
+    p.add_argument("--implicit-causal", action="store_true")
     args = p.parse_args()
     args.output.mkdir(exist_ok=False)
     import importlib.metadata
@@ -52,6 +59,7 @@ def main() -> None:
     import qwen35_training_mlp as wrapper
     import torch
     import torch._inductor.config as inductor_config
+    from qwen35_training_graph import sample_logits
     from safetensors import safe_open
     from safetensors.torch import save_file
     from transformers import Qwen3_5ForCausalLM
@@ -65,6 +73,7 @@ def main() -> None:
     torch.manual_seed(773)
     report = dict(
         state="loading",
+        argv=sys.argv,
         backend=args.backend,
         cases=[],
         scope="Whole 24-layer text-only BF16 Qwen3.5-0.8B; all-linear rank4 LoRA FP32 masters; dropout0; zero_grad+forward+causal_loss+backward+AdamW; synthetic fixed text, not convergence",
@@ -81,11 +90,17 @@ def main() -> None:
         device=torch.cuda.get_device_name(),
         cuda_graph_replay=(
             None
-            if args.backend.startswith("compiled")
-            and args.compile_backend == "cudagraphs"
-            else False
+            if args.backend == "native-graph"
+            else (
+                None
+                if args.backend.startswith("compiled")
+                and args.compile_backend == "cudagraphs"
+                else False
+            )
         ),
         manual_cuda_graph_replay=False,
+        native_autograd_graph_requested=args.backend == "native-graph",
+        implicit_causal_requested=args.implicit_causal,
         cuda_graph_backend_requested=(
             args.backend.startswith("compiled") and args.compile_backend == "cudagraphs"
         ),
@@ -109,10 +124,13 @@ def main() -> None:
         n: hashlib.sha256(Path(__file__).with_name(n).read_bytes()).hexdigest()
         for n in [
             "benchmark_qwen35_training.py",
+            "run_qwen35_training.py",
             "qwen35_training_mlp.py",
             "lora_swiglu_training.py",
             "lora_swiglu_kernels.py",
             "lora_native_training.py",
+            "qwen35_training_graph.py",
+            "qwen35_training_mask.py",
         ]
     }
     report["input_receipt"] = json.loads(
@@ -164,6 +182,10 @@ def main() -> None:
         conv_function=gdn[0].causal_conv1d_fn.__module__,
     )
     model.config.use_cache = False
+    if args.implicit_causal:
+        from qwen35_training_mask import install
+
+        report["attention_policy"] = install(model)
     model = peft.get_peft_model(
         model,
         peft.LoraConfig(
@@ -229,6 +251,19 @@ def main() -> None:
     save()
     input_ids = json.loads((args.checkpoint / "input-tokens.json").read_text())
 
+    def run(inputs):
+        if args.backend == "native-graph":
+            return train_model(inputs["input_ids"])
+        if args.implicit_causal:
+            from qwen35_training_mask import fixed_positions
+
+            inputs = dict(inputs, position_ids=fixed_positions(inputs["input_ids"]))
+        result = train_model(**inputs)
+        return (
+            result.loss,
+            sample_logits(result.logits.detach()),
+        )
+
     def reset():
         with torch.no_grad():
             for name, p in params.items():
@@ -258,6 +293,10 @@ def main() -> None:
                 device="cuda",
             ).reshape(1, tokens)
             batch = dict(input_ids=ids, labels=ids, use_cache=False)
+            if args.implicit_causal and model.config.pad_token_id is not None:
+                assert not (ids == model.config.pad_token_id).any().item(), (
+                    "padding unsupported"
+                )
             case = dict(
                 tokens=tokens,
                 checkpointing=bool(checkpointing),
@@ -265,22 +304,34 @@ def main() -> None:
                 sample_losses=[],
             )
             optim = reset()
+            graph_context = nullcontext(None)
+            if args.backend == "native-graph":
+                if checkpointing:
+                    raise ValueError(
+                        "native graph probe does not support checkpointing"
+                    )
+                from qwen35_training_graph import capture, graph_counters
+
+                graph_context = graph_counters()
+            with graph_context as graph_counts:
+                if args.backend == "native-graph":
+                    train_model = capture(
+                        model, ids, implicit_causal=args.implicit_causal
+                    )
+                    case["native_graph_setup"] = dict(graph_counts)
+                # Keep the common correctness/timing procedure below outside
+                # this temporary capture-only instrumentation context.
+            if graph_counts is not None:
+                case["native_graph_api_counts"] = graph_counts
             # Save all parameter gradients and the third-step update for CPU
             # cross-method checks; these copies are outside the timing interval.
             for step in range(3):
                 optim.zero_grad(set_to_none=True)
                 with torch.autocast("cuda", dtype=torch.bfloat16):
-                    output = train_model(**batch)
-                    loss = output.loss
+                    loss, audit_logits = run(batch)
                 if step == 2:
-                    positions = [0, tokens // 2, tokens - 2]
-                    logits = (
-                        output.logits.detach()[0, positions, ::257]
-                        .float()
-                        .cpu()
-                        .contiguous()
-                    )
-                del output
+                    logits = audit_logits.detach().float().cpu().contiguous()
+                del audit_logits
                 loss.backward()
                 assert torch.isfinite(loss).item()
                 assert all(
@@ -312,13 +363,50 @@ def main() -> None:
                 {k: p.detach().cpu().contiguous() for k, p in params.items()},
                 str(args.output / f"updated-gc{checkpointing}-t{tokens}.safetensors"),
             )
+            if args.check_input_change:
+                original_ids = ids.clone()
+                changed = ids.roll(1, dims=-1)
+                assert not torch.equal(changed, ids)
+                case["changed_input_sha256"] = hashlib.sha256(
+                    changed.cpu().numpy().tobytes()
+                ).hexdigest()
+                optim.zero_grad(set_to_none=True)
+                with torch.autocast("cuda", dtype=torch.bfloat16):
+                    changed_loss, changed_logits = run(
+                        dict(input_ids=changed, labels=changed, use_cache=False)
+                    )
+                changed_loss.backward()
+                assert torch.equal(ids, original_ids), (
+                    "graph changed caller input storage"
+                )
+                case["changed_input_loss"] = changed_loss.item()
+                assert all(
+                    p.grad is not None and torch.isfinite(p.grad).all().item()
+                    for p in params.values()
+                )
+                save_file(
+                    {k: p.grad.detach().cpu().contiguous() for k, p in params.items()},
+                    str(
+                        args.output
+                        / f"changed-grad-gc{checkpointing}-t{tokens}.safetensors"
+                    ),
+                )
+                save_file(
+                    {"logits": changed_logits.detach().float().cpu().contiguous()},
+                    str(
+                        args.output
+                        / f"changed-logits-gc{checkpointing}-t{tokens}.safetensors"
+                    ),
+                )
+                del changed, changed_loss, changed_logits, original_ids
             del optim
             optim = reset()
 
             def step(optimizer=optim, inputs=batch):
                 optimizer.zero_grad(set_to_none=True)
                 with torch.autocast("cuda", dtype=torch.bfloat16):
-                    loss = train_model(**inputs).loss
+                    loss, audit_logits = run(inputs)
+                del audit_logits
                 loss.backward()
                 optimizer.step()
                 return loss.detach()
@@ -332,6 +420,9 @@ def main() -> None:
             torch.cuda.reset_peak_memory_stats()
             resident = torch.cuda.memory_allocated()
             wall, gpu = [], []
+            timed_replays_before = (
+                graph_counts["replays"] if graph_counts is not None else 0
+            )
             for _ in range(args.samples):
                 torch.cuda.synchronize()
                 a, b = (
@@ -360,6 +451,13 @@ def main() -> None:
                 peak_allocated_bytes=torch.cuda.max_memory_allocated(),
                 peak_reserved_bytes=torch.cuda.max_memory_reserved(),
             )
+            if graph_counts is not None:
+                case["native_graph_timed_replays"] = (
+                    graph_counts["replays"] - timed_replays_before
+                )
+                assert case["native_graph_timed_replays"] == 2 * args.samples
+                assert graph_counts["captures"] == 2
+                report["cuda_graph_replay"] = True
             report["cases"].append(case)
             report["compiler_counters"] = {
                 k: dict(v) for k, v in torch._dynamo.utils.counters.items()
@@ -375,6 +473,8 @@ def main() -> None:
                 flush=True,
             )
             del optim, step, loss, grads, logits, ids, batch
+            if args.backend == "native-graph":
+                train_model = model
             for parameter in params.values():
                 parameter.grad = None
             gc.collect()

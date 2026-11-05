@@ -18,7 +18,20 @@ analysis = importlib.util.module_from_spec(spec)
 spec.loader.exec_module(analysis)
 
 
-@pytest.mark.parametrize("drift", [None, "loss", "grad", "updated", "logits"])
+@pytest.mark.parametrize(
+    "drift",
+    [
+        None,
+        "loss",
+        "grad",
+        "updated",
+        "logits",
+        "timed-loss",
+        "changed-loss",
+        "changed-grad",
+        "changed-logits",
+    ],
+)
 def test_cpu_comparison_gates(tmp_path, monkeypatch, drift):
     for name in ("peft-before", "packed"):
         path = tmp_path / name
@@ -37,16 +50,36 @@ def test_cpu_comparison_gates(tmp_path, monkeypatch, drift):
                             tokens=128,
                             checkpointing=False,
                             losses=losses,
+                            sample_losses=[
+                                1.0
+                                + (
+                                    0.02
+                                    if name == "packed" and drift == "timed-loss"
+                                    else 0.0
+                                )
+                            ],
+                            changed_input_loss=2.0
+                            + (
+                                0.02
+                                if name == "packed" and drift == "changed-loss"
+                                else 0.0
+                            ),
                             median_wall_ms=2 if name == "peft-before" else 1,
                         )
                     ],
                 )
             )
         )
-        for family in ("grad", "updated", "logits"):
+        for family in ("grad", "updated", "logits", "changed-grad", "changed-logits"):
             value = torch.ones(2, 3)
             if name == "packed" and family == drift:
-                value += {"grad": 0.1, "updated": 0.0002, "logits": 0.03}[family]
+                value += {
+                    "grad": 0.1,
+                    "updated": 0.0002,
+                    "logits": 0.03,
+                    "changed-grad": 0.1,
+                    "changed-logits": 0.03,
+                }[family]
             safe.save_file({"weight": value}, path / f"{family}-gc0-t128.safetensors")
     (tmp_path / "run.json").write_text(json.dumps({"state": "complete"}))
     output = tmp_path / "comparison.json"

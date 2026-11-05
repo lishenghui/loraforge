@@ -5,15 +5,21 @@ to the complete Qwen3.5-0.8B text model. It measures real optimizer steps, not
 manual CUDA-graph replay. It is a standalone first-order training feasibility
 study with fixed text batches, not a convergence or Unsloth comparison.
 
-The main full-model run has completed, but **native PEFT numerical equivalence
-has not passed**. Consumer fusion passes its matched packed-projection reference;
-the packed projection itself fails the original PEFT gradient/update gates.
-The timings below are experimental, not a validated drop-in training speedup.
-CPU checks pass (204 passed, three skipped, 49 GPU cases deselected), including
-actual PEFT parameter ownership, checkpointed updates and comparison failure
-gates. The independent complete-model compiler study is recorded separately. A later
-separate-native-projection ablation passes all native gates only when retaining
-native activation, with no demonstrated complete-step speedup.
+The later [native-autograd graph follow-up](qwen35-training-autograd.md) now
+passes **exact native PEFT comparisons** at all three tested lengths after
+preserving implicit causal SDPA/GQA and explicit contiguous rotary positions.
+Same-job complete-step gains are 3.429–3.431x at 128 tokens and 1.454–1.540x at
+1024; 4096 tokens remains essentially unchanged. This is BF16, rank four,
+batch one, dropout zero, checkpointing off, no padding/packing or KV cache.
+It does not establish convergence, QLoRA performance or a total-VRAM saving.
+225 CPU checks, Ruff and wheel/sdist checks pass.
+
+The older packed-projection and compiler measurements below retain their
+**failed original PEFT gradient/update gates**. Matched packed-reference success
+and those experimental timings must not be presented as native-equivalent
+training. The separate-native expansion-only ablation is exact but has no
+robust speedup. The verified graph path retains the entire original PEFT model
+and does not use those packed/custom MLP replacements.
 
 ## Complete training step measurements
 
@@ -302,10 +308,13 @@ total-VRAM saving. Both allocator measures are retained in
 hashes, warnings, gates and every timing sample. These three new GPU jobs are
 finished; none remains queued or running for this optimization round.
 
-The next useful investigation is the GDN/causal-convolution graph boundaries
-and AOT backward accumulation order, with the same native gates. The measured
-benefit of short-sequence scheduling is larger than the separate-base consumer
-benefit; another tiny MLP fusion alone is not supported as the path to 1.3x.
+The subsequent [isolation and repair](qwen35-training-autograd.md) identifies
+an additional forward-path change: tracing/capture disables implicit causal
+mask skipping and GQA in the native SDPA wrapper, including automatic packing
+handling for a single sequence. Preserving the fixed contiguous causal path
+with native-autograd capture now gives exact original-PEFT results. AOT-based
+failures recorded here remain rejected. Short-sequence scheduling has a much
+larger measured benefit than another separate-base MLP consumer fusion.
 This remains a fixed-text BF16 training experiment, not QLoRA, serving throughput,
 trained compression quality or a matched Unsloth benchmark.
 

@@ -1,0 +1,410 @@
+{
+  "job": {
+    "id": 23502195,
+    "state": "FAILED",
+    "elapsed_seconds": 158,
+    "node": "nid005026",
+    "partition": "small-g",
+    "gcd": 1,
+    "cpus": 7,
+    "host_memory_gb": 40,
+    "time_limit_minutes": 10
+  },
+  "reason": "Mask factory correctly rejected a packing wrapper generated automatically during tracing/capture even for contiguous single-sequence default positions. No successful Dynamo/native-graph timing used.",
+  "raw_comparison_sha256": "141f36780d62ea04f7b5eed8b78325b7586a2f6edf0cdeaec0f0856c09bc2ffb",
+  "run": {
+    "state": "failed",
+    "workers": [
+      {
+        "name": "peft-before",
+        "backend": "peft",
+        "state": "complete",
+        "returncode": 0,
+        "seconds": 67.5008054379723
+      },
+      {
+        "name": "peft-implicit",
+        "backend": "peft",
+        "state": "complete",
+        "returncode": 0,
+        "seconds": 28.144206863013096
+      },
+      {
+        "name": "dynamo-eager",
+        "backend": "compiled-model",
+        "state": "failed",
+        "returncode": 1,
+        "seconds": 15.17359458602732
+      },
+      {
+        "name": "native-graph",
+        "backend": "native-graph",
+        "state": "failed",
+        "returncode": 1,
+        "seconds": 16.522302232973743
+      },
+      {
+        "name": "peft-after",
+        "backend": "peft",
+        "state": "complete",
+        "returncode": 0,
+        "seconds": 28.418749221018516
+      }
+    ]
+  },
+  "gates": {
+    "loss_max_abs": 0.01,
+    "sampled_logits_relative_l2": 0.02,
+    "per_parameter_gradient_relative_l2": 0.05,
+    "updated_parameter_max_abs": 0.0001
+  },
+  "comparisons": [
+    {
+      "candidate": "peft-implicit",
+      "reference": "peft-before",
+      "checkpointing": false,
+      "tokens": 128,
+      "speedup": 1.007302755693783,
+      "loss_max_abs": 0.0,
+      "grad": {
+        "tensors": 372,
+        "exact_tensors": 372,
+        "max_abs": 0.0,
+        "max_relative_l2": 0.0,
+        "failed": [],
+        "passed": true,
+        "aggregate_relative_l2": 0.0
+      },
+      "updated": {
+        "tensors": 372,
+        "exact_tensors": 372,
+        "max_abs": 0.0,
+        "max_relative_l2": 0.0,
+        "failed": [],
+        "passed": true,
+        "aggregate_relative_l2": 0.0
+      },
+      "logits": {
+        "tensors": 1,
+        "exact_tensors": 1,
+        "max_abs": 0.0,
+        "max_relative_l2": 0.0,
+        "failed": [],
+        "passed": true,
+        "aggregate_relative_l2": 0.0
+      },
+      "numerics_passed": true,
+      "timed_loss_max_abs": 0.0,
+      "changed_input_loss_max_abs": 0.0,
+      "changed-grad": {
+        "tensors": 372,
+        "exact_tensors": 372,
+        "max_abs": 0.0,
+        "max_relative_l2": 0.0,
+        "failed": [],
+        "passed": true,
+        "aggregate_relative_l2": 0.0
+      },
+      "changed-logits": {
+        "tensors": 1,
+        "exact_tensors": 1,
+        "max_abs": 0.0,
+        "max_relative_l2": 0.0,
+        "failed": [],
+        "passed": true,
+        "aggregate_relative_l2": 0.0
+      }
+    },
+    {
+      "candidate": "peft-implicit",
+      "reference": "peft-before",
+      "checkpointing": false,
+      "tokens": 1024,
+      "speedup": 1.0112892040977302,
+      "loss_max_abs": 0.0,
+      "grad": {
+        "tensors": 372,
+        "exact_tensors": 372,
+        "max_abs": 0.0,
+        "max_relative_l2": 0.0,
+        "failed": [],
+        "passed": true,
+        "aggregate_relative_l2": 0.0
+      },
+      "updated": {
+        "tensors": 372,
+        "exact_tensors": 372,
+        "max_abs": 0.0,
+        "max_relative_l2": 0.0,
+        "failed": [],
+        "passed": true,
+        "aggregate_relative_l2": 0.0
+      },
+      "logits": {
+        "tensors": 1,
+        "exact_tensors": 1,
+        "max_abs": 0.0,
+        "max_relative_l2": 0.0,
+        "failed": [],
+        "passed": true,
+        "aggregate_relative_l2": 0.0
+      },
+      "numerics_passed": true,
+      "timed_loss_max_abs": 0.0,
+      "changed_input_loss_max_abs": 0.0,
+      "changed-grad": {
+        "tensors": 372,
+        "exact_tensors": 372,
+        "max_abs": 0.0,
+        "max_relative_l2": 0.0,
+        "failed": [],
+        "passed": true,
+        "aggregate_relative_l2": 0.0
+      },
+      "changed-logits": {
+        "tensors": 1,
+        "exact_tensors": 1,
+        "max_abs": 0.0,
+        "max_relative_l2": 0.0,
+        "failed": [],
+        "passed": true,
+        "aggregate_relative_l2": 0.0
+      }
+    },
+    {
+      "candidate": "peft-implicit",
+      "reference": "peft-before",
+      "checkpointing": false,
+      "tokens": 4096,
+      "speedup": 0.997657713844402,
+      "loss_max_abs": 0.0,
+      "grad": {
+        "tensors": 372,
+        "exact_tensors": 372,
+        "max_abs": 0.0,
+        "max_relative_l2": 0.0,
+        "failed": [],
+        "passed": true,
+        "aggregate_relative_l2": 0.0
+      },
+      "updated": {
+        "tensors": 372,
+        "exact_tensors": 372,
+        "max_abs": 0.0,
+        "max_relative_l2": 0.0,
+        "failed": [],
+        "passed": true,
+        "aggregate_relative_l2": 0.0
+      },
+      "logits": {
+        "tensors": 1,
+        "exact_tensors": 1,
+        "max_abs": 0.0,
+        "max_relative_l2": 0.0,
+        "failed": [],
+        "passed": true,
+        "aggregate_relative_l2": 0.0
+      },
+      "numerics_passed": true,
+      "timed_loss_max_abs": 0.0,
+      "changed_input_loss_max_abs": 0.0,
+      "changed-grad": {
+        "tensors": 372,
+        "exact_tensors": 372,
+        "max_abs": 0.0,
+        "max_relative_l2": 0.0,
+        "failed": [],
+        "passed": true,
+        "aggregate_relative_l2": 0.0
+      },
+      "changed-logits": {
+        "tensors": 1,
+        "exact_tensors": 1,
+        "max_abs": 0.0,
+        "max_relative_l2": 0.0,
+        "failed": [],
+        "passed": true,
+        "aggregate_relative_l2": 0.0
+      }
+    },
+    {
+      "candidate": "peft-after",
+      "reference": "peft-before",
+      "checkpointing": false,
+      "tokens": 128,
+      "speedup": 0.9761073646582241,
+      "loss_max_abs": 0.0,
+      "grad": {
+        "tensors": 372,
+        "exact_tensors": 372,
+        "max_abs": 0.0,
+        "max_relative_l2": 0.0,
+        "failed": [],
+        "passed": true,
+        "aggregate_relative_l2": 0.0
+      },
+      "updated": {
+        "tensors": 372,
+        "exact_tensors": 372,
+        "max_abs": 0.0,
+        "max_relative_l2": 0.0,
+        "failed": [],
+        "passed": true,
+        "aggregate_relative_l2": 0.0
+      },
+      "logits": {
+        "tensors": 1,
+        "exact_tensors": 1,
+        "max_abs": 0.0,
+        "max_relative_l2": 0.0,
+        "failed": [],
+        "passed": true,
+        "aggregate_relative_l2": 0.0
+      },
+      "numerics_passed": true,
+      "timed_loss_max_abs": 0.0,
+      "changed_input_loss_max_abs": 0.0,
+      "changed-grad": {
+        "tensors": 372,
+        "exact_tensors": 372,
+        "max_abs": 0.0,
+        "max_relative_l2": 0.0,
+        "failed": [],
+        "passed": true,
+        "aggregate_relative_l2": 0.0
+      },
+      "changed-logits": {
+        "tensors": 1,
+        "exact_tensors": 1,
+        "max_abs": 0.0,
+        "max_relative_l2": 0.0,
+        "failed": [],
+        "passed": true,
+        "aggregate_relative_l2": 0.0
+      }
+    },
+    {
+      "candidate": "peft-after",
+      "reference": "peft-before",
+      "checkpointing": false,
+      "tokens": 1024,
+      "speedup": 1.0099231367488937,
+      "loss_max_abs": 0.0,
+      "grad": {
+        "tensors": 372,
+        "exact_tensors": 372,
+        "max_abs": 0.0,
+        "max_relative_l2": 0.0,
+        "failed": [],
+        "passed": true,
+        "aggregate_relative_l2": 0.0
+      },
+      "updated": {
+        "tensors": 372,
+        "exact_tensors": 372,
+        "max_abs": 0.0,
+        "max_relative_l2": 0.0,
+        "failed": [],
+        "passed": true,
+        "aggregate_relative_l2": 0.0
+      },
+      "logits": {
+        "tensors": 1,
+        "exact_tensors": 1,
+        "max_abs": 0.0,
+        "max_relative_l2": 0.0,
+        "failed": [],
+        "passed": true,
+        "aggregate_relative_l2": 0.0
+      },
+      "numerics_passed": true,
+      "timed_loss_max_abs": 0.0,
+      "changed_input_loss_max_abs": 0.0,
+      "changed-grad": {
+        "tensors": 372,
+        "exact_tensors": 372,
+        "max_abs": 0.0,
+        "max_relative_l2": 0.0,
+        "failed": [],
+        "passed": true,
+        "aggregate_relative_l2": 0.0
+      },
+      "changed-logits": {
+        "tensors": 1,
+        "exact_tensors": 1,
+        "max_abs": 0.0,
+        "max_relative_l2": 0.0,
+        "failed": [],
+        "passed": true,
+        "aggregate_relative_l2": 0.0
+      }
+    },
+    {
+      "candidate": "peft-after",
+      "reference": "peft-before",
+      "checkpointing": false,
+      "tokens": 4096,
+      "speedup": 0.9969966385887826,
+      "loss_max_abs": 0.0,
+      "grad": {
+        "tensors": 372,
+        "exact_tensors": 372,
+        "max_abs": 0.0,
+        "max_relative_l2": 0.0,
+        "failed": [],
+        "passed": true,
+        "aggregate_relative_l2": 0.0
+      },
+      "updated": {
+        "tensors": 372,
+        "exact_tensors": 372,
+        "max_abs": 0.0,
+        "max_relative_l2": 0.0,
+        "failed": [],
+        "passed": true,
+        "aggregate_relative_l2": 0.0
+      },
+      "logits": {
+        "tensors": 1,
+        "exact_tensors": 1,
+        "max_abs": 0.0,
+        "max_relative_l2": 0.0,
+        "failed": [],
+        "passed": true,
+        "aggregate_relative_l2": 0.0
+      },
+      "numerics_passed": true,
+      "timed_loss_max_abs": 0.0,
+      "changed_input_loss_max_abs": 0.0,
+      "changed-grad": {
+        "tensors": 372,
+        "exact_tensors": 372,
+        "max_abs": 0.0,
+        "max_relative_l2": 0.0,
+        "failed": [],
+        "passed": true,
+        "aggregate_relative_l2": 0.0
+      },
+      "changed-logits": {
+        "tensors": 1,
+        "exact_tensors": 1,
+        "max_abs": 0.0,
+        "max_relative_l2": 0.0,
+        "failed": [],
+        "passed": true,
+        "aggregate_relative_l2": 0.0
+      }
+    }
+  ],
+  "source_sha256": {
+    "benchmark_qwen35_training.py": "fb64e9bcc2bd62fb1b7f4fed3a8f8c3ab5b22c34506ef59d311942b1e0351088",
+    "run_qwen35_training.py": "403ee9541b2f422385a295d6383a443c77f8998dd28bece4c74185d6d16aa917",
+    "qwen35_training_graph.py": "436772ab97e1a112577e013831c0e3e04dc8131c5debba801c42f1a443b7e3ce",
+    "qwen35_training_mask.py": "a69549bb18e5af4a48b174ab6fe58467f97b2cc37e16ffa1af0975918c474633"
+  },
+  "logs_sha256": {
+    "native-graph.log": "1596fefdc12b00c4b01185dd71d45fc195a3d7c23888ff021cbd31f2c3e68ad2",
+    "dynamo-eager.log": "4003ee316a4914a7a70ddfd30fd75b8f5fd67e691e9cf4234945193b3ed0ebbf",
+    "gpu-23502195.log": "f9fc1c0fabeb933a3b35af82cfb120ee08b93470e063b15e8596b2cbfe93dbf4"
+  }
+}

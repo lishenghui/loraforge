@@ -21,11 +21,16 @@ def main() -> None:
     selection.add_argument("--skip-whole-compile", action="store_true")
     selection.add_argument("--whole-compile-only", action="store_true")
     selection.add_argument("--native-consumer-only", action="store_true")
+    selection.add_argument("--autograd-isolation-only", action="store_true")
+    selection.add_argument("--causal-policy-only", action="store_true")
     parser.add_argument("--emulate-precision-casts", action="store_true")
     parser.add_argument("--recompile-limit", type=int)
     parser.add_argument(
-        "--compile-backend", choices=["inductor", "cudagraphs"], default="inductor"
+        "--compile-backend",
+        choices=["inductor", "cudagraphs", "eager", "aot_eager"],
+        default="inductor",
     )
+    parser.add_argument("--check-input-change", action="store_true")
     args = parser.parse_args()
     args.output.mkdir(exist_ok=False)
     deadline = time.monotonic() + args.max_seconds
@@ -57,6 +62,23 @@ def main() -> None:
             ("native-expand", "native-expand"),
             ("peft-after", "peft"),
         ]
+    elif args.autograd_isolation_only:
+        modes = [
+            ("peft-before", "peft"),
+            ("dynamo-eager", "compiled-model"),
+            ("aot-eager", "compiled-model"),
+            ("graph-backend", "compiled-model"),
+            ("native-graph", "native-graph"),
+            ("peft-after", "peft"),
+        ]
+    elif args.causal_policy_only:
+        modes = [
+            ("peft-before", "peft"),
+            ("peft-implicit", "peft"),
+            ("dynamo-eager", "compiled-model"),
+            ("native-graph", "native-graph"),
+            ("peft-after", "peft"),
+        ]
     for name, backend in modes:
         remaining = deadline - time.monotonic()
         if remaining < 30:
@@ -79,7 +101,10 @@ def main() -> None:
             "--checkpointing",
             *(
                 ["0"]
-                if backend == "compiled-model" or args.whole_compile_only
+                if backend in ("compiled-model", "native-graph")
+                or args.whole_compile_only
+                or args.autograd_isolation_only
+                or args.causal_policy_only
                 else ["0", "1"]
             ),
         ]
@@ -87,7 +112,16 @@ def main() -> None:
             command.append("--emulate-precision-casts")
         if args.recompile_limit is not None:
             command += ["--recompile-limit", str(args.recompile_limit)]
-        command += ["--compile-backend", args.compile_backend]
+        compiler = {
+            "dynamo-eager": "eager",
+            "aot-eager": "aot_eager",
+            "graph-backend": "cudagraphs",
+        }.get(name, args.compile_backend)
+        command += ["--compile-backend", compiler]
+        if args.check_input_change:
+            command.append("--check-input-change")
+        if args.causal_policy_only and name not in ("peft-before", "peft-after"):
+            command.append("--implicit-causal")
         timeout = min(
             remaining, 300 if name in ("peft-before", "compiled-model") else 240
         )
@@ -95,7 +129,7 @@ def main() -> None:
             if args.whole_compile_only:
                 # Measured native controls take ~20s; reserve a full minute.
                 timeout = min(420, remaining - 60)
-            else:
+            elif not (args.autograd_isolation_only or args.causal_policy_only):
                 timeout = min(timeout, remaining - 150)
         started = time.monotonic()
         print("START_WORKER", name, flush=True)

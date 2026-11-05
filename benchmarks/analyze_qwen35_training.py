@@ -24,6 +24,7 @@ def main() -> None:
         updated_parameter_max_abs=0.0001,
     )
     report = dict(
+        analyzer_sha256=hashlib.sha256(Path(__file__).read_bytes()).hexdigest(),
         scope="Whole BF16 Qwen3.5 text training step; fixed text, no convergence claim",
         gates=gates,
         workers={},
@@ -84,7 +85,7 @@ def main() -> None:
                     else relative
                     <= gates[
                         "per_parameter_gradient_relative_l2"
-                        if family == "grad"
+                        if family.endswith("grad")
                         else "sampled_logits_relative_l2"
                     ]
                 )
@@ -99,6 +100,15 @@ def main() -> None:
         return summary
 
     pairs = [
+        ("dynamo-eager", "peft-before"),
+        ("aot-eager", "peft-before"),
+        ("graph-backend", "peft-before"),
+        ("native-graph", "peft-before"),
+        ("native-graph", "dynamo-eager"),
+        ("peft-implicit", "peft-before"),
+        ("native-graph", "peft-implicit"),
+        ("graph-backend", "aot-eager"),
+        ("aot-eager", "dynamo-eager"),
         ("native-activation", "peft-before"),
         ("native-consumer", "peft-before"),
         ("native-expand", "peft-before"),
@@ -146,6 +156,32 @@ def main() -> None:
             comparison["numerics_passed"] = loss_error <= gates["loss_max_abs"] and all(
                 comparison[family]["passed"] for family in ("grad", "updated", "logits")
             )
+            if "sample_losses" in value and "sample_losses" in rc:
+                comparison["timed_loss_max_abs"] = max(
+                    abs(a - b)
+                    for a, b in zip(
+                        value["sample_losses"], rc["sample_losses"], strict=True
+                    )
+                )
+                comparison["numerics_passed"] &= (
+                    comparison["timed_loss_max_abs"] <= gates["loss_max_abs"]
+                )
+            if "changed_input_loss" in value or "changed_input_loss" in rc:
+                assert value.get("changed_input_sha256") == rc.get(
+                    "changed_input_sha256"
+                ), "changed inputs differ"
+                comparison["changed_input_loss_max_abs"] = abs(
+                    value["changed_input_loss"] - rc["changed_input_loss"]
+                )
+                for family in ("changed-grad", "changed-logits"):
+                    comparison[family] = tensors(
+                        candidate, reference, family, int(key[0]), key[1]
+                    )
+                comparison["numerics_passed"] &= comparison[
+                    "changed_input_loss_max_abs"
+                ] <= gates["loss_max_abs"] and all(
+                    comparison[f]["passed"] for f in ("changed-grad", "changed-logits")
+                )
             report["comparisons"].append(comparison)
             print(
                 candidate,
