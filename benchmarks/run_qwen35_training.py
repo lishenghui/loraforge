@@ -20,6 +20,8 @@ def main() -> None:
     selection = parser.add_mutually_exclusive_group()
     selection.add_argument("--skip-whole-compile", action="store_true")
     selection.add_argument("--whole-compile-only", action="store_true")
+    parser.add_argument("--emulate-precision-casts", action="store_true")
+    parser.add_argument("--recompile-limit", type=int)
     args = parser.parse_args()
     args.output.mkdir(exist_ok=False)
     deadline = time.monotonic() + args.max_seconds
@@ -69,11 +71,19 @@ def main() -> None:
                 else ["0", "1"]
             ),
         ]
+        if args.emulate_precision_casts:
+            command.append("--emulate-precision-casts")
+        if args.recompile_limit is not None:
+            command += ["--recompile-limit", str(args.recompile_limit)]
         timeout = min(
             remaining, 300 if name in ("peft-before", "compiled-model") else 240
         )
         if backend == "compiled-model":
-            timeout = min(timeout, remaining - 150)
+            if args.whole_compile_only:
+                # Measured native controls take ~20s; reserve a full minute.
+                timeout = min(420, remaining - 60)
+            else:
+                timeout = min(timeout, remaining - 150)
         started = time.monotonic()
         print("START_WORKER", name, flush=True)
         with (args.output / f"{name}.log").open("w") as log:

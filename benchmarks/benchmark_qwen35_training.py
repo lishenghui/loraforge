@@ -36,6 +36,8 @@ def main() -> None:
     )
     p.add_argument("--warmup", type=int, default=2)
     p.add_argument("--samples", type=int, default=5)
+    p.add_argument("--emulate-precision-casts", action="store_true")
+    p.add_argument("--recompile-limit", type=int)
     args = p.parse_args()
     args.output.mkdir(exist_ok=False)
     import importlib.metadata
@@ -43,10 +45,17 @@ def main() -> None:
     import peft
     import qwen35_training_mlp as wrapper
     import torch
+    import torch._inductor.config as inductor_config
     from safetensors import safe_open
     from safetensors.torch import save_file
     from transformers import Qwen3_5ForCausalLM
 
+    if args.emulate_precision_casts:
+        inductor_config.emulate_precision_casts = True
+    if args.recompile_limit is not None:
+        if args.recompile_limit < 1:
+            raise ValueError("recompile limit must be positive")
+        torch._dynamo.config.recompile_limit = args.recompile_limit
     torch.manual_seed(773)
     report = dict(
         state="loading",
@@ -72,6 +81,11 @@ def main() -> None:
         lr=0.0001,
         warmup=args.warmup,
         samples=args.samples,
+        compiler_settings=dict(
+            emulate_precision_casts=inductor_config.emulate_precision_casts,
+            recompile_limit=torch._dynamo.config.recompile_limit,
+            float32_matmul_precision=torch.get_float32_matmul_precision(),
+        ),
     )
     report["source_sha256"] = {
         n: hashlib.sha256(Path(__file__).with_name(n).read_bytes()).hexdigest()

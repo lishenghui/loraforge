@@ -154,9 +154,12 @@ PYTHONPATH=/absolute/path/to/benchmarks:$PYTHONPATH \
   --output swiglu.json --tokens 128 1024 4096 8192
 ```
 
-The next model-level step is to attach a rank-4 wrapper with correct parameter
-ownership to a BF16 Qwen3.5 training baseline, then compare a complete step
-including GDN/attention/loss/checkpointing against PEFT, compiled PEFT and
-actual Unsloth under matched settings. Neither this microbenchmark nor its
-three optimizer updates establish full-model speed, task quality or superiority
-over Unsloth. No training hook is installed and serving PRs are unchanged.
+The [whole-model follow-up](qwen35-training.md) now attaches the rank-4 wrapper
+with actual PEFT parameter ownership and measures the complete text-model step,
+including GDN/attention/loss/checkpointing and AdamW. Its incremental consumer
+gain is much smaller than this isolated MLP result, and the packed projection
+fails original PEFT's gradient/update parity gates. The numerical distinction
+between that packed reference and the new consumer kernel is recorded there.
+Neither these short optimizer trajectories nor the full-model timing establishes
+SFT task quality or superiority over actual Unsloth. No training hook is
+installed and serving PRs are unchanged.
