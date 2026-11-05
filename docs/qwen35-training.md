@@ -128,6 +128,10 @@ keeps all six required workers, token lengths and checkpoint settings, and
 omits the separate optional whole-model compilation worker. Its measurement
 still includes the compiled-MLP baseline; it does not establish a comparison
 against compiling the complete model. That comparison needs a separate run.
+`--whole-compile-only` runs ordinary PEFT before/after controls around the
+complete-model compiler, all without checkpointing, and requires the compiler
+worker to complete for that run to count as complete. These workers still run
+in separate processes and measure identical full optimizer steps.
 
 CPU comparison after collection:
 

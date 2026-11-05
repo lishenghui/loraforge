@@ -17,7 +17,9 @@ def main() -> None:
     parser.add_argument("--output", type=Path, required=True)
     parser.add_argument("--tokens", type=int, nargs="+", default=[128, 1024, 4096])
     parser.add_argument("--max-seconds", type=int, default=1100)
-    parser.add_argument("--skip-whole-compile", action="store_true")
+    selection = parser.add_mutually_exclusive_group()
+    selection.add_argument("--skip-whole-compile", action="store_true")
+    selection.add_argument("--whole-compile-only", action="store_true")
     args = parser.parse_args()
     args.output.mkdir(exist_ok=False)
     deadline = time.monotonic() + args.max_seconds
@@ -34,6 +36,12 @@ def main() -> None:
     if args.skip_whole_compile:
         modes = [
             (name, backend) for name, backend in modes if backend != "compiled-model"
+        ]
+    elif args.whole_compile_only:
+        modes = [
+            ("peft-before", "peft"),
+            ("compiled-model", "compiled-model"),
+            ("peft-after", "peft"),
         ]
     for name, backend in modes:
         remaining = deadline - time.monotonic()
@@ -55,7 +63,11 @@ def main() -> None:
             "--tokens",
             *map(str, args.tokens),
             "--checkpointing",
-            *(["0"] if backend == "compiled-model" else ["0", "1"]),
+            *(
+                ["0"]
+                if backend == "compiled-model" or args.whole_compile_only
+                else ["0", "1"]
+            ),
         ]
         timeout = min(
             remaining, 300 if name in ("peft-before", "compiled-model") else 240
@@ -92,7 +104,9 @@ def main() -> None:
         print("END_WORKER", name, state, flush=True)
         if name == "peft-before" and state != "complete":
             break
-    required = {name for name, _ in modes if name != "compiled-model"}
+    required = {
+        name for name, _ in modes if name != "compiled-model" or args.whole_compile_only
+    }
     completed = {
         worker["name"] for worker in report["workers"] if worker["state"] == "complete"
     }
