@@ -132,8 +132,21 @@ gfx90a, including graph replay, stream ordering and output alias rejection.
 The first complete-service attempt stopped because its test-only audit required
 all96 scale checks at model construction, before eager warmup populated them.
 That attempt is retained as a failed validation harness run; it is not evidence
-of a package-service pass. The audit is being retried after warmup in an isolated
-directory. Complete NF4/GDN service migration validation remains pending.
+of a package-service pass.
+
+Corrected installed-wheel job `23496963` completed in 9m04s on one MI250 GCD
+(`nid005031`, small-g, 7 CPUs, 40GB, 20min cap), with unchanged package source.
+Each of the NF4 and BF16 GDN pairs matches all44 validation sequences and saved
+logprobs exactly against its legacy control: maximum saved logprob difference0.
+All114 actual checkpoint projections and336 BF16 LoRA buffers are checked.
+The NF4 package path verifies96 exact reconstructions. The standalone GDN
+package path prepares18 shared parameter pairs, executes324 fused projections
+and retains original prefill fallback. Eager/prefill and decode graphs execute;
+additional GDN owner storage beyond model parameters is zero. The two pairs
+share inputs and controls within that one allocation. Timings have one repeat
+for validation sanity only, and are not a new speedup measurement.
+See [the installed API validation record](experimental-validation-mi250.json)
+for exact comparisons, source hashes, ownership counts and retained failures.
 
 Earlier compression/native numerical failures remain unchanged. Passing an
 incremental migration comparison does not establish trained-adapter quality,

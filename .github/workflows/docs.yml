@@ -15,6 +15,9 @@ concurrency:
 jobs:
   build:
     runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      pages: read
     steps:
       - uses: actions/checkout@v7
       - uses: actions/setup-python@v7
@@ -23,6 +26,9 @@ jobs:
           cache: pip
       - name: Install documentation tools without GPU dependencies
         run: python -m pip install ".[docs]"
+      - name: Configure Pages metadata
+        if: github.event_name != 'pull_request' && (github.ref == 'refs/heads/main' || github.ref == 'refs/heads/docs/site')
+        uses: actions/configure-pages@v6
       - name: Build strict HTML documentation
         env:
           DOCS_SOURCE_REF: ${{ github.sha }}
@@ -57,3 +63,5 @@ jobs:
       - name: Deploy GitHub Pages
         id: deployment
         uses: actions/deploy-pages@v5
+        with:
+          timeout: 1200000
