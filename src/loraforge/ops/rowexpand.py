@@ -56,6 +56,7 @@ def row_expand(
     *,
     blocks=880,
     threads=256,
+    row_tile=16,
 ):
     """Accumulate BF16-rounded scaled delta into output on its current stream.
 
@@ -63,6 +64,9 @@ def row_expand(
     fixed compact regions owned by RetainedLayout. Output may have padded rows.
     Routing, metadata and operands must live on the same device. No host rank
     reads, synchronization or allocations occur after the extension is loaded.
+    row_tile=2/4/8 splits each existing <=16-row segment inside the B kernel;
+    16 preserves the original kernel. A routing and per-token arithmetic stay
+    unchanged. These explicit alternatives require workload-specific timing.
     """
     if any(t.requires_grad for t in (z, store, output, scales)):
         raise ValueError("RowExpand serving operators do not support autograd")
@@ -83,5 +87,6 @@ def row_expand(
         capacity,
         blocks,
         threads,
+        row_tile,
     )
     return output

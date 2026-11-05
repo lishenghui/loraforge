@@ -224,5 +224,9 @@ def install_sglang_backend():
 
 def install():
     """SGLang plugin entrypoint; inert unless explicitly enabled."""
+    if os.environ.get("LORAFORGE_SGLANG_QWEN35") == "1":
+        from ._sglang_qwen35 import install_qwen35_lora
+
+        install_qwen35_lora()
     if os.environ.get("LORAFORGE_SGLANG") == "1":
         install_sglang_backend()

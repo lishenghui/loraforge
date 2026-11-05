@@ -16,7 +16,11 @@ from loraforge.integrations._sglang_fleet import create_backend  # noqa: E402
 from loraforge.runtime.retained import RetainedLayout  # noqa: E402
 
 
-@pytest.fixture(scope="module", params=[False, True], ids=["frozen", "active-prefill"])
+@pytest.fixture(
+    scope="module",
+    params=[(False, False), (True, False), (False, True)],
+    ids=["frozen", "active-prefill", "hybrid"],
+)
 def fleet_class(request):
     from sglang.srt.lora.mem_pool import LoRAMemoryPool
 
@@ -24,7 +28,7 @@ def fleet_class(request):
 
     init, load = LoRAMemoryPool.init_buffers, LoRAMemoryPool.load_lora_weight_to_buffer
     rowexpand_extension()
-    cls = create_backend({}, active_prefill=request.param)
+    cls = create_backend({}, active_prefill=request.param[0], hybrid=request.param[1])
     yield cls
     LoRAMemoryPool.init_buffers, LoRAMemoryPool.load_lora_weight_to_buffer = init, load
     del LoRAMemoryPool._loraforge_fleet
@@ -45,7 +49,15 @@ def forward(tokens, decode):
 
 @pytest.mark.parametrize(
     "name,slices",
-    [("o_proj", 1), ("down_proj", 1), ("gate_up_proj", 2), ("qkv_proj", 3)],
+    [
+        ("o_proj", 1),
+        ("down_proj", 1),
+        ("gate_up_proj", 2),
+        ("qkv_proj", 3),
+        ("in_proj_qkvz", 4),
+        ("out_proj", 1),
+        ("in_proj_ba", 2),
+    ],
 )
 @pytest.mark.parametrize("decode,tokens", [(True, 4), (True, 33), (False, 67)])
 def test_all_projection_paths(fleet_class, monkeypatch, name, slices, decode, tokens):
@@ -96,9 +108,14 @@ def test_all_projection_paths(fleet_class, monkeypatch, name, slices, decode, to
             output_offset_cpu=offsets_cpu,
             base_output=base.clone(),
         )
-        if slices == 3:
+        if slices >= 3:
             return backend.run_qkv_lora(
-                x=x, qkv_lora_a=a, qkv_lora_b=b, max_qkv_out_dim=64, **common
+                x=x,
+                qkv_lora_a=a,
+                qkv_lora_b=b,
+                max_qkv_out_dim=64,
+                n_slices=slices,
+                **common,
             )
         if slices == 2:
             return backend.run_gate_up_lora(
@@ -160,7 +177,7 @@ def test_all_projection_paths(fleet_class, monkeypatch, name, slices, decode, to
             reference = compute()
             backend._fleet_prefill_slots = slots
             torch.testing.assert_close(compute(), reference, rtol=0, atol=0)
-        if backend._fleet_active_prefill:
+        if backend._fleet_active_prefill and name != "in_proj_ba":
             assert backend._fleet_hits["skipped_native_high_prefill"] > 0
             assert backend._fleet_hits["skipped_rowexpand_low_prefill"] > 0
         # Capture with only low-rank requests, then replay high/mixed/null routes.
@@ -199,9 +216,167 @@ def test_all_projection_paths(fleet_class, monkeypatch, name, slices, decode, to
             torch.testing.assert_close(actual, compute(), rtol=0, atol=0)
             torch.testing.assert_close(actual, oracle(), rtol=0.03, atol=0.003)
     hits = backend.fleet_snapshot()["python_capture_eager_calls"]
-    assert hits["rowexpand_decode" if decode else "rowexpand_prefill"] > 0
+    if name != "in_proj_ba" and (decode or not backend._fleet_hybrid):
+        assert hits["rowexpand_decode" if decode else "rowexpand_prefill"] > 0
     if not decode:
         assert hits["rank_aware_shrink"] > 0
+
+
+def test_four_slice_unequal_widths_and_strided_output():
+    from loraforge.ops.rowexpand import direct_shrink, row_expand
+
+    torch.manual_seed(15)
+    a = torch.randn(3, 64, 64, device="cuda", dtype=torch.bfloat16) / 10
+    b = torch.randn(3, 28, 16, device="cuda", dtype=torch.bfloat16) / 10
+    catalog = {
+        str(k): {"base_model.model.layers.0.linear_attn.in_proj_qkvz.lora_A.weight": k}
+        for k in (3, 16)
+    }
+    layout = RetainedLayout(a, b, "in_proj_qkvz", 0, catalog)
+    for slot, k in enumerate((0, 3, 16)):
+        layout.load(str(k) if k else None, slot, 16 if k else 0)
+    x = torch.randn(6, 64, device="cuda", dtype=torch.bfloat16) / 10
+    z = torch.zeros(6, 64, device="cuda", dtype=torch.bfloat16)
+    output = torch.zeros(6, 32, device="cuda", dtype=torch.bfloat16)[:, :28]
+
+    def ints(data):
+        return torch.tensor(data, device="cuda", dtype=torch.int32)
+
+    routes = [0, 1, 2, 1, 0, 2]
+    direct_shrink(x, a, z, ints(routes), layout.rank, 4, 16)
+    offsets = [0, 6, 12, 20, 28]
+    row_expand(
+        z,
+        layout.store,
+        layout.boff,
+        layout.bucket,
+        output,
+        ints([0, 2, 4, 6]),
+        ints([0, 1, 2]),
+        ints([0, 4, 1, 3, 2, 5]),
+        layout.rank,
+        torch.ones(3, device="cuda"),
+        ints(offsets),
+        ints(3),
+        16,
+        blocks=8,
+        threads=128,
+    )
+    expected = torch.zeros_like(output)
+    for row, slot in enumerate(routes):
+        k = [0, 3, 16][slot]
+        if not k:
+            continue
+        for sl, (start, end) in enumerate(zip(offsets[:-1], offsets[1:], strict=True)):
+            zz = (x[row].float() @ a[slot, sl * k : (sl + 1) * k].float().T).bfloat16()
+            expected[row, start:end] = (
+                zz.float() @ b[slot, start:end, :k].float().T
+            ).bfloat16()
+    torch.testing.assert_close(output, expected, rtol=0.03, atol=0.003)
+
+
+@pytest.mark.parametrize("row_tile", [2, 4, 8, 16])
+@pytest.mark.parametrize("threads", [128, 256])
+def test_row_tiles_preserve_graph_routes_ranks_and_partial_outputs(row_tile, threads):
+    from loraforge.ops.rowexpand import row_expand
+
+    torch.manual_seed(319)
+    kw = dict(device="cuda", dtype=torch.bfloat16)
+    widths = [17, 265, 3, 514]  # Slice boundaries cross output blocks.
+    offsets = [0]
+    for width in widths:
+        offsets.append(offsets[-1] + width)
+    n, count = offsets[-1], 37
+    a = torch.randn(4, 256, 64, **kw) / 10
+    raw_a = a.clone()
+    b = torch.randn(4, n, 64, **kw) / 20
+    catalog = {
+        name: {"model.layers.0.linear_attn.in_proj_qkvz.lora_A.weight": rank}
+        for name, rank in (("one-low", 3), ("one-high", 64), ("two", 16), ("three", 64))
+    }
+    layout = RetainedLayout(a, b, "in_proj_qkvz", 0, catalog)
+    for slot, name in enumerate((None, "one-low", "two", "three")):
+        layout.load(name, slot, 64 if name else 0)
+
+    def ints(values):
+        return torch.tensor(values, device="cuda", dtype=torch.int32)
+
+    z = torch.randn(count, 256, **kw) / 10
+    base = torch.randn(count, n, **kw) / 10
+    output = torch.empty(count, n + 7, **kw)[:, :n]
+    reference = torch.empty_like(output)
+    seg, slots = ints([0, 16, 32, 37]), ints([1, 2, 3])
+    perm = torch.randperm(count, device="cuda", dtype=torch.int32)
+    scales = torch.tensor([0.0, 0.5, 1.25, -0.75], device="cuda")
+    offs, nseg = ints(offsets), ints(3)
+
+    def run(out, tile, block_threads):
+        out.copy_(base)
+        return row_expand(
+            z,
+            layout.store,
+            layout.boff,
+            layout.bucket,
+            out,
+            seg,
+            slots,
+            perm,
+            layout.rank,
+            scales,
+            offs,
+            nseg,
+            64,
+            row_tile=tile,
+            threads=block_threads,
+        )
+
+    run(output, row_tile, threads)
+    torch.cuda.synchronize()
+    graph = torch.cuda.CUDAGraph()
+    with torch.cuda.graph(graph):
+        run(output, row_tile, threads)
+    addresses = [
+        t.data_ptr() for t in (output, seg, slots, perm, nseg, layout.rank, layout.boff)
+    ]
+    for names, boundaries, active, high in (
+        ([1, 2, 3], [0, 16, 32, 37], 3, False),
+        ([3, 0, 1], [0, 5, 21, 37], 3, True),
+        ([2, 1, 0], [0, 16, 32, 37], 2, False),
+    ):
+        a[1].copy_(raw_a[1])
+        layout.load("one-high" if high else "one-low", 1, 64)
+        slots.copy_(ints(names))
+        seg.copy_(ints(boundaries))
+        perm.copy_(perm.flip(0))
+        nseg.fill_(active)
+        graph.replay()
+        run(reference, 16, 256)
+        torch.testing.assert_close(output, reference, rtol=0, atol=0)
+        expected = base.clone()
+        for segment in range(active):
+            slot = names[segment]
+            rank = [0, 64 if high else 3, 16, 64][slot]
+            if not rank:
+                continue
+            for row in perm[boundaries[segment] : boundaries[segment + 1]].tolist():
+                for sl, (start, end) in enumerate(
+                    zip(offsets[:-1], offsets[1:], strict=True)
+                ):
+                    delta = (
+                        z[row, sl * rank : (sl + 1) * rank].float()
+                        @ b[slot, start:end, :rank].float().T
+                    )
+                    expected[row, start:end] = (
+                        base[row, start:end].float()
+                        + (delta * scales[slot]).bfloat16().float()
+                    ).bfloat16()
+        torch.testing.assert_close(output, expected, rtol=0.03, atol=0.003)
+        assert addresses == [
+            t.data_ptr()
+            for t in (output, seg, slots, perm, nseg, layout.rank, layout.boff)
+        ]
+    with pytest.raises(RuntimeError, match="row_tile must"):
+        run(output, 3, threads)
 
 
 @pytest.mark.parametrize("rank", [1, 2, 4, 8, 16, 32, 64])

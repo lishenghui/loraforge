@@ -15,11 +15,25 @@ from pathlib import Path
 
 from loraforge.runtime.retained import RetainedLayout, read_rank_catalog
 
+_QWEN35_TINY_SHAPES = {
+    "in_proj_qkvz": (1024, 8192, 4),
+    "in_proj_ba": (1024, 32, 2),
+    "out_proj": (2048, 1024, 1),
+    "o_proj": (2048, 1024, 1),
+    "gate_up_proj": (1024, 7168, 2),
+    "down_proj": (3584, 1024, 1),
+    "qkv_proj": (1024, 5120, 3),
+}
+
 
 class FleetPolicy:
-    """Frozen MI250X profile: table-selected decode A, all decode B, low prefill B."""
+    """Dense MI250X table; hybrid tiny-rank reductions require a separate opt-in."""
 
-    def __init__(self, table=None):
+    def __init__(self, table=None, *, hybrid=False, hybrid_tiny=False):
+        if hybrid_tiny and not hybrid:
+            raise ValueError("tiny-rank policy requires the Qwen3.5 hybrid bridge")
+        self.hybrid = hybrid
+        self.hybrid_tiny = hybrid_tiny
         self.table = (
             json.loads(
                 (
@@ -30,7 +44,68 @@ class FleetPolicy:
             else table
         )
 
-    def select(self, name, phase, tokens):
+    def select(
+        self,
+        name,
+        phase,
+        tokens,
+        *,
+        output_width=None,
+        input_width=None,
+        rank_capacity=None,
+        slices=None,
+    ):
+        if self.hybrid:
+            # Hybrid recurrent states can amplify small rounding changes. The
+            # dense-model HIP-A and prefill-B profile is not a validated GDN
+            # profile. Keep those reductions native; optimize decode B only.
+            cfg = dict(
+                a="native",
+                b="all" if phase == "decode" and name != "in_proj_ba" else "native",
+                nblocks=880,
+                threads=256,
+                row_tile=16,
+            )
+            if phase == "decode":
+                # Qwen3.5-0.8B B-only profile. Output width is checked so larger
+                # hybrid models retain the original mapping. A stays native.
+                if output_width == 1024 and name in (
+                    "out_proj",
+                    "down_proj",
+                    "o_proj",
+                ):
+                    if 1 <= tokens <= 8:
+                        cfg["threads"] = 128
+                    elif 16 <= tokens <= 32:
+                        cfg.update(threads=128, row_tile=2)
+                elif output_width == 5120 and name == "qkv_proj" and 16 <= tokens <= 32:
+                    cfg["row_tile"] = 4
+            # Small-rank HIP A and prefill B change reduction order. Keep them
+            # opt-in, and limit the profile to the measured 0.8B geometries.
+            tiny = (
+                self.hybrid_tiny
+                and rank_capacity in (4, 8)
+                and (input_width, output_width, slices) == _QWEN35_TINY_SHAPES.get(name)
+            )
+            if tiny and phase == "decode" and 1 <= tokens <= 32:
+                cfg["a"] = "hip"
+                if name in ("out_proj", "down_proj", "o_proj"):
+                    cfg["b"] = "native"
+            elif tiny and phase == "prefill":
+                wide = name in ("in_proj_qkvz", "gate_up_proj", "qkv_proj")
+                narrow = name in ("out_proj", "down_proj", "o_proj")
+                if (wide and 128 <= tokens <= 1024) or (narrow and tokens == 1024):
+                    cfg.update(b="all", threads=256, row_tile=16, nblocks=880)
+            return cfg
+        if name in ("in_proj_qkvz", "out_proj"):
+            # Hybrid projections have different shapes from the dense-model
+            # tuning table. Keep native A; enable only shape-generic RowExpand.
+            return dict(
+                a="native",
+                b="all" if phase == "decode" else "low",
+                nblocks=880,
+                threads=256,
+            )
         points = self.table.get(phase, {}).get(name, {})
         if not points:
             return dict(a="native", b="native", nblocks=880, threads=256)
@@ -71,12 +146,13 @@ def _active_rank_classes(loaded, slots):
     return low, high
 
 
-def create_backend(catalog, *, active_prefill=False):
+def create_backend(catalog, *, active_prefill=False, hybrid=False, hybrid_tiny=False):
     import torch
     from sglang.kernels.ops.lora.dense.chunked_sgmv_expand import (
         chunked_sgmv_lora_expand_forward as native_expand,
     )
     from sglang.srt.lora.backend.chunked_backend import ChunkedSgmvLoRABackend
+    from sglang.srt.lora.lora import LoRAAdapter
     from sglang.srt.lora.mem_pool import LoRAMemoryPool
 
     from loraforge.ops.rowexpand import direct_shrink, row_expand, rowexpand_extension
@@ -84,7 +160,10 @@ def create_backend(catalog, *, active_prefill=False):
     from ._sglang_rank_aware import shrink as rank_shrink
 
     a_entries, b_entries = weakref.WeakValueDictionary(), weakref.WeakValueDictionary()
-    policy = FleetPolicy()
+    # Explicit installer calls and plugin activation must select the same
+    # reduction policy, including adapters that target only the hybrid's MLP.
+    hybrid = hybrid or getattr(LoRAAdapter, "_loraforge_qwen35", False)
+    policy = FleetPolicy(hybrid=hybrid, hybrid_tiny=hybrid_tiny)
     if getattr(LoRAMemoryPool, "_loraforge_fleet", False):
         raise RuntimeError(
             "Fleet pool hooks already belong to another backend instance"
@@ -100,7 +179,15 @@ def create_backend(catalog, *, active_prefill=False):
         old_init(self, *args, **kwargs)
         self._loraforge_layouts = []
         for name, aa in self.A_buffer.items():
-            if name not in ("qkv_proj", "gate_up_proj", "o_proj", "down_proj"):
+            if name not in (
+                "qkv_proj",
+                "gate_up_proj",
+                "o_proj",
+                "down_proj",
+                "in_proj_qkvz",
+                "in_proj_ba",
+                "out_proj",
+            ):
                 raise ValueError(f"unsupported Fleet projection: {name}")
             for layer, (a, b) in enumerate(zip(aa, self.B_buffer[name], strict=True)):
                 if a is None or b is None:
@@ -146,6 +233,7 @@ def create_backend(catalog, *, active_prefill=False):
             self._fleet_decode = False
             self._fleet_hits = Counter()
             self._fleet_active_prefill = active_prefill
+            self._fleet_hybrid = hybrid
             self._fleet_prefill_slots = None
 
         def prepare_lora_batch(
@@ -186,7 +274,13 @@ def create_backend(catalog, *, active_prefill=False):
             if e is None:
                 return rank_shrink(x, weights, info, slices)
             cfg = policy.select(
-                e.name, "decode" if self._fleet_decode else "prefill", x.shape[0]
+                e.name,
+                "decode" if self._fleet_decode else "prefill",
+                x.shape[0],
+                input_width=x.shape[1],
+                output_width=e.b.shape[1],
+                rank_capacity=e.capacity,
+                slices=slices,
             )
             eligible = (
                 cfg["a"] == "hip"
@@ -218,13 +312,21 @@ def create_backend(catalog, *, active_prefill=False):
                     z, weights, info, offsets, max_slice, base, slice_offsets_cpu=cpu
                 )
             phase = "decode" if self._fleet_decode else "prefill"
-            cfg = policy.select(e.name, phase, z.shape[0])
+            cfg = policy.select(
+                e.name,
+                phase,
+                z.shape[0],
+                output_width=weights.shape[1],
+                input_width=e.a.shape[2],
+                rank_capacity=e.capacity,
+                slices=e.slices,
+            )
             eligible = (
                 cfg["b"] != "native"
                 and info is self.batch_info
                 and (info.max_len or 16) <= 16
                 and cpu is not None
-                and 2 <= cpu.numel() <= 4
+                and 2 <= cpu.numel() <= 5
                 and z.dtype == torch.bfloat16
                 and z.is_contiguous()
                 and (base is None or (base.dtype == z.dtype and base.stride(1) == 1))
@@ -282,6 +384,9 @@ def create_backend(catalog, *, active_prefill=False):
             if not need_rowexpand:
                 return base
             self._fleet_hits[f"rowexpand_{phase}"] += 1
+            self._fleet_hits[
+                f"rowexpand_tile{cfg.get('row_tile', 16)}_threads{cfg['threads']}/{e.name}"
+            ] += 1
             return row_expand(
                 z,
                 e.store,
@@ -298,6 +403,7 @@ def create_backend(catalog, *, active_prefill=False):
                 e.capacity,
                 blocks=cfg["nblocks"],
                 threads=cfg["threads"],
+                row_tile=cfg.get("row_tile", 16),
             )
 
         def run_lora_a_sgemm(
@@ -377,6 +483,8 @@ def create_backend(catalog, *, active_prefill=False):
             return dict(
                 policy="fleet",
                 active_prefill=self._fleet_active_prefill,
+                hybrid=self._fleet_hybrid,
+                hybrid_tiny=policy.hybrid_tiny,
                 python_capture_eager_calls=dict(self._fleet_hits),
                 modules=len(entries),
                 shadow_bytes=sum(
@@ -399,11 +507,17 @@ def backend_from_environment():
     active_prefill = os.environ.get("LORAFORGE_SGLANG_ACTIVE_PREFILL", "0")
     if active_prefill not in ("0", "1"):
         raise ValueError("LORAFORGE_SGLANG_ACTIVE_PREFILL must be 0 or 1")
+    hybrid_tiny = os.environ.get("LORAFORGE_SGLANG_QWEN35_TINY", "0")
+    if hybrid_tiny not in ("0", "1"):
+        raise ValueError("LORAFORGE_SGLANG_QWEN35_TINY must be 0 or 1")
     manifest = Path(os.environ["LORAFORGE_SGLANG_MANIFEST"])
     data = json.loads(manifest.read_text())
     paths = [a.get("path", a.get("source")) for a in data["adapters"]]
     if any(not p for p in paths):
         raise ValueError("every adapter must declare a local path")
     return create_backend(
-        read_rank_catalog(paths), active_prefill=active_prefill == "1"
+        read_rank_catalog(paths),
+        active_prefill=active_prefill == "1",
+        hybrid=os.environ.get("LORAFORGE_SGLANG_QWEN35") == "1",
+        hybrid_tiny=hybrid_tiny == "1",
     )

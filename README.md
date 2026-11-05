@@ -9,6 +9,8 @@ It includes PEFT adapter I/O and compact export for linear LoRA and rsLoRA,
 and is in early development. An opt-in SGLang 0.5.22 decode integration is included; see
 [the integration contract](docs/sglang.md) and
 [the migration plan](docs/migration.md).
+The experimental [Qwen3.5 hybrid adapter bridge](docs/qwen35.md) handles GDN
+projection packing; its validation status and benchmark scope are separate.
 
 ## Install from source
 

@@ -26,8 +26,10 @@ other plugins, include them deliberately and avoid another csgmv replacement.
 Alternatively, call `install_sglang_backend()` from
 `loraforge.integrations.sglang` before constructing a backend in each worker.
 Registration is repeatable and rejects unsupported SGLang versions and existing
-foreign csgmv replacements. The general entrypoint is inert without
-`LORAFORGE_SGLANG=1`. SGLang's loader logs plugin exceptions, so direct installer
+foreign csgmv replacements. The backend replacement is inert without
+`LORAFORGE_SGLANG=1`. The separate experimental `LORAFORGE_SGLANG_QWEN35=1`
+switch enables the [Qwen3.5 adapter-format bridge](qwen35.md), including for a
+native csgmv baseline. SGLang's loader logs plugin exceptions, so direct installer
 calls provide a fail-fast version/conflict check for embedded deployments.
 
 Decode uses LoRAForge operators for ordinary linear, fused QKV and fused gate/up

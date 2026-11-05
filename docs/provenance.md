@@ -1,5 +1,58 @@
 # Source provenance
 
+## Qwen3.5 GDN adaptation — 2026-11-04
+
+`integrations/_sglang_qwen35.py` is independently implemented against the
+inspected SGLang 0.5.22 model/loader interfaces and the official Qwen3.5 config.
+It copies no framework source. References and the exact compatibility boundary
+are in [qwen35.md](qwen35.md); validation artifacts record runtime file hashes.
+The four-slice RowExpand instantiation extends the existing project-owned
+kernel below, retaining its author/source notices and original three-slice
+shared-memory footprint. The synthetic adapters in the pilot are generated
+test data, not research model outputs or imported trained adapters.
+
+The B-only `row_tile=2/4/8` extension is new LoRAForge scheduling code around
+the existing attributed RowExpand reduction. It splits each existing segment
+inside B without changing A metadata, rank accumulation or BF16 rounding. The
+original `row_tile=16` kernel remains the default low-level implementation.
+`benchmarks/rowexpand_tiles.py` and its graph/rank/route regression cases are
+new project code; no additional probe or framework implementation is copied.
+MI250 validation and cache-regime timings are recorded in
+[qwen35-rowtiles-mi250.json](qwen35-rowtiles-mi250.json).
+
+The opt-in Qwen3.5 tiny-rank dispatch is new LoRAForge policy code derived
+from the project's rank-4/rank-8 operator and full-model experiments. It selects
+the already attributed HIP shrink, RowExpand and native implementations;
+no new probe or framework kernel is imported. Its separate timing opt-in
+preserves the original strict logprob result while allowing token-matched
+performance measurements. See [qwen35.md](qwen35.md) for scope and results.
+
+`benchmarks/qwen35_gdn_consumer.py` is an independently implemented research
+kernel for the fixed Qwen3.5-0.8B contiguous projection boundary. It computes
+BF16-rounded LoRA B corrections while producing QKV/Z/b/a for the original
+GDN consumer. It copies no upstream kernel. Its functions match the measured
+prototype AST; [the experiment report](qwen35-gdn.md) records GPU checks,
+framework hashes, whole-model controls and remaining scope limits.
+
+The new benchmark-only `qwen35_tiny_fused.cu` and `qwen35_wide_fused.cu` retain
+the attributed `ops/csrc/rowexpand.cu` HIP shrink reduction, BF16 conversion
+helpers and original probe source notice. Their shared-A, fused A+B and direct
+GDN unpack scheduling are new LoRAForge experiment code; no additional upstream
+kernel is imported. `qwen35_fused_lora.py` supplies explicit lazy ROCm loaders,
+and `check_qwen35_wide_fusion.py` is a portable operator check against the
+existing HIP/RowExpand/consumer implementations. Both native source files are
+byte-identical to the GPU-study sources. Benchmark `.cu` files accompany the
+source archive, alongside their Python callers; they do not become installed
+runtime operators. [The follow-up report](qwen35-fused-lora.md) records numerical
+checks, shape exclusions and whole-model controls.
+
+`benchmarks/qwen35_rank4_fused.cu` specializes the same attributed HIP reduction
+and BF16 conversion helpers to capacity 4 and the two measured narrow input
+widths, with unrolled chunks and vector B loads. Its lazy loader and portable
+30-case operator check are new experiment code. Live retained ranks and routes
+remain GPU metadata, with mixed-rank and changed-metadata graph equality checks.
+This source is also a benchmark prototype, not an installed library kernel.
+
 ## Foundation
 
 Created on 2026-10-31 as new packaging, documentation, and CPU checks under
@@ -247,3 +300,36 @@ portability. Other exploratory probe backends are not part of this measured path
 exports, folds per-module scaling into BF16 B and publishes true module ranks.
 This is a recorded format/scaling conversion, not another compression algorithm.
 The conversion can introduce BF16 rounding and requires corresponding validation.
+
+The Qwen3.5 bounded-grid experiment used SGLang 0.5.22's sorted adapter groups
+and fixed-size chunk contract. Its capacity bound and tests were new LoRAForge
+code; no new upstream kernel was copied. Although numerically unchanged, it
+regressed full-model service throughput and was reverted. It is recorded as
+a rejected experiment in the Qwen3.5 guide, not an enabled optimization.
+
+### Qwen3.5 prefill and metadata reuse prototypes
+
+`benchmarks/qwen35_prefill_fused.py`, `qwen35_decode_silu.py` and
+`qwen35_metadata_cache.py` are new
+LoRAForge research implementations. They use SGLang 0.5.22's native sorted
+16-token segment/pool contracts and the attributed Fleet retained-rank layout;
+no additional upstream kernel is copied. The two-dot prefill implementation
+keeps BF16 intermediates; B-at-SiLU preserves the tested native BF16 activation
+rounding. The cache reuses only consecutive static decode metadata, scoped to
+Fleet TP1/no-overlap workers and non-DP execution. These benchmark helpers do
+not replace the installed backend. Their check programs and source comparison
+receipts are documented in `docs/qwen35-high-concurrency.md`.
+
+
+### Qwen3.5 cold-prefill graph experiment
+
+`benchmarks/qwen35_cold_prefill_metadata.py` and
+`qwen35_cold_prefill_graph.py` are new process-local benchmark glue against
+SGLang 0.5.22's `ForwardMetadata`, prefill graph runner and GDN eager metadata
+contracts. They add plain EXTEND preparation without copying upstream GPU
+kernels. Cold 8x128 queries use fixed independent metadata buffers; physical
+GDN state-slot translation remains native. Native convolution, recurrent,
+attention, KV writes and LoRA computations retain their order. The capture
+fixture must also be 8x128, because the default 1024+empty-requests fixture
+captures different convolution/chunk grids. These helpers are explicit
+benchmark opt-ins, not an installed-library runtime change.

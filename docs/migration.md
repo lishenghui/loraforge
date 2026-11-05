@@ -247,3 +247,137 @@ full-model comparisons in job 23452964, but measured 0.9922x the frozen control.
 It remains disabled by default. The matched base-only job 23453345 and three
 sampled GPU windows now quantify the remaining headroom; 1.3x has not been
 demonstrated. See [the measurements and limitations](rowexpand.md).
+
+## Qwen3.5 hybrid extension — 2026-11-04
+
+The opt-in bridge now packs HF qkv+z and b+a adapter factors for dense Qwen3.5
+text models, and Fleet supports four-slice retained layouts and RowExpand.
+This is a new model adaptation; no probe research source or shared SGLang
+installation was modified. The conservative hybrid dispatch retains native
+shrink and prefill reductions after the first fast-policy pilot failed its
+declared numerical gate.
+
+Job 23457660 completed with 85 GPU checks and a full-model synthetic-adapter
+pilot: 20/20 native/Fleet sequences matched, max logprob difference 0.0159646.
+Matched median speedups were 1.032x/1.034x/1.009x at concurrency 1/8/32.
+These are modest pilot gains, not a trained-adapter quality claim or general
+hybrid certification. [Architecture, reproduction and limits](qwen35.md) and
+[both accepted and rejected measurements](qwen35-mi250.json) are retained.
+
+The follow-up numerical protocol includes a repeated mixed batch of 32 (52
+cases total). The conservative implementation passes this stronger gate in job
+23461243 with the same 0.0159646 maximum logprob difference. Profiling identifies
+native A and the smaller RowExpand advantage at large batches as the main
+remaining costs. Empty-grid bounds regressed service throughput; four selective
+HIP-A profiles failed the unchanged model gate, including MLP down alone.
+The B-only change was near the control and was not adopted. Source hashes,
+same-card timings and rejected attempts are recorded in
+[the optimization evidence](qwen35-optimization-mi250.json). Those investigations
+did not establish an additional speedup.
+
+The B-only row-subdivision follow-up passed 93 GPU checks and 32 operator cases
+with bitwise agreement across every custom variant (23463508). It changes work
+ownership, preserving each token's rank reduction and native A batching.
+Model attempt 23464050 failed in the experiment's reference-path reader after
+passing the model comparisons; the corrected same-card repeat **23464674**
+completed in 13m07s. Both Fleet policies match native token IDs in 52/52 cases
+(maximum logprob difference 0.0159646), and new/old Fleet token-logprob records
+are exact. The shape/batch-bounded B profile improves old-Fleet throughput by
+0.61%/0.63%/1.53% at C1/8/32. Against native the ratios are
+1.0173x/1.0291x/0.9954x: high concurrency remains near parity. These are small,
+single-run synthetic-pilot gains, not 1.3x or trained-adapter quality equivalence.
+The implementation, limits and raw evidence are in [qwen35.md](qwen35.md) and
+[qwen35-rowtiles-mi250.json](qwen35-rowtiles-mi250.json). Current CPU checks total
+129; the original dense dispatch and hybrid native-A/prefill reductions remain.
+
+The Qwen3.5 harness also prepares compact fixed rank-4/rank-8 synthetic fixtures.
+Both engines now read the prepared pool capacity instead of using a hardcoded
+rank-64 pool, and the CPU comparison checks matching server options. These
+fixtures isolate small-rank execution; they do not validate trained compression
+quality. See [the tiny-rank protocol](qwen35.md).
+
+The compact full-model jobs **23465767** (rank 4) and **23466166** (rank 8)
+completed with 52/52 matching native/Fleet token sequences each. Rank 4's saved
+logprobs are exact; rank 8's maximum difference is 0.0351560, below 0.05.
+Matching pool capacity, all 456 positive fused entries, fixed addresses and
+decode graphs were audited. Fleet/native ratios at C1/8/32 are
+**1.0191x/0.9992x/0.9855x** for rank 4 and **1.0001x/0.9831x/0.9710x** for rank 8.
+Tiny ranks alone do not recover the paper's speedup under the conservative
+hybrid policy. Runtime code is unchanged; native A/prefill remain enabled.
+See [the evidence and limits](qwen35-tiny-rank-mi250.json).
+
+The subsequent tiny-rank profile is a separate opt-in,
+`LORAFORGE_SGLANG_QWEN35_TINY=1`, bounded to the measured Qwen3.5-0.8B shapes,
+pool capacities 4/8 and batch ranges. It uses HIP A in decode, native narrow B,
+and shape-selected prefill B; existing kernels are unchanged. Default hybrid
+reductions remain conservative. The benchmark's explicit
+`--allow-logprob-drift` permits token-matched speed studies without changing
+the meaning of the strict numerical result.
+
+Job **23469847** completed rank-4/rank-8 native/fast pairs on one MI250X GCD.
+Fast/native ratios at C1/8/32 are **1.1428x/1.0848x/1.0586x** and
+**1.1528x/1.0824x/1.0625x**, including base-model computation. Each rank keeps
+52/52 token sequences, but maximum logprob differences **0.1187558/0.0909806**
+exceed 0.05; these are reported separately from the authorized timing checks.
+All 456 positive fused entries, graphs, fixed addresses, HIP A and prefill/decode
+RowExpand were audited. CPU checks total **133**. This is a synthetic pilot,
+not a trained-quality or 1.3x claim; see [results and limits](qwen35.md) and
+[the recorded evidence](qwen35-tiny-speed-mi250.json).
+
+The later [tiny-LoRA fusion experiments](qwen35-fused-lora.md) add standalone
+benchmark kernels and curated evidence, without changing the installed tiny
+profile. Shared A has little rank-4 latency benefit. Narrow A+B, wide A+B and
+direct GDN A+B+unpack retain intermediate BF16 rounding and are checked on
+MI250X, including null routes and graph metadata updates. Selected rank-4
+full-model fusion reaches 1.2993x/1.2093x/1.1175x matched native throughput at
+C1/8/32; before/after controls drift by 2.61%/1.30%/0.79%. All 52 native token
+sequences match, with zero new saved logprob difference versus the preceding
+combined prototype; the existing strict native logprob failure remains.
+These research hooks are not installed by library flags. Benchmark native
+sources now accompany the sdist so its Python operator checks can compile them.
+
+The capacity-4 narrow specialization then fixes K/tile/layout constants,
+unrolls the original input accumulation and vectorizes B reads. Job **23474915**
+passes 30 exact operator/metadata-changing graph cases and completes matched
+control-before/specialized/native/control-after serving. Ratios are
+**1.2975x/1.2503x/1.1345x** native at C1/8/32, with **1.17–3.21%** incremental
+gain over the two fused controls, 52/52 token sequences and zero new saved
+logprob difference. These remain benchmark prototypes; the native strict gate
+and broader quality/hardware validation remain outside the measured speed claim.
+
+The [high-concurrency follow-up](qwen35-high-concurrency.md) adds standalone
+capacity-four prefill A+B, B-at-SiLU and consecutive-decode metadata prototypes.
+The first MI250 screen rejects grouped decode gate/up and narrow prefill fusion.
+The per-row decode consumer passes 32 exact eager and 32 metadata-changing graph
+comparisons and improves that operator segment 1.39–1.73x at batch 32. CPU checks
+total 134, including 14 cache invalidation transitions; cache-only passes 64
+exact full-model sequences.
+
+Job **23476560** completes the C32 whole-model ablation: the combined row variant
+reaches **2611.61 tokens/s**, 1.94–2.53% above its controls, **1.1554x native**
+and **82.42%** of the same-card base. All 64 native token sequences match.
+Native maximum logprob drift 0.120192 and incremental prefill A+B drift 0.086396
+remain strict failures; aligning A's K chunk does not remove the latter.
+The row change adds zero saved logprob difference to that prefill candidate.
+The exact prefill consumer alone regresses complete serving throughput.
+These are benchmark prototypes, without installed integration defaults or
+trained-quality claims; the explicit timing opt-in preserves numerical flags.
+
+
+The [cold-prefill graph follow-up](qwen35-high-concurrency.md) adds an explicit
+benchmark-only SGLang 0.5.22 graph metadata adapter for eight cold 128-token
+requests. Triton/GDN plain EXTEND support and an exact capture fixture enable
+prefill replay while native state translation and all arithmetic remain intact.
+A public `--cold-prefill-graph` entry propagates to spawned workers and uses
+identical graph options in native/Fleet/base. Extended validation checks 96
+sequences, including 32-way 64-output generation; comparison requires actual
+prefill/GDN graph replay evidence. CPU checks total 148.
+
+Job 23481601 completes same-card bracketing and graph-enabled native/base in
+16m36s: the experimental combined policy reaches 2966–2978 tokens/s at C32,
+13.19–13.76% above its 2620/2618 controls, 1.1724–1.1773x same-graph native and
+86.08–86.43% of same-graph base. Each mode's graph is 96/96 exact against its
+own eager arithmetic. The expanded suite also reveals that the pre-existing
+fast research policy matches only 28/32 long native outputs (92/96 overall).
+This native parity failure is retained; graph adds no new difference. These
+remain synthetic benchmark prototypes, not a production/default runtime change.

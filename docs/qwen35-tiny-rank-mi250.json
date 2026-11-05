@@ -1,0 +1,807 @@
+{
+  "schema_version": 1,
+  "scope": "Compact fixed-rank synthetic Qwen3.5-0.8B full-model native/Fleet comparison; no trained-adapter compression or quality claim",
+  "model": "Qwen/Qwen3.5-0.8B",
+  "model_provenance": {
+    "config.json": {
+      "sha256": "b90b86f35c8e6925ef74ee04d0e758f0a845c83a42089ad82bbaa948de9b4204",
+      "bytes": 2907,
+      "hub_revision": "2fc06364715b967f1860aea9cf38778875588b17",
+      "hub_etag": "715f0448b9d38103211f0ad88bbb4d6e4f4be8c9"
+    },
+    "model.safetensors.index.json": {
+      "sha256": "d8a08838a613b025eb7952ed9db11696213e57e76a375661ef5c12f9dd5dcf4e",
+      "bytes": 50900,
+      "hub_revision": "2fc06364715b967f1860aea9cf38778875588b17",
+      "hub_etag": "f691cefdb79d73270895ebd6d9594ddcecfc1838"
+    },
+    "model.safetensors-00001-of-00001.safetensors": {
+      "sha256": "04b1c301231dd422b8860db31311ab2721511346a32cb1e079c4c4e5f1fe4696",
+      "bytes": 1746942600,
+      "hub_revision": "2fc06364715b967f1860aea9cf38778875588b17",
+      "hub_etag": "04b1c301231dd422b8860db31311ab2721511346a32cb1e079c4c4e5f1fe4696"
+    },
+    "tokenizer.json": {
+      "sha256": "5f9e4d4901a92b997e463c1f46055088b6cca5ca61a6522d1b9f64c4bb81cb42",
+      "bytes": 12807982,
+      "hub_revision": "2fc06364715b967f1860aea9cf38778875588b17",
+      "hub_etag": "5f9e4d4901a92b997e463c1f46055088b6cca5ca61a6522d1b9f64c4bb81cb42"
+    },
+    "tokenizer_config.json": {
+      "sha256": "49e2b6e395f959f077f1e992b338919c0d4a9732fc6e613995e06557f843500c",
+      "bytes": 16709,
+      "hub_revision": "2fc06364715b967f1860aea9cf38778875588b17",
+      "hub_etag": "fae3ce993e07c092ad024dde45e592379fde91bb"
+    }
+  },
+  "model_hashes_rechecked": true,
+  "hardware": "one MI250X gfx90a GCD per sequential rank job",
+  "host_cpus": 7,
+  "host_memory_gb": 40,
+  "torch": "2.11.0+rocm7.2_lumi_aif_20260929120822",
+  "hip": "7.2.53211",
+  "sglang": "0.5.22 with recorded source files",
+  "framework_sha256": {
+    "srt/models/qwen3_5.py": "e3ced2f65d5fb8afa839c6550ab8f38f9b0d659a01c41d99516496438a6b2439",
+    "srt/lora/lora.py": "368221bec72a8c75e900e46b76fd80c6c15a1adf929b9e069684c159c89bacee",
+    "srt/lora/lora_manager.py": "e24f6bbffd0b844b509f568b718c178bbccd890dfcf2d571c4b24bf22d14cf73",
+    "srt/lora/layers.py": "ac84622c5712e8b75d56767f6984809c9ed8263ab9e1299ec33e59ee9baa5bbb",
+    "srt/lora/mem_pool.py": "92f50dbee269322127112bbc9567df91f7d7fa93ac62ee418a16e5020e24169f",
+    "srt/lora/utils.py": "2b198d405a427542f43b04a9281d656a93d9b323f23951b8b8245cbfa9f57fc4",
+    "srt/lora/backend/chunked_backend.py": "765e4f6d3f0cd6608ff40a3ae5c5fa3b9325fa7b40d3938740642c519d56af06"
+  },
+  "runtime_sha256": {
+    "loraforge/__init__.py": "2bf557e06002babd4e9746ab3cfbb3993c2d46a181d2178ed3996efa688ac3f4",
+    "loraforge/py.typed": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "loraforge/_version.py": "57be4cc1ee0a0f9be1feeebbefe897f1a24694e1261b979575a9659e90b89db7",
+    "loraforge/integrations/_sglang_rank_aware.py": "954859a70b48f3524474bd7d43f732de24155beba2a0c620b48c1ea8503617f4",
+    "loraforge/integrations/__init__.py": "15b66483ac55a6bf33c289e1f0c6b30829f61b02aae66d0e6bcc7d325b862d30",
+    "loraforge/integrations/_sglang_fleet.py": "794963e8d47d819a96b4c15ef16138dc30d6117aadbf3fcd02e260512de1d52b",
+    "loraforge/integrations/_sglang_qwen35.py": "aad9e0a34e519dc791aaaff19c774d501f88524e7c865ee8815343fcf790a022",
+    "loraforge/integrations/_sglang_stable_prefill.py": "bcdf67a4f4ccba778bf61302a2dedf40aae1097b59864f2fdfee7d2f60639600",
+    "loraforge/integrations/sglang.py": "0d65ab2b4fde747a7ee6fa0d853d60ba4d0c7b9367765581197ab329e04a05bd",
+    "loraforge/ops/flashtsqr.py": "e7a5f1c92945460c7d10b821438b638adce36f4d13ee0fd7a69eced80a18e1b1",
+    "loraforge/ops/__init__.py": "dc3560e4dea257bee5d8ab6441c7a7bfeea2cdd7ac84ca08de4652c7b0c40486",
+    "loraforge/ops/gemv.py": "a06d3c425e1d580a908ee2777fb0107dea0b821d2e8596a565801d5d34eab0d7",
+    "loraforge/ops/_gemv_kernels.py": "fb4d65b454a7b416900658646a3e1bb91ecb7c174950066ff3710442c89faa4b",
+    "loraforge/ops/_extension.py": "bf6264e06a15fcec877349207e472e15d56678ca629c45013a5b40eedb8816df",
+    "loraforge/ops/rowexpand.py": "addd275cc920c7b74502afd81dadbddf5d857f1df032187105005c46fe57aba7",
+    "loraforge/runtime/gpu.py": "0e6e0e9764bd7d7476300790715e7246949ede55de504cf1d3eba090ea56f79c",
+    "loraforge/runtime/retained.py": "9fcf7a33152f8d0fae86af094c636b38f232abf2a468ec231d469e0d632736f9",
+    "loraforge/runtime/__init__.py": "990a315100079e3256d02454f589289e07f16dbd81c4df71e93ad6b15010748e",
+    "loraforge/runtime/slots.py": "1fc46d34c83b1aed15314facb784ba58cbf9cfbcd0437eb8bb0021b0cf67193b",
+    "loraforge/compression/quality.py": "27e931afcb51390e85f186c92a6ebab6888510de14205eae5c7f8f8ed1bdd503",
+    "loraforge/compression/__init__.py": "b7d741dc363a787724b8cf724f79b11293f220234da0714b5a50e230d0f16243",
+    "loraforge/compression/spectral.py": "d441b65c96edd6674dc38c17f0be09f5155a090ce1d003fba1958e2f0e8794d6",
+    "loraforge/compression/allocation.py": "d3b80fe4cb48ff127340ff3f702f62eb134447a1fa44ff60d2c655686fd8e486",
+    "loraforge/adapters/_config.py": "722412220a5386b0abdf63469b15ef4eeefd83d887fca5a13de153f8218efce1",
+    "loraforge/adapters/__init__.py": "6acbe7b3c8108387dc3bac946ff56fc9d9bb70dee4fd5ad82942e7fe0bfea6de",
+    "loraforge/adapters/sglang.py": "d4070b314dbfb5f48e320d45ef71d5329516b9a15d6e8ad44ac8008a99fe2996",
+    "loraforge/adapters/peft.py": "4cca6ef23cd8295a47b43654c12238b3e4807d43268a9e560b47ea0ef2a67adb",
+    "loraforge/integrations/data/mi250x_fleet_dispatch.json": "245318e64963720c2ba13034598a1aa815c7320aee52438519082b67bb5b63da",
+    "loraforge/ops/csrc/jacobi_eigh.cu": "82d0e9e71d0eb8dbb2eb75d0b0b083f3158245f9de39fa48b1e5d46a180e44c4",
+    "loraforge/ops/csrc/bindings.cpp": "e590fab0a6605049ce1136093e41bfd124a3e5853071059cd6bfe7f003ec412e",
+    "loraforge/ops/csrc/rowexpand.hip": "a7617bc6c167ccfb75608c329776f53fe141bdd5029e814819f6b024ccae057a",
+    "loraforge/ops/csrc/rowexpand.cu": "962b2b813ecb2eeaafc057ff26e866a5deecbae2c455fa6957c1c19914ce8bba",
+    "loraforge/ops/csrc/tsqr_full.cu": "a41b1396a248516e5a21947762cd8a168c03e2a6c59d129c56099206bb873a9c",
+    "loraforge/ops/csrc/tsqr_wide.cu": "e6e5f7a47296b0bd35ab655bedecb2d9eb9f86e1b3a2b0af421d2663f4b8c52b"
+  },
+  "runtime_commit": "11975b3f1e5540deb296c4824129cbb5dbd10bd1",
+  "benchmark_commit": "2da5b4113f132e7944b3cb0a6d886f1e9289dda3",
+  "benchmark_sha256": "9c4e53c26379d4ccc5a5c25559eb0923cd433d78728786e919fc042d6b3f4ae0",
+  "protocol": {
+    "adapters": 4,
+    "scale": 1.0,
+    "input_tokens": 128,
+    "output_tokens": 64,
+    "concurrencies": [
+      1,
+      8,
+      32
+    ],
+    "requests_at_concurrency": {
+      "1": 32,
+      "8": 192,
+      "32": 384
+    },
+    "warmup_requests_per_concurrency": 32,
+    "repeats": 3,
+    "order": [
+      "native",
+      "fleet"
+    ],
+    "dtype": "BF16",
+    "tp": 1,
+    "decode": "graph",
+    "prefill": "eager",
+    "prefix_cache": false,
+    "comparison": "identical checkpoints and physical pool rank within each pair; complete model throughput",
+    "numerical_gate": "52 cases, eight output tokens each; exact token IDs, maximum common-prefix logprob difference <= 0.05; repeated within each engine"
+  },
+  "validation": {
+    "cpu_tests": 129,
+    "ci_run": 41860398462,
+    "ci_jobs_passed": 6,
+    "prior_gpu_operator_tests": 93,
+    "prior_gpu_jobs": [
+      23463508,
+      23464050
+    ],
+    "runtime_change": "none in this study"
+  },
+  "results": [
+    {
+      "rank": 4,
+      "job": {
+        "job": "23465767",
+        "node": "nid005035",
+        "rank": 4,
+        "state": "complete",
+        "cpu_comparison": "passed"
+      },
+      "fixture": {
+        "kind": "fixed_compact",
+        "physical_rank": 4,
+        "fixed_retained_rank": 4,
+        "physical_parameters": 10822656,
+        "retained_parameters": 10822656,
+        "rank64_parameters": 173162496,
+        "retained_fraction_of_rank64": 0.0625,
+        "scaling": 1.0
+      },
+      "adapter_sha256": [
+        "dcd7d821badae1d0668fb2c2abc2d1a65558974a25dfd5295f4d42a71e4d42cb",
+        "462b724d4543ae42710860e6418519db424523cc2c292f966b79f6240186fcfc",
+        "89198ebdfbe3706ff801949ee3013db83d7ea899084a50cf0cba702fa9a4b373",
+        "eb54220c3032d4b65e2a77cc72dce70f9c014e0266207f91775bb47ee865acf3"
+      ],
+      "retained_rank_histogram": {
+        "4": 744
+      },
+      "numerics": {
+        "cases": 52,
+        "same_token_cases": 52,
+        "same_tokens": true,
+        "max_common_prefix_logprob_difference": 0.0,
+        "numerical_pass": true
+      },
+      "execution_audit_pass": true,
+      "matched_server_options": true,
+      "performance": [
+        {
+          "concurrency": 1,
+          "tokens_per_second": {
+            "native": 122.3327840805222,
+            "fleet": 124.66412593090682
+          },
+          "fleet_over_native": 1.019057375894021
+        },
+        {
+          "concurrency": 8,
+          "tokens_per_second": {
+            "native": 833.8260869123828,
+            "fleet": 833.1435920216893
+          },
+          "fleet_over_native": 0.9991814901195755
+        },
+        {
+          "concurrency": 32,
+          "tokens_per_second": {
+            "native": 2207.7995950857035,
+            "fleet": 2175.877725589948
+          },
+          "fleet_over_native": 0.9855413192543337
+        }
+      ],
+      "arms": {
+        "native": {
+          "measurements": [
+            {
+              "concurrency": 1,
+              "seconds": 16.729958840995096,
+              "requests": 32,
+              "output_tokens": 2048,
+              "tokens_per_second": 122.4151248347115,
+              "repeat": 0
+            },
+            {
+              "concurrency": 1,
+              "seconds": 16.754463388002478,
+              "requests": 32,
+              "output_tokens": 2048,
+              "tokens_per_second": 122.23608435388806,
+              "repeat": 1
+            },
+            {
+              "concurrency": 1,
+              "seconds": 16.741219578980235,
+              "requests": 32,
+              "output_tokens": 2048,
+              "tokens_per_second": 122.3327840805222,
+              "repeat": 2
+            },
+            {
+              "concurrency": 8,
+              "seconds": 14.734085080999648,
+              "requests": 192,
+              "output_tokens": 12288,
+              "tokens_per_second": 833.9845964270968,
+              "repeat": 0
+            },
+            {
+              "concurrency": 8,
+              "seconds": 14.736886016005883,
+              "requests": 192,
+              "output_tokens": 12288,
+              "tokens_per_second": 833.8260869123828,
+              "repeat": 1
+            },
+            {
+              "concurrency": 8,
+              "seconds": 14.813126307009952,
+              "requests": 192,
+              "output_tokens": 12288,
+              "tokens_per_second": 829.5345455999388,
+              "repeat": 2
+            },
+            {
+              "concurrency": 32,
+              "seconds": 11.042332634999184,
+              "requests": 384,
+              "output_tokens": 24576,
+              "tokens_per_second": 2225.6167072983503,
+              "repeat": 0
+            },
+            {
+              "concurrency": 32,
+              "seconds": 11.17446843200014,
+              "requests": 384,
+              "output_tokens": 24576,
+              "tokens_per_second": 2199.299246273059,
+              "repeat": 1
+            },
+            {
+              "concurrency": 32,
+              "seconds": 11.131445107021136,
+              "requests": 384,
+              "output_tokens": 24576,
+              "tokens_per_second": 2207.7995950857035,
+              "repeat": 2
+            }
+          ],
+          "audits": {
+            "backends": [
+              "ChunkedSgmvLoRABackend"
+            ],
+            "phases": [
+              {
+                "EXTEND/eager": 511,
+                "DECODE/graph": 15484
+              }
+            ],
+            "load_events": 5,
+            "all_fixed_addresses": true,
+            "max_lora_rank": 4,
+            "max_loras_per_batch": 5,
+            "max_loaded_loras": 5
+          },
+          "artifact_sha256": {
+            "correctness.json": "2ce5ada3370417c0a4033b035fc4857be9dc8679afaf771cb08359cd2429f95a",
+            "measurements.json": "8a62f8be02cd6275820267b315fee4d50f1067ffe6c68cdf653d7fef4db1c9a4",
+            "server-args.json": "de25cd191f54ad54ea939d61bdb39a7cc999602ef64f7a593c7ead2844562077",
+            "audit-87577.json": "9b8493c271d42440dbaf7ba1a982f3188c529a0fb3c2bd727609a900e95e49cf",
+            "server-info.json": "5c59e02371494af6321dd13d012732adf7926b631564519f29e0aad29cd171dc",
+            "server.log": "79201ef69c6352b660966b3ef7e5fcba0aa1bcd8cadd8beaa507dbada64618ef"
+          }
+        },
+        "fleet": {
+          "measurements": [
+            {
+              "concurrency": 1,
+              "seconds": 16.432254322018707,
+              "requests": 32,
+              "output_tokens": 2048,
+              "tokens_per_second": 124.63292983822335,
+              "repeat": 0
+            },
+            {
+              "concurrency": 1,
+              "seconds": 16.425992837001104,
+              "requests": 32,
+              "output_tokens": 2048,
+              "tokens_per_second": 124.68043912613221,
+              "repeat": 1
+            },
+            {
+              "concurrency": 1,
+              "seconds": 16.428142296004808,
+              "requests": 32,
+              "output_tokens": 2048,
+              "tokens_per_second": 124.66412593090682,
+              "repeat": 2
+            },
+            {
+              "concurrency": 8,
+              "seconds": 14.74287602500408,
+              "requests": 192,
+              "output_tokens": 12288,
+              "tokens_per_second": 833.487304591005,
+              "repeat": 0
+            },
+            {
+              "concurrency": 8,
+              "seconds": 14.803472178027732,
+              "requests": 192,
+              "output_tokens": 12288,
+              "tokens_per_second": 830.0755290531529,
+              "repeat": 1
+            },
+            {
+              "concurrency": 8,
+              "seconds": 14.74895818400546,
+              "requests": 192,
+              "output_tokens": 12288,
+              "tokens_per_second": 833.1435920216893,
+              "repeat": 2
+            },
+            {
+              "concurrency": 32,
+              "seconds": 11.282519828004297,
+              "requests": 384,
+              "output_tokens": 24576,
+              "tokens_per_second": 2178.2368100962703,
+              "repeat": 0
+            },
+            {
+              "concurrency": 32,
+              "seconds": 11.29673280401039,
+              "requests": 384,
+              "output_tokens": 24576,
+              "tokens_per_second": 2175.4962630677974,
+              "repeat": 1
+            },
+            {
+              "concurrency": 32,
+              "seconds": 11.294752324989531,
+              "requests": 384,
+              "output_tokens": 24576,
+              "tokens_per_second": 2175.877725589948,
+              "repeat": 2
+            }
+          ],
+          "audits": {
+            "backends": [
+              "FleetBackend"
+            ],
+            "phases": [
+              {
+                "EXTEND/eager": 511,
+                "DECODE/graph": 15481
+              }
+            ],
+            "load_events": 5,
+            "all_fixed_addresses": true,
+            "max_lora_rank": 4,
+            "max_loras_per_batch": 5,
+            "max_loaded_loras": 5,
+            "dispatch": {
+              "rank_aware_shrink": 60306,
+              "rowexpand_decode": 1728,
+              "rowexpand_tile16_threads256/in_proj_qkvz": 324,
+              "rowexpand_tile2_threads128/out_proj": 108,
+              "rowexpand_tile16_threads256/gate_up_proj": 432,
+              "rowexpand_tile2_threads128/down_proj": 144,
+              "rowexpand_tile4_threads256/qkv_proj": 36,
+              "rowexpand_tile2_threads128/o_proj": 36,
+              "rowexpand_tile16_threads128/out_proj": 216,
+              "rowexpand_tile16_threads128/down_proj": 288,
+              "rowexpand_tile16_threads256/qkv_proj": 72,
+              "rowexpand_tile16_threads128/o_proj": 72
+            },
+            "fused_retained_ranks": {
+              "4": 456
+            },
+            "checkpoint_ranks": {
+              "4": 456
+            },
+            "positive_fused_entries_by_projection": {
+              "down_proj": 96,
+              "o_proj": 24,
+              "out_proj": 72,
+              "in_proj_qkvz": 72,
+              "in_proj_ba": 72,
+              "qkv_proj": 24,
+              "gate_up_proj": 96
+            }
+          },
+          "artifact_sha256": {
+            "correctness.json": "2ce5ada3370417c0a4033b035fc4857be9dc8679afaf771cb08359cd2429f95a",
+            "measurements.json": "42d9a38287c7d0770104f03ffdb2c1034cbbeb467cf0139952f4c825acede65d",
+            "server-args.json": "de25cd191f54ad54ea939d61bdb39a7cc999602ef64f7a593c7ead2844562077",
+            "audit-88046.json": "0106fdbf5a048d9025f8647ae043b33c8d8d85a81b6ed35961abaa6c7cd814da",
+            "server-info.json": "bc972456ba3d8b18c01cc681ec501db47682d3ca54bf044c6dd031401d9974dd",
+            "server.log": "62a620226ba7817997508479465493ba7cf1cabee913754a8d4fb62d4f139667",
+            "native-comparison.json": "cf8643c75022a6b816c380cf3a0e805b08dc481e1281b0c7159d9078da890a9f"
+          }
+        }
+      },
+      "bundle_sha256": "eb149fc0d4bb1103184b617d9fb008d8e5b4754d8072bae89758ddfe91d44564",
+      "slurm": {
+        "state": "COMPLETED",
+        "elapsed": "00:09:09",
+        "exit_code": "0:0",
+        "node": "nid005035"
+      }
+    },
+    {
+      "rank": 8,
+      "job": {
+        "job": "23466166",
+        "node": "nid005108",
+        "rank": 8,
+        "state": "complete",
+        "cpu_comparison": "passed"
+      },
+      "fixture": {
+        "kind": "fixed_compact",
+        "physical_rank": 8,
+        "fixed_retained_rank": 8,
+        "physical_parameters": 21645312,
+        "retained_parameters": 21645312,
+        "rank64_parameters": 173162496,
+        "retained_fraction_of_rank64": 0.125,
+        "scaling": 1.0
+      },
+      "adapter_sha256": [
+        "5a22b1b72fd6e36ac95cfcaf671cc0623212115eca962dbb1cbaae197ce87acf",
+        "7abcb1f178f01935a096e92504d223d2b56a6e8bed21cfb84e2f49e51b2c1941",
+        "ec3f83a242e25bc7172d5d20211390853f7748e2895354326dd900f16011b1b3",
+        "98a6c240e30408efaf69a9e178e5f975e6d107fe21083414c5cf6e92de3e45c1"
+      ],
+      "retained_rank_histogram": {
+        "8": 744
+      },
+      "numerics": {
+        "cases": 52,
+        "same_token_cases": 52,
+        "same_tokens": true,
+        "max_common_prefix_logprob_difference": 0.0351560115814209,
+        "numerical_pass": true
+      },
+      "execution_audit_pass": true,
+      "matched_server_options": true,
+      "performance": [
+        {
+          "concurrency": 1,
+          "tokens_per_second": {
+            "native": 122.79519690516143,
+            "fleet": 122.80149322381973
+          },
+          "fleet_over_native": 1.0000512749587687
+        },
+        {
+          "concurrency": 8,
+          "tokens_per_second": {
+            "native": 846.1072872485856,
+            "fleet": 831.8136491817994
+          },
+          "fleet_over_native": 0.9831065891025865
+        },
+        {
+          "concurrency": 32,
+          "tokens_per_second": {
+            "native": 2250.762095217689,
+            "fleet": 2185.385657048903
+          },
+          "fleet_over_native": 0.970953643520257
+        }
+      ],
+      "arms": {
+        "native": {
+          "measurements": [
+            {
+              "concurrency": 1,
+              "seconds": 16.677500242978567,
+              "requests": 32,
+              "output_tokens": 2048,
+              "tokens_per_second": 122.80017809397025,
+              "repeat": 0
+            },
+            {
+              "concurrency": 1,
+              "seconds": 16.678176765999524,
+              "requests": 32,
+              "output_tokens": 2048,
+              "tokens_per_second": 122.79519690516143,
+              "repeat": 1
+            },
+            {
+              "concurrency": 1,
+              "seconds": 16.68022392198327,
+              "requests": 32,
+              "output_tokens": 2048,
+              "tokens_per_second": 122.78012630878962,
+              "repeat": 2
+            },
+            {
+              "concurrency": 8,
+              "seconds": 14.524405406991718,
+              "requests": 192,
+              "output_tokens": 12288,
+              "tokens_per_second": 846.0243056892942,
+              "repeat": 0
+            },
+            {
+              "concurrency": 8,
+              "seconds": 14.521356932003982,
+              "requests": 192,
+              "output_tokens": 12288,
+              "tokens_per_second": 846.2019119520552,
+              "repeat": 1
+            },
+            {
+              "concurrency": 8,
+              "seconds": 14.522980933019426,
+              "requests": 192,
+              "output_tokens": 12288,
+              "tokens_per_second": 846.1072872485856,
+              "repeat": 2
+            },
+            {
+              "concurrency": 32,
+              "seconds": 10.92997853999259,
+              "requests": 384,
+              "output_tokens": 24576,
+              "tokens_per_second": 2248.494808116674,
+              "repeat": 0
+            },
+            {
+              "concurrency": 32,
+              "seconds": 10.91244163599913,
+              "requests": 384,
+              "output_tokens": 24576,
+              "tokens_per_second": 2252.1082650216485,
+              "repeat": 1
+            },
+            {
+              "concurrency": 32,
+              "seconds": 10.918968313984806,
+              "requests": 384,
+              "output_tokens": 24576,
+              "tokens_per_second": 2250.762095217689,
+              "repeat": 2
+            }
+          ],
+          "audits": {
+            "backends": [
+              "ChunkedSgmvLoRABackend"
+            ],
+            "phases": [
+              {
+                "EXTEND/eager": 511,
+                "DECODE/graph": 15478
+              }
+            ],
+            "load_events": 5,
+            "all_fixed_addresses": true,
+            "max_lora_rank": 8,
+            "max_loras_per_batch": 5,
+            "max_loaded_loras": 5
+          },
+          "artifact_sha256": {
+            "correctness.json": "762cdfbca901e4c04a9b7b8da6dc5c019a9636bba86c7f57a589f1f03c3b9706",
+            "measurements.json": "1b9ff26f4c1ad8abfca8e96dc5c2204a58774c21b666a98623acebd2219d1e61",
+            "audit-53012.json": "dc463cbb5bd9fe41007c9b8e55b2590a7470d0e360a50933b883a88e74e2dc60",
+            "server-args.json": "ada1152e673def171b164ad80ea6103c029018f1d005b7db1c1e13cab5d8fe7a",
+            "server-info.json": "61948f44cf5e82a85f47ae7af314a75383b6f9b2304524dd6df0ac2cda18e051",
+            "server.log": "a3f09357c428e78ef45cb6d48c50fd57c0e7ba35283a576b119f40a0aa5a7bc1"
+          }
+        },
+        "fleet": {
+          "measurements": [
+            {
+              "concurrency": 1,
+              "seconds": 16.682077934005065,
+              "requests": 32,
+              "output_tokens": 2048,
+              "tokens_per_second": 122.76648077667338,
+              "repeat": 0
+            },
+            {
+              "concurrency": 1,
+              "seconds": 16.67367793098674,
+              "requests": 32,
+              "output_tokens": 2048,
+              "tokens_per_second": 122.82832908712662,
+              "repeat": 1
+            },
+            {
+              "concurrency": 1,
+              "seconds": 16.677321637020214,
+              "requests": 32,
+              "output_tokens": 2048,
+              "tokens_per_second": 122.80149322381973,
+              "repeat": 2
+            },
+            {
+              "concurrency": 8,
+              "seconds": 14.772539513010997,
+              "requests": 192,
+              "output_tokens": 12288,
+              "tokens_per_second": 831.8136491817994,
+              "repeat": 0
+            },
+            {
+              "concurrency": 8,
+              "seconds": 14.765265192982042,
+              "requests": 192,
+              "output_tokens": 12288,
+              "tokens_per_second": 832.223454126683,
+              "repeat": 1
+            },
+            {
+              "concurrency": 8,
+              "seconds": 14.8461288799881,
+              "requests": 192,
+              "output_tokens": 12288,
+              "tokens_per_second": 827.6905110640431,
+              "repeat": 2
+            },
+            {
+              "concurrency": 32,
+              "seconds": 11.242728823010111,
+              "requests": 384,
+              "output_tokens": 24576,
+              "tokens_per_second": 2185.9461690209173,
+              "repeat": 0
+            },
+            {
+              "concurrency": 32,
+              "seconds": 11.245612380007515,
+              "requests": 384,
+              "output_tokens": 24576,
+              "tokens_per_second": 2185.385657048903,
+              "repeat": 1
+            },
+            {
+              "concurrency": 32,
+              "seconds": 11.280630627996288,
+              "requests": 384,
+              "output_tokens": 24576,
+              "tokens_per_second": 2178.601605747753,
+              "repeat": 2
+            }
+          ],
+          "audits": {
+            "backends": [
+              "FleetBackend"
+            ],
+            "phases": [
+              {
+                "EXTEND/eager": 511,
+                "DECODE/graph": 15478
+              }
+            ],
+            "load_events": 5,
+            "all_fixed_addresses": true,
+            "max_lora_rank": 8,
+            "max_loras_per_batch": 5,
+            "max_loaded_loras": 5,
+            "dispatch": {
+              "rank_aware_shrink": 60306,
+              "rowexpand_decode": 1728,
+              "rowexpand_tile16_threads256/in_proj_qkvz": 324,
+              "rowexpand_tile2_threads128/out_proj": 108,
+              "rowexpand_tile16_threads256/gate_up_proj": 432,
+              "rowexpand_tile2_threads128/down_proj": 144,
+              "rowexpand_tile4_threads256/qkv_proj": 36,
+              "rowexpand_tile2_threads128/o_proj": 36,
+              "rowexpand_tile16_threads128/out_proj": 216,
+              "rowexpand_tile16_threads128/down_proj": 288,
+              "rowexpand_tile16_threads256/qkv_proj": 72,
+              "rowexpand_tile16_threads128/o_proj": 72
+            },
+            "fused_retained_ranks": {
+              "8": 456
+            },
+            "checkpoint_ranks": {
+              "8": 456
+            },
+            "positive_fused_entries_by_projection": {
+              "out_proj": 72,
+              "in_proj_qkvz": 72,
+              "gate_up_proj": 96,
+              "o_proj": 24,
+              "down_proj": 96,
+              "qkv_proj": 24,
+              "in_proj_ba": 72
+            }
+          },
+          "artifact_sha256": {
+            "audit-53473.json": "43e72135ceda943334eaedc7a254a89a53c4a7d3cba749ecd5f841f697ec1bb4",
+            "correctness.json": "e2c3fa33244f929177e2685aa287012128532a0eab456efe8ede1462bf249374",
+            "measurements.json": "ee28e55fe9135b451b3f87064f29d13ba7529fdd735be651533e5e98185ce275",
+            "server-args.json": "ada1152e673def171b164ad80ea6103c029018f1d005b7db1c1e13cab5d8fe7a",
+            "server-info.json": "9303d8b09310fb0621a479e76f9cb174155dc89d417398251c68c2024f9636ed",
+            "server.log": "816bee44691fbb34bbe404dfdcaf3fdadbaffd60aa411cff245d19548748509b",
+            "native-comparison.json": "5f148b75ab2c830e6dc58aa2b5089d4687dc3775800f3a95f3f2f98a4e55fcdd"
+          }
+        }
+      },
+      "bundle_sha256": "6e04a5ec8815a45a67d25ee12ee6d46068eaa99df3b754cc20b1967e35292126",
+      "slurm": {
+        "state": "COMPLETED",
+        "elapsed": "00:09:05",
+        "exit_code": "0:0",
+        "node": "nid005108"
+      }
+    }
+  ],
+  "paper_context": {
+    "original_hybrid_rowexpand_rank_histogram": {
+      "64": 150,
+      "16": 90,
+      "32": 96,
+      "8": 48
+    },
+    "original_hybrid_rowexpand_mean_rank": 37.75,
+    "original_hybrid_rowexpand_rank64_fraction": 0.390625,
+    "per_projection_fused_rank_counts": {
+      "in_proj_qkvz": {
+        "64": 36,
+        "16": 18,
+        "32": 18
+      },
+      "out_proj": {
+        "64": 18,
+        "8": 18,
+        "16": 18,
+        "32": 18
+      },
+      "gate_up_proj": {
+        "16": 24,
+        "32": 24,
+        "64": 48
+      },
+      "qkv_proj": {
+        "64": 18,
+        "32": 6
+      },
+      "in_proj_ba": {
+        "8": 72
+      },
+      "down_proj": {
+        "32": 24,
+        "64": 24,
+        "8": 24,
+        "16": 24
+      },
+      "o_proj": {
+        "16": 6,
+        "32": 6,
+        "64": 6,
+        "8": 6
+      }
+    },
+    "rank_statistic_scope": "Positive module/adapter entries; excludes native b/a; not parameter-, frequency-, or latency-weighted.",
+    "paper_spectral_compact_parameters": 457866752,
+    "paper_original_parameters": 5946605568,
+    "paper_fraction": 0.07699632113888338,
+    "source_sha256": {
+      "loraforge-validation/qwen35-rowtiles-model-retry-20261104/raw/candidate/results/fleet-23464674-1793804744622566707/audit-106966.json": "e9e53cb9d621c5c8776189bf016c9b3355fffbeac881d4347a0089efedb566e7",
+      "probe_paper/evidence/20261029/qwen50-factorial/original-native-s101/manifest.json": "aa69a56aabea927d0066d326e9559fa7bdaf28aad9141e6d58e404e1ed3d209c",
+      "probe_paper/evidence/20261029/qwen50-factorial/fleet-optimized-s101/manifest.json": "70a651c3cebb11719684adfcfeb46ab81d0dcba89896fa86b63535b77f61f3e4",
+      "probe_paper/main.tex": "6b819559b170418b2aacfb3f13f6d576c59d5881e57e18cd5a7320f603dcbdd3"
+    }
+  },
+  "limits": [
+    "Four synthetic adapters, not trained compressed fleet",
+    "Native A and prefill remain enabled",
+    "Three samples, fixed native-before-Fleet order within a rank job",
+    "No fresh base-only arm",
+    "Eight-token numerical sequences do not certify long generation or task quality",
+    "Fixed uniform ranks eliminate pool padding in native too; this does not measure the heterogeneous retained-rank advantage from the paper.",
+    "Hybrid native A and prefill remain enabled; the paper uses additional custom A and low-rank prefill paths.",
+    "Between-rank absolute rates come from different allocations; native/Fleet ratios are paired within each rank allocation."
+  ]
+}

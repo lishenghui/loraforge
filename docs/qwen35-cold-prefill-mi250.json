@@ -1,0 +1,351 @@
+{
+  "job": 23481601,
+  "node": "nid005033",
+  "scope": "BF16 Qwen3.5-0.8B TP1 one MI250 GCD four compact rank4 synthetic adapters C32 128 input64 forced output384 requests three repeats; no prefix cache or AITER",
+  "order": [
+    "current",
+    "graph-before",
+    "native",
+    "native-graph",
+    "base",
+    "base-graph",
+    "graph-after",
+    "current-after"
+  ],
+  "arms": {
+    "current": {
+      "median_tokens_per_second": 2620.4566291340448,
+      "repeats": [
+        2625.257697908919,
+        2618.9402803029548,
+        2620.4566291340448
+      ],
+      "audit": [
+        {
+          "counts": {
+            "EXTEND/eager": 250,
+            "DECODE/graph": 2786
+          },
+          "cold_graph": {},
+          "fixed_address_loads": true,
+          "positive_rank4_entries": 456
+        }
+      ]
+    },
+    "graph-before": {
+      "median_tokens_per_second": 2966.0758965175955,
+      "repeats": [
+        2966.108543169218,
+        2964.7355655762644,
+        2966.0758965175955
+      ],
+      "audit": [
+        {
+          "counts": {
+            "EXTEND/eager": 134,
+            "DECODE/graph": 2787,
+            "EXTEND/graph": 117
+          },
+          "cold_graph": {
+            "buffers": 1,
+            "capture_prepares": 1,
+            "replay_prepares": 117,
+            "scope_rejections": 134,
+            "gdn_capture": 1,
+            "gdn_replay": 117
+          },
+          "fixed_address_loads": true,
+          "positive_rank4_entries": 456
+        }
+      ]
+    },
+    "native": {
+      "median_tokens_per_second": 2265.4710229515404,
+      "repeats": [
+        2265.4710229515404,
+        2267.8421941980714,
+        2255.0646239534426
+      ],
+      "audit": [
+        {
+          "counts": {
+            "EXTEND/eager": 250,
+            "DECODE/graph": 2786
+          },
+          "cold_graph": {},
+          "fixed_address_loads": true,
+          "positive_rank4_entries": 0
+        }
+      ]
+    },
+    "native-graph": {
+      "median_tokens_per_second": 2529.988549514575,
+      "repeats": [
+        2531.471063413769,
+        2529.988549514575,
+        2528.684171495578
+      ],
+      "audit": [
+        {
+          "counts": {
+            "EXTEND/eager": 134,
+            "DECODE/graph": 2787,
+            "EXTEND/graph": 117
+          },
+          "cold_graph": {
+            "buffers": 1,
+            "capture_prepares": 1,
+            "replay_prepares": 117,
+            "scope_rejections": 134,
+            "gdn_capture": 1,
+            "gdn_replay": 117
+          },
+          "fixed_address_loads": true,
+          "positive_rank4_entries": 0
+        }
+      ]
+    },
+    "base": {
+      "median_tokens_per_second": 3162.255934899806,
+      "repeats": [
+        3155.7892219524724,
+        3162.255934899806,
+        3167.896817851044
+      ],
+      "audit": [
+        {
+          "counts": {
+            "EXTEND/eager": 250,
+            "DECODE/graph": 2787
+          },
+          "cold_graph": {},
+          "fixed_address_loads": true,
+          "positive_rank4_entries": 0
+        }
+      ]
+    },
+    "base-graph": {
+      "median_tokens_per_second": 3445.904512387181,
+      "repeats": [
+        3445.904512387181,
+        3446.911956115489,
+        3433.5658307822655
+      ],
+      "audit": [
+        {
+          "counts": {
+            "EXTEND/eager": 134,
+            "DECODE/graph": 2790,
+            "EXTEND/graph": 117
+          },
+          "cold_graph": {
+            "buffers": 1,
+            "capture_prepares": 1,
+            "replay_prepares": 117,
+            "scope_rejections": 134,
+            "gdn_capture": 1,
+            "gdn_replay": 117
+          },
+          "fixed_address_loads": true,
+          "positive_rank4_entries": 0
+        }
+      ]
+    },
+    "graph-after": {
+      "median_tokens_per_second": 2978.4506990438563,
+      "repeats": [
+        2974.2742407837964,
+        2978.4506990438563,
+        2981.6493886147227
+      ],
+      "audit": [
+        {
+          "counts": {
+            "EXTEND/eager": 134,
+            "DECODE/graph": 2787,
+            "EXTEND/graph": 117
+          },
+          "cold_graph": {
+            "buffers": 1,
+            "capture_prepares": 1,
+            "replay_prepares": 117,
+            "scope_rejections": 134,
+            "gdn_capture": 1,
+            "gdn_replay": 117
+          },
+          "fixed_address_loads": true,
+          "positive_rank4_entries": 456
+        }
+      ]
+    },
+    "current-after": {
+      "median_tokens_per_second": 2618.196740416468,
+      "repeats": [
+        2623.2206670914734,
+        2618.196740416468,
+        2614.2125360922746
+      ],
+      "audit": [
+        {
+          "counts": {
+            "EXTEND/eager": 250,
+            "DECODE/graph": 2787
+          },
+          "cold_graph": {},
+          "fixed_address_loads": true,
+          "positive_rank4_entries": 456
+        }
+      ]
+    }
+  },
+  "numerics": {
+    "graph-before_vs_current": {
+      "cases": 96,
+      "same_token_cases": 96,
+      "same_tokens": true,
+      "max_common_prefix_logprob_difference": 0.0,
+      "numerical_pass": true
+    },
+    "graph-after_vs_current": {
+      "cases": 96,
+      "same_token_cases": 96,
+      "same_tokens": true,
+      "max_common_prefix_logprob_difference": 0.0,
+      "numerical_pass": true
+    },
+    "current-after_vs_current": {
+      "cases": 96,
+      "same_token_cases": 96,
+      "same_tokens": true,
+      "max_common_prefix_logprob_difference": 0.0,
+      "numerical_pass": true
+    },
+    "native-graph_vs_native": {
+      "cases": 96,
+      "same_token_cases": 96,
+      "same_tokens": true,
+      "max_common_prefix_logprob_difference": 0.0,
+      "numerical_pass": true
+    },
+    "base-graph_vs_base": {
+      "cases": 96,
+      "same_token_cases": 96,
+      "same_tokens": true,
+      "max_common_prefix_logprob_difference": 0.0,
+      "numerical_pass": true
+    },
+    "current_vs_native": {
+      "cases": 96,
+      "same_token_cases": 92,
+      "same_tokens": false,
+      "max_common_prefix_logprob_difference": 0.12019228935241699,
+      "numerical_pass": false
+    },
+    "graph-before_vs_native-graph": {
+      "cases": 96,
+      "same_token_cases": 92,
+      "same_tokens": false,
+      "max_common_prefix_logprob_difference": 0.12019228935241699,
+      "numerical_pass": false
+    },
+    "graph-after_vs_native-graph": {
+      "cases": 96,
+      "same_token_cases": 92,
+      "same_tokens": false,
+      "max_common_prefix_logprob_difference": 0.12019228935241699,
+      "numerical_pass": false
+    }
+  },
+  "improvement_over_bracketed_current": {
+    "min_ratio": 1.1318927638568719,
+    "max_ratio": 1.1375962138620965
+  },
+  "same_graph_native_ratios": [
+    1.1723673204318226,
+    1.177258568864008
+  ],
+  "same_graph_base_fractions": [
+    0.8607539430809185,
+    0.8643451054250217
+  ],
+  "current_control_drift": -0.0008624026409945751,
+  "graph_repeat_drift": 0.004172112568255448,
+  "matched_native_fleet_arguments": true,
+  "framework_sha256": {
+    "srt/layers/attention/triton_backend.py": "7b614b08ef06eff8fe999988e1a5553d9d8fba2bf8d8ae3def85738bfe451062",
+    "srt/layers/attention/hybrid_linear_attn_backend.py": "be138ae62064638c6801f1a90646b30553862f7bc8fc3ff72be354cbc937be44",
+    "srt/layers/attention/linear/gdn_backend.py": "cbed4b7dc995bb7d4ca26381c1b707749a1eb3cf77983576c436723a31fb7ffb",
+    "srt/model_executor/runner/prefill_cuda_graph_runner.py": "79dfe054614988172acb88a616824ecb437ea0848337840d170e1a57f3979bab",
+    "srt/models/qwen3_5.py": "e3ced2f65d5fb8afa839c6550ab8f38f9b0d659a01c41d99516496438a6b2439",
+    "srt/lora/backend/chunked_backend.py": "765e4f6d3f0cd6608ff40a3ae5c5fa3b9325fa7b40d3938740642c519d56af06"
+  },
+  "limitation": "The pre-existing fast research policy matches64/64 short native outputs but only28/32 long outputs. Expanded native numerical gate fails. Cold graph adds zero saved token/logprob drift versus its own eager arithmetic in all three modes. These are single-allocation synthetic timings; installed Fleet runtime unchanged.",
+  "pilot_source_equivalence": {
+    "cold_graph": {
+      "pilot_sha256": "33e6d2a6d9f6096a70420684a327de9a2b026bd00141262f0cab6ad667bfc119",
+      "public_sha256": "cc844a87fa4edd2b7f03b09c0e544f65e1616004e9c04ffb867d71ba79148b0a",
+      "computational_ast_equal_excluding_imports_version_guard_and_marker": true
+    },
+    "cold_metadata": {
+      "pilot_sha256": "cb2481330ba0696f2c78489fb932e9f7d02b1c1da87463887262b0c22afaf659",
+      "public_sha256": "26eee4474618c20ff17f13155ba685c86985f004c9f7a11dc23052be3c9f3618",
+      "computational_ast_equal_excluding_imports_version_guard_and_marker": true
+    }
+  },
+  "public_cli_validation": {
+    "job": 23481853,
+    "node": "nid005037",
+    "state": "complete",
+    "modes": {
+      "native": {
+        "numerics": {
+          "cases": 96,
+          "same_token_cases": 96,
+          "same_tokens": true,
+          "max_common_prefix_logprob_difference": 0.0,
+          "numerical_pass": true
+        },
+        "counts": {
+          "EXTEND/eager": 58,
+          "DECODE/graph": 518,
+          "EXTEND/graph": 10
+        },
+        "cold_graph": {
+          "buffers": 1,
+          "capture_prepares": 1,
+          "replay_prepares": 10,
+          "scope_rejections": 58,
+          "gdn_capture": 1,
+          "gdn_replay": 10
+        }
+      },
+      "base": {
+        "numerics": {
+          "cases": 96,
+          "same_token_cases": 96,
+          "same_tokens": true,
+          "max_common_prefix_logprob_difference": 0.0,
+          "numerical_pass": true
+        },
+        "counts": {
+          "EXTEND/eager": 58,
+          "DECODE/graph": 519,
+          "EXTEND/graph": 10
+        },
+        "cold_graph": {
+          "buffers": 1,
+          "capture_prepares": 1,
+          "replay_prepares": 10,
+          "scope_rejections": 58,
+          "gdn_capture": 1,
+          "gdn_replay": 10
+        }
+      }
+    },
+    "source_sha256": {
+      "qwen35_hybrid.py": "de07e33e6389d35b23f10fd39fe5d8ba275ebd146af2eddf84f033c79ab39cd7",
+      "qwen35_cold_prefill_graph.py": "cc844a87fa4edd2b7f03b09c0e544f65e1616004e9c04ffb867d71ba79148b0a",
+      "qwen35_cold_prefill_metadata.py": "26eee4474618c20ff17f13155ba685c86985f004c9f7a11dc23052be3c9f3618"
+    }
+  }
+}
