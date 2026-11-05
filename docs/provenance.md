@@ -430,3 +430,38 @@ screen as a portable fixture-based program. Its numerical/timing-loop AST
 matches the GPU screen after equivalent function/output-path normalization.
 Opt-ins, paired controls, source hashes, failures and limits are recorded in
 [the follow-up](qwen35-storage-nf4.md).
+
+### Installed experimental interfaces — 2026-11-05
+
+The selected implementations above are promoted from this repository's
+`6b2e36a98406f43adf469de35d7835a4e2f93ce3` snapshot into the installed package.
+No new probe or third-party implementation is copied. The four selected
+reconstruction kernel ASTs are unchanged; rejected MFMA/split-K candidates
+remain benchmark-only. Source checksums are recorded with the API validation.
+
+| Previous benchmark implementation | Installed implementation |
+| --- | --- |
+| `qwen35_nf4_ops.py` selected reconstruction kernels | `ops/_nf4_kernels.py`, `ops/nf4.py` |
+| `qwen35_nf4_linear.py` | `integrations/_sglang_nf4_linear.py` |
+| `qwen35_nf4_compat.py` | `integrations/_sglang_nf4_compat.py` |
+| `qwen35_packed_loader.py` | `integrations/_sglang_qwen35_loader.py` |
+| `qwen35_gdn_storage.py` | `integrations/_sglang_gdn_storage.py` |
+
+Legacy benchmark imports now delegate to those implementations. Intentional
+changes add a validated, graph-compatible tensor entrypoint, explicit mode
+selection and conflicts, runtime/hardware/checkpoint guards and worker-plugin
+propagation. Admission source structure is still checked before rewriting the
+single allowed quantization list; other upstream checks remain intact. Public
+validation uses explicit exceptions rather than removable local assertions.
+
+`annotations.py` is new dependency-free code, inspired by public alpha API
+annotation conventions. It copies no Ray code and adds no Ray dependency.
+It attaches immutable metadata and documentation, preserves object identity
+by default, and optionally warns once per process at synchronous entrypoints.
+The new `sglang_experimental.py` publishes actual installed NF4 and GDN APIs.
+`_sglang_gdn.py` independently wires one packed BF16 base projection to the
+original Linear adapter calls during decode, with unchanged prefill fallback.
+It covers native csgmv metadata preparation and does not require the private
+consumer/tiny-rank research hooks. Storage sharing reuses the attributed
+project-owned implementation above. Numerical/shape and package-validation
+boundaries are in [experimental APIs](experimental.md).

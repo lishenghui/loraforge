@@ -96,3 +96,17 @@ def test_closure_based_lazy_finalizer_cannot_bypass_storage_consolidation():
     assert b.data_ptr() == packed[8192:].data_ptr()
     assert obj._forward_input_proj() is packed
     assert calls == ["finalize"]
+
+
+def test_public_storage_api_accepts_an_explicit_owner_without_private_hooks():
+    from loraforge.integrations.sglang_experimental import share_qwen35_gdn_storage
+
+    layer, q, b = fixture()
+    packed = layer._lf_packed
+    del layer._lf_packed
+    assert share_qwen35_gdn_storage(layer, packed_weight=packed)
+    assert q.data_ptr() == packed.data_ptr()
+    assert b.data_ptr() == packed[8192:].data_ptr()
+    assert not share_qwen35_gdn_storage(layer, packed_weight=packed)
+    with pytest.raises(ValueError, match="existing packed"):
+        share_qwen35_gdn_storage(layer)

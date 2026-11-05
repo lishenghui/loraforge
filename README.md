@@ -11,6 +11,9 @@ and is in early development. An opt-in SGLang 0.5.22 decode integration is inclu
 [the migration plan](docs/migration.md).
 The experimental [Qwen3.5 hybrid adapter bridge](docs/qwen35.md) handles GDN
 projection packing; its validation status and benchmark scope are separate.
+Selected NF4 and BF16 GDN implementations also expose installed alpha APIs,
+with inspectable `ExperimentalAPI` metadata and explicit per-worker opt-ins.
+See [experimental APIs](docs/experimental.md) for usage and support limits.
 
 ## Install from source
 

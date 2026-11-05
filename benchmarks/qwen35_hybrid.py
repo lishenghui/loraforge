@@ -248,13 +248,16 @@ def install_packed_experiment():
 
 def install_nf4_experiment():
     if os.environ.get("LORAFORGE_BENCH_QWEN35_NF4") == "1":
-        from qwen35_nf4_compat import install
+        from loraforge.integrations.sglang_experimental import install_qwen35_nf4
 
-        install()
+        mode = "stock"
         if os.environ.get("LORAFORGE_BENCH_QWEN35_NF4_LINEAR") == "1":
-            from qwen35_nf4_linear import install as install_linear
-
-            install_linear()
+            mode = (
+                "byte-pairs"
+                if os.environ.get("LORAFORGE_BENCH_QWEN35_NF4_PAIRS") == "1"
+                else "cached-scales"
+            )
+        install_qwen35_nf4(mode=mode)
 
 
 def install_cold_prefill_experiment():

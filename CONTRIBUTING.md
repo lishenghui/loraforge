@@ -54,6 +54,12 @@ the actual FlashTSQR-to-file-to-PEFT path, including grouped modules.
 
 ## Code and API conventions
 
+Public experimental APIs belong in the installed package and use
+`loraforge.annotations.ExperimentalAPI` with an English reason and documented
+support boundaries. Use warning wrappers only at explicit installation
+entrypoints, keeping numerical operations metadata-only. See
+[experimental APIs](docs/experimental.md) for lifecycle and validation rules.
+
 - Keep imports lightweight. Compile and initialize devices only when explicitly
   requested by an operation.
 - Pass devices and configuration explicitly; avoid cluster paths and global

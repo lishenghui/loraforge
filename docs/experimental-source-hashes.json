@@ -1,0 +1,28 @@
+{
+  "source_commit": "6b2e36a98406f43adf469de35d7835a4e2f93ce3",
+  "source_sha256": {
+    "benchmarks/qwen35_nf4_ops.py": "2e9950588cb5aca83f4a1059f7821747d905568c5ecd09305b79813526542774",
+    "benchmarks/qwen35_nf4_linear.py": "d231d8849280cb59afd8fcfdda8c736eeb3383697c135d92795cfc0629bb1811",
+    "benchmarks/qwen35_nf4_compat.py": "4cac59d538518f117118e6706f1dea587f76f22ba757493427a8a8bb973929c9",
+    "benchmarks/qwen35_packed_loader.py": "ba2c789baf40a2dac140880d717b5fe1853362a61fc7e16991733d4c23c56ee6",
+    "benchmarks/qwen35_gdn_storage.py": "cce56f4e22a8b62efc7e66cc9f1620c3cbadeb54ef59c66d163717e8fddd2778"
+  },
+  "package_sha256": {
+    "annotations.py": "49c3fca88b4862c9474f4e8cde408df55d6b606cf7cdf85b9b38c6fa9734a70a",
+    "ops/nf4.py": "1dd5b9841f05e349c4217c572684976dca73395c67f48a59c934a4d780735a2e",
+    "ops/_nf4_kernels.py": "84de3e44489ce6ce6da4a6016c384a077f248337db75c5cc9a8b11b6ba25b581",
+    "integrations/sglang_experimental.py": "cd11e46937a9ed5b309aed5ec307b73916e455744971659004e6d8a32d81b5cc",
+    "integrations/_sglang_gdn.py": "6032a9355bcb887bdc07a3d64a7f4f658fa2a5fc43b963af6d9ce221c10bbd9f",
+    "integrations/_sglang_gdn_storage.py": "4d78cf0277bfb2035502f955eaccb1651cb46b45e13e859d3dd6df6ec5841f66",
+    "integrations/_sglang_nf4_compat.py": "bfb9e3843d7a7d2c7e6d61395c0f1fba84a89fd179f7496e9a245c618cdb5d94",
+    "integrations/_sglang_nf4_linear.py": "54c58398964fd5abb986ae0b73eedd18acd1545e967b210651a97418afbb4c02",
+    "integrations/_sglang_qwen35_loader.py": "ba2c789baf40a2dac140880d717b5fe1853362a61fc7e16991733d4c23c56ee6",
+    "integrations/sglang.py": "77d478dcf995823e49158db11a5766bea0e80e0219468164fbb695ecbd6901d4"
+  },
+  "kernel_ast_equal": [
+    "_code_value",
+    "_values",
+    "_dequant",
+    "_dequant_pairs"
+  ]
+}

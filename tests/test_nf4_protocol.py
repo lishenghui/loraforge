@@ -54,7 +54,7 @@ def test_platform_extension_retains_other_checks():
     ],
 )
 def test_platform_extension_refuses_unknown_source(source):
-    with pytest.raises(AssertionError):
+    with pytest.raises(ValueError):
         compat.extended_verify_source(source)
 
 
