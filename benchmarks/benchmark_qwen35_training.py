@@ -27,6 +27,9 @@ def main() -> None:
             "fused",
             "compact",
             "compiled-model",
+            "native-activation",
+            "native-consumer",
+            "native-expand",
         ],
         required=True,
     )
@@ -38,6 +41,9 @@ def main() -> None:
     p.add_argument("--samples", type=int, default=5)
     p.add_argument("--emulate-precision-casts", action="store_true")
     p.add_argument("--recompile-limit", type=int)
+    p.add_argument(
+        "--compile-backend", choices=["inductor", "cudagraphs"], default="inductor"
+    )
     args = p.parse_args()
     args.output.mkdir(exist_ok=False)
     import importlib.metadata
@@ -73,7 +79,16 @@ def main() -> None:
             ]
         },
         device=torch.cuda.get_device_name(),
-        cuda_graph_replay=False,
+        cuda_graph_replay=(
+            None
+            if args.backend.startswith("compiled")
+            and args.compile_backend == "cudagraphs"
+            else False
+        ),
+        manual_cuda_graph_replay=False,
+        cuda_graph_backend_requested=(
+            args.backend.startswith("compiled") and args.compile_backend == "cudagraphs"
+        ),
         gradient_accumulation=1,
         batch=1,
         rank=4,
@@ -82,6 +97,9 @@ def main() -> None:
         warmup=args.warmup,
         samples=args.samples,
         compiler_settings=dict(
+            backend=args.compile_backend
+            if args.backend.startswith("compiled")
+            else None,
             emulate_precision_casts=inductor_config.emulate_precision_casts,
             recompile_limit=torch._dynamo.config.recompile_limit,
             float32_matmul_precision=torch.get_float32_matmul_precision(),
@@ -94,6 +112,7 @@ def main() -> None:
             "qwen35_training_mlp.py",
             "lora_swiglu_training.py",
             "lora_swiglu_kernels.py",
+            "lora_native_training.py",
         ]
     }
     report["input_receipt"] = json.loads(
@@ -171,8 +190,18 @@ def main() -> None:
         initial_hash.update(name.encode())
         initial_hash.update(value.numpy().tobytes())
     report["initial_adapter_sha256"] = initial_hash.hexdigest()
-    if args.backend in ("packed", "compiled-mlp", "fused", "compact"):
-        backend = args.backend if args.backend in ("fused", "compact") else "native"
+    if args.backend in (
+        "packed",
+        "compiled-mlp",
+        "fused",
+        "compact",
+        "native-activation",
+        "native-consumer",
+        "native-expand",
+    ):
+        backend = (
+            args.backend if args.backend not in ("packed", "compiled-mlp") else "native"
+        )
         count = wrapper.replace_mlps(model, backend)
         assert count == 24, count
         report["replaced_mlps"] = count
@@ -180,14 +209,19 @@ def main() -> None:
         for module in model.modules():
             if isinstance(module, wrapper.TrainingMLP):
                 module.forward = torch.compile(
-                    module.forward, fullgraph=True, dynamic=False
+                    module.forward,
+                    backend=args.compile_backend,
+                    fullgraph=True,
+                    dynamic=False,
                 )
     params = wrapper.adapter_parameters(model)
     assert params.keys() == initial.keys()
     assert all(p.dtype == torch.float32 for p in params.values())
     base = model.get_base_model()
     train_model = (
-        torch.compile(model, fullgraph=False, dynamic=False)
+        torch.compile(
+            model, backend=args.compile_backend, fullgraph=False, dynamic=False
+        )
         if args.backend == "compiled-model"
         else model
     )

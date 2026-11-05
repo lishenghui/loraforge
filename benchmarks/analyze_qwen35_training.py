@@ -99,6 +99,10 @@ def main() -> None:
         return summary
 
     pairs = [
+        ("native-activation", "peft-before"),
+        ("native-consumer", "peft-before"),
+        ("native-expand", "peft-before"),
+        ("native-consumer", "native-activation"),
         ("packed", "peft-before"),
         ("compiled-mlp", "packed"),
         ("fused", "packed"),

@@ -9,9 +9,11 @@ The main full-model run has completed, but **native PEFT numerical equivalence
 has not passed**. Consumer fusion passes its matched packed-projection reference;
 the packed projection itself fails the original PEFT gradient/update gates.
 The timings below are experimental, not a validated drop-in training speedup.
-CPU checks pass (199 passed, three skipped, 49 GPU cases deselected), including
+CPU checks pass (204 passed, three skipped, 49 GPU cases deselected), including
 actual PEFT parameter ownership, checkpointed updates and comparison failure
-gates. The independent complete-model compiler study is recorded separately.
+gates. The independent complete-model compiler study is recorded separately. A later
+separate-native-projection ablation passes all native gates only when retaining
+native activation, with no demonstrated complete-step speedup.
 
 ## Complete training step measurements
 
@@ -176,6 +178,137 @@ consumer implementation's matched-reference success remains distinct from
 the original PEFT failures. GPU work for this study is finished; no new jobs or
 recurring follow-up are required for the recorded experiment.
 
+## Preserving separate native base projections
+
+Job `23501083` completed in 4m17s on `nid005053`: five workers, six cases
+per worker, 300 real optimizer steps. It reuses the same BF16 model, rank-four
+adapters, optimizer, input and acceptance gates. Each candidate retains the
+original PEFT module and Parameter objects, separate gate/up base GEMMs and
+native base-input-gradient autograd nodes. There is no concatenated base
+weight, trainable shadow copy or installed-environment modification.
+
+Three ablations isolate the consumer operations:
+
+- `native-expand` fuses only B expansion, scaling and the base residual; native
+  SiLU/multiplication and the original forward evaluation order are retained.
+- `native-activation` retains PEFT projections and fuses only SwiGLU activation
+  forward/backward.
+- `native-consumer` fuses gate/up B expansion, residual and SwiGLU, while keeping
+  separate original base and shrink projections. Down projection remains PEFT.
+
+Median complete-step milliseconds; speed ranges bracket both same-job PEFT
+controls:
+
+| Checkpoint | Tokens | PEFT before / after | Expand | Activation | Consumer | PEFT / consumer range |
+| --- | ---: | ---: | ---: | ---: | ---: | ---: |
+| off | 128 | 223.40 / 221.18 | 226.51 | 225.71 | 221.50 | 0.999–1.009x |
+| off | 1024 | 223.53 / 221.08 | 225.54 | 226.24 | 221.42 | 0.998–1.010x |
+| off | 4096 | 462.71 / 466.83 | 464.74 | 458.98 | 460.47 | 1.005–1.014x |
+| on | 128 | 374.28 / 371.72 | 374.28 | 376.45 | 365.15 | 1.018–1.025x |
+| on | 1024 | 374.11 / 371.05 | 374.17 | 377.69 | 365.15 | 1.016–1.025x |
+| on | 4096 | 600.47 / 605.08 | 604.33 | 596.43 | 595.00 | 1.009–1.017x |
+
+Before/after controls are exact numerically and drift at most 1.10% in median
+time. `native-expand` is **exact in all saved losses, logits, 372 gradients and
+372 updated tensors in all six cases**, but has no robust speed benefit.
+`native-activation` and `native-consumer` are exact at 128/4096 tokens and exact
+against each other in every case. Both fail the 1024-token gradient/update
+gates, identically with checkpointing on/off: maximum loss drift 5.636e-5,
+aggregate gradient relative L2 0.02886, worst parameter gradient 0.27288, and
+maximum parameter-update difference 5.861e-4. Eleven parameter gradients and
+329 updated tensors fail their respective gates. Sampled-logit relative L2
+0.01077 passes its own gate; this does not override failed gradient gates.
+
+This narrows the remaining discrepancy to the activation-fusion path; it does
+not prove every approximate sigmoid intrinsic produces unacceptable training.
+Preserving separate base projections removes the earlier packed-projection
+failure in the expansion-only control. It also removes most of that path's
+apparent speedup. The consumer's modest complete-step benefit must not be
+reported as a native-equivalent result at 1024 tokens. Peak allocation at 4096
+without checkpointing changes from 20.862 GiB (PEFT) to 20.204 GiB (consumer);
+with checkpointing it remains 13.152 GiB.
+
+[The native-projection receipt](qwen35-training-native-consumer-mi250.json)
+retains samples, hashes, controls, gate outcomes and worst failing tensors.
+Raw CPU comparisons and all saved gradient/update artifacts remain in the
+separate experiment directory.
+
+### SiLU math-policy screen
+
+A targeted diagnostic, job `23501232` (`nid005030`, 17 seconds), exhausts every
+finite BF16 gate bit pattern in [-80,80], with seeded BF16 up values and
+upstream gradients. It compares the existing sigmoid implementation, ROCm
+libdevice exp/fast-exp and rounded-division variants, with compiler FMA off/on.
+The existing policy is exact against native Torch for output, gate gradient and
+up gradient throughout this stated input fixture. Two exp variants with FMA
+on differ in one gradient element by 1.14e-13; the other tested policies are
+exact. This does **not** identify approximate sigmoid as the cause of the
+1024-token whole-model drift. A single up/gradient pair per gate value does not
+exhaust all finite triples or model autograd accumulation orders. No math-policy
+change is selected based on this screen. [The diagnostic receipt](qwen35-training-silu-mi250.json)
+records the input count, source hash and every policy result.
+
+## Native-operator graph backend
+
+Job `23501330`, `nid005030`, completes in 3m01s: native PEFT before/after controls
+and `torch.compile(..., backend="cudagraphs", fullgraph=False, dynamic=False)`,
+all without checkpointing. The process-local recompile limit is 64. This tests
+reducing dispatch overhead through Torch's backend, without selecting Inductor
+fusion or the packed/custom MLP. AOT autograd still transforms the execution;
+this configuration is **not** a guarantee of native gradient accumulation order.
+The optimizer is outside compilation. Each measured call performs forward,
+backward and a real foreach AdamW update; no manually replayed frozen update is
+timed. All nine worker/shape cases and 90 real updates complete.
+
+| Tokens | PEFT before / after ms | Graph backend ms | Speed range | Native numerical gate |
+| --- | ---: | ---: | ---: | --- |
+| 128 | 217.59 / 222.84 | 119.00 | 1.828–1.873x | fail |
+| 1024 | 219.38 / 223.25 | 181.14 | 1.211–1.232x | fail |
+| 4096 | 467.65 / 467.80 | 546.71 | 0.855–0.856x | fail |
+
+Bracketing native controls remain exactly equal numerically; time drift is
+2.42%/1.77%/0.03%. The short-sequence result is consistent with substantial
+avoidable dispatch overhead, but the experiment does not isolate graph replay
+from every AOT transformation. It rejects using this backend indiscriminately
+for long sequences. No demonstrated native-equivalent training speedup is
+inferred: all three gradient/update comparisons fail their unchanged gates.
+
+| Tokens | Loss max abs | All-gradient relative L2 | Worst parameter gradient relative L2 | Updated parameter max abs |
+| --- | ---: | ---: | ---: | ---: |
+| 128 | 0.002315 | 0.02822 | 0.21265 | 5.796e-4 |
+| 1024 | 0.000405 | 0.02753 | 0.32436 | 5.824e-4 |
+| 4096 | 0.0000362 | 0.02786 | 0.44464 | 5.707e-4 |
+
+Loss and sampled-logit gates pass individually. Maximum timed-loss drift after
+the separate reset/warmup is 0.00656/0.000276/0.000143; losses continue changing
+with real updates, but this does not establish equivalent convergence. The
+failures affect 11/16/16 parameter gradients and 343/331/334 updated tensors.
+
+The worker records 57 successful AOT graphs and 1188 captured calls. There are
+324 empty-graph warnings, explicit graph breaks at causal-convolution
+non-contiguous `out=` arguments and at FLA's compiler-disabled GDN/gated-norm
+functions. Some surrounding model frames fall back to eager. No recompile-limit
+warning occurs. These facts preclude a whole-model single-static-graph claim;
+`cuda_graph_replay` is deliberately null in the receipt for this requested
+backend, rather than asserting that every region is captured. The process
+records the requested backend and complete compiler counters.
+
+Allocated-memory peaks alone are misleading here. At 128/1024/4096 tokens,
+PyTorch allocated peaks fall from 2.191/6.455/20.862 GiB to
+1.532/2.235/4.640 GiB, while **reserved** peaks rise from
+2.291/6.969/23.104 GiB to 3.693/9.633/29.361 GiB. This is not a demonstrated
+total-VRAM saving. Both allocator measures are retained in
+[the graph-backend receipt](qwen35-training-graphs-mi250.json), alongside source
+hashes, warnings, gates and every timing sample. These three new GPU jobs are
+finished; none remains queued or running for this optimization round.
+
+The next useful investigation is the GDN/causal-convolution graph boundaries
+and AOT backward accumulation order, with the same native gates. The measured
+benefit of short-sequence scheduling is larger than the separate-base consumer
+benefit; another tiny MLP fusion alone is not supported as the path to 1.3x.
+This remains a fixed-text BF16 training experiment, not QLoRA, serving throughput,
+trained compression quality or a matched Unsloth benchmark.
+
 ## Model and parameter contract
 
 The original local Hugging Face checkpoint is extracted without numerical
@@ -202,7 +335,7 @@ The base stays frozen. `qwen35_training_mlp.py` replaces only the 24 MLPs,
 preserving the actual six PEFT Parameter objects per MLP and their scaling.
 GDN and attention adapters retain ordinary PEFT execution. Stable canonical
 names and a complete initial adapter hash must agree across workers.
-Concatenated gate/up base weights belong to the replacement; discarded modules
+For the original packed variants, concatenated gate/up base weights belong to the replacement; discarded modules
 are not retained, and no inactive baseline model occupies the same process.
 
 ## Comparisons and timing
@@ -216,6 +349,9 @@ Each path runs in a separate process on the same allocated GCD:
 | `compiled-mlp` | Same packed MLP compiled with `fullgraph=True, dynamic=False` | Native HF/PEFT |
 | `fused` | Consumer fusion, separate scaled/unscaled backward buffers | Native HF/PEFT |
 | `compact` | Consumer fusion with fresh gradient-buffer reuse | Native HF/PEFT |
+| `native-expand` | Separate PEFT base/shrink nodes; B expansion/residual fusion | Native HF/PEFT |
+| `native-activation` | PEFT projections; activation-only fusion | Native HF/PEFT |
+| `native-consumer` | Separate PEFT base/shrink nodes; gate/up expand/residual/activation fusion | Native HF/PEFT |
 | `compiled-model` | Ordinary PEFT; complete model compiled with `fullgraph=False` | Record graph breaks and any compiler failure |
 
 The `packed` control separates base-projection concatenation and PEFT casting
@@ -262,7 +398,7 @@ the latter alone cannot establish equivalence to the ordinary PEFT model.
 
 ## Environment and reproduction
 
-LUMI small-g, one MI250 GCD, seven CPUs, 40GB host memory and a 20-minute cap.
+LUMI small-g, one MI250 GCD, seven CPUs, 40GB host memory; the completed runs request a 10-minute cap.
 Torch 2.11.0 ROCm 7.2, Transformers 5.10.1, PEFT 0.21.1. FLA 0.6.0 pure-Python
 wheels are extracted only into the test directory and prepended to PYTHONPATH;
 the existing Torch/Triton/SGLang installation is unchanged. Dependency receipts
@@ -295,6 +431,16 @@ against compiling the complete model. That comparison needs a separate run.
 complete-model compiler, all without checkpointing, and requires the compiler
 worker to complete for that run to count as complete. These workers still run
 in separate processes and measure identical full optimizer steps.
+
+`--native-consumer-only --max-seconds 520` runs the three separate-base
+consumer ablations with native before/after controls, token lengths 128/1024/4096
+and checkpointing off/on. It requires all five workers to complete.
+
+The explicit `--whole-compile-only --compile-backend cudagraphs
+--recompile-limit 64 --max-seconds 520` selection runs the native-operator graph
+backend and before/after controls without checkpointing. The default compiler
+backend remains Inductor. Backend-managed captures are distinct from manually
+replaying an isolated forward/backward graph; real AdamW updates remain timed.
 
 CPU comparison after collection:
 

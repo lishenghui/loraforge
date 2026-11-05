@@ -20,8 +20,12 @@ def main() -> None:
     selection = parser.add_mutually_exclusive_group()
     selection.add_argument("--skip-whole-compile", action="store_true")
     selection.add_argument("--whole-compile-only", action="store_true")
+    selection.add_argument("--native-consumer-only", action="store_true")
     parser.add_argument("--emulate-precision-casts", action="store_true")
     parser.add_argument("--recompile-limit", type=int)
+    parser.add_argument(
+        "--compile-backend", choices=["inductor", "cudagraphs"], default="inductor"
+    )
     args = parser.parse_args()
     args.output.mkdir(exist_ok=False)
     deadline = time.monotonic() + args.max_seconds
@@ -43,6 +47,14 @@ def main() -> None:
         modes = [
             ("peft-before", "peft"),
             ("compiled-model", "compiled-model"),
+            ("peft-after", "peft"),
+        ]
+    elif args.native_consumer_only:
+        modes = [
+            ("peft-before", "peft"),
+            ("native-activation", "native-activation"),
+            ("native-consumer", "native-consumer"),
+            ("native-expand", "native-expand"),
             ("peft-after", "peft"),
         ]
     for name, backend in modes:
@@ -75,6 +87,7 @@ def main() -> None:
             command.append("--emulate-precision-casts")
         if args.recompile_limit is not None:
             command += ["--recompile-limit", str(args.recompile_limit)]
+        command += ["--compile-backend", args.compile_backend]
         timeout = min(
             remaining, 300 if name in ("peft-before", "compiled-model") else 240
         )

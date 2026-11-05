@@ -11,7 +11,7 @@ import pytest
 torch = pytest.importorskip("torch")
 peft = pytest.importorskip("peft")
 ROOT = Path(__file__).resolve().parents[1] / "benchmarks"
-for name in ("lora_swiglu_training", "qwen35_training_mlp"):
+for name in ("lora_swiglu_training", "lora_native_training", "qwen35_training_mlp"):
     spec = importlib.util.spec_from_file_location(name, ROOT / f"{name}.py")
     module = importlib.util.module_from_spec(spec)
     sys.modules[name] = module
@@ -55,7 +55,17 @@ def model():
     ).double()
 
 
-@pytest.mark.parametrize("backend", ["native", "fused", "compact"])
+@pytest.mark.parametrize(
+    "backend",
+    [
+        "native",
+        "fused",
+        "compact",
+        "native-activation",
+        "native-consumer",
+        "native-expand",
+    ],
+)
 def test_wrapper_preserves_parameters_and_checkpoint_updates(backend):
     from torch.utils.checkpoint import checkpoint
 
@@ -93,3 +103,22 @@ def test_wrapper_rejects_dropout():
     m.base_model.model.mlp.gate_proj.lora_dropout["default"] = torch.nn.Dropout(0.1)
     with pytest.raises(ValueError, match="dropout"):
         probe.replace_mlps(m, "fused")
+
+
+def test_separate_consumer_gradcheck():
+    torch.manual_seed(774)
+    values = [
+        torch.randn(*s, dtype=torch.float64, requires_grad=True)
+        for s in [(2, 3, 7), (2, 3, 7), (2, 3, 4), (2, 3, 4), (7, 4), (7, 4)]
+    ]
+    fn = sys.modules["lora_native_training"]._GateUp.apply
+    assert torch.autograd.gradcheck(lambda *v: fn(*v, 0.7), tuple(values))
+
+
+def test_expand_add_gradcheck():
+    values = [
+        torch.randn(*s, dtype=torch.float64, requires_grad=True)
+        for s in [(2, 3, 7), (2, 3, 4), (7, 4)]
+    ]
+    fn = sys.modules["lora_native_training"]._ExpandAdd.apply
+    assert torch.autograd.gradcheck(lambda *v: fn(*v, 0.7), tuple(values))

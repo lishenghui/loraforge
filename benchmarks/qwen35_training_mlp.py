@@ -78,7 +78,13 @@ def replace_mlps(model: nn.Module, backend: str) -> int:
     for name, original in candidates:
         parent_name, attr = name.rsplit(".", 1)
         parent = model.get_submodule(parent_name)
-        setattr(parent, attr, TrainingMLP(original, backend))
+        if backend in ("native-activation", "native-consumer", "native-expand"):
+            from lora_native_training import NativeTrainingMLP
+
+            replacement = NativeTrainingMLP(original, backend)
+        else:
+            replacement = TrainingMLP(original, backend)
+        setattr(parent, attr, replacement)
     return len(candidates)
 
 

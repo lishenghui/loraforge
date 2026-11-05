@@ -280,3 +280,65 @@ def input_gradient(dx0, dug, duu, ag, au):
         enable_fp_fusion=False,
     )
     return dx
+
+
+@triton.jit
+def _gate_up_separate(
+    G0,
+    U0,
+    UG,
+    UU,
+    BG,
+    BU,
+    G,
+    U,
+    H,
+    WIDTH: tl.constexpr,
+    SIZE: tl.constexpr,
+    RANK: tl.constexpr,
+    SCALE: tl.constexpr,
+    BLOCK: tl.constexpr,
+):
+    i = tl.program_id(0) * BLOCK + tl.arange(0, BLOCK)
+    row, col = i // WIDTH, i % WIDTH
+    mask = i < SIZE
+    bg, bu = tl.full((BLOCK,), 0, tl.float32), tl.full((BLOCK,), 0, tl.float32)
+    for k in tl.static_range(RANK):
+        bg += tl.load(UG + row * RANK + k, mask, 0).to(tl.float32) * tl.load(
+            BG + col * RANK + k, mask, 0
+        ).to(tl.float32)
+        bu += tl.load(UU + row * RANK + k, mask, 0).to(tl.float32) * tl.load(
+            BU + col * RANK + k, mask, 0
+        ).to(tl.float32)
+    bg = (bg.to(tl.bfloat16).to(tl.float32) * SCALE).to(tl.bfloat16).to(tl.float32)
+    bu = (bu.to(tl.bfloat16).to(tl.float32) * SCALE).to(tl.bfloat16).to(tl.float32)
+    g = (tl.load(G0 + i, mask, 0).to(tl.float32) + bg).to(tl.bfloat16).to(tl.float32)
+    u = (tl.load(U0 + i, mask, 0).to(tl.float32) + bu).to(tl.bfloat16).to(tl.float32)
+    act = (g * tl.sigmoid(g)).to(tl.bfloat16).to(tl.float32)
+    tl.store(G + i, g, mask)
+    tl.store(U + i, u, mask)
+    tl.store(H + i, act * u, mask)
+
+
+def gate_up_separate(g0, u0, ug, uu, bg, bu, scale):
+    shape = g0.shape
+    g0, u0, ug, uu = [v.contiguous() for v in (g0, u0, ug, uu)]
+    g, u, h = torch.empty_like(g0), torch.empty_like(u0), torch.empty_like(g0)
+    _gate_up_separate[(triton.cdiv(g0.numel(), 256),)](
+        g0,
+        u0,
+        ug,
+        uu,
+        bg,
+        bu,
+        g,
+        u,
+        h,
+        shape[-1],
+        g0.numel(),
+        ug.shape[-1],
+        scale,
+        256,
+        enable_fp_fusion=False,
+    )
+    return g, u, h

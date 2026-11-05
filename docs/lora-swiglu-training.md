@@ -163,3 +163,9 @@ between that packed reference and the new consumer kernel is recorded there.
 Neither these short optimizer trajectories nor the full-model timing establishes
 SFT task quality or superiority over actual Unsloth. No training hook is
 installed and serving PRs are unchanged.
+
+The later separate-native-projection ablation in that guide passes every native
+gate with expansion-only fusion but shows no robust speedup. The graph-backend
+control shows larger short-sequence experimental gains while still failing
+native gradient/update gates and slowing down at 4096 tokens. Neither is
+selected as a production training replacement.

@@ -170,3 +170,9 @@ then attach to a small Qwen3.5 SFT run. Compare against native PEFT and actual
 Unsloth with matched checkpointing, loss fusion, precision and batch tokens.
 The present result cannot establish superiority over Unsloth or complete-model
 training acceleration.
+
+The complete BF16 Qwen3.5 follow-up is recorded in
+[the model training guide](qwen35-training.md). It includes separate-native-base
+consumer ablations and native-operator graph-backend controls, with full
+gradient/update failures and timing regressions retained. Those results remain
+separate from this NF4 projection experiment.

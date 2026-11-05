@@ -437,3 +437,21 @@ The dependency wheel hashes and numerical/timing scope are recorded in
 `docs/qwen35-training.md`. The dependency selection follows the upstream
 [backend installation guide](https://github.com/fla-org/flash-linear-attention/blob/main/INSTALL.md)
 without resolving or replacing the working ROCm Torch/Triton installation.
+
+### Separate native-base training consumers
+
+`lora_native_training.py` and the separate-base kernel in
+`lora_swiglu_kernels.py` are new LoRAForge benchmark implementations. They retain
+PEFT's actual projection modules, master Parameters, input-cast boundaries and
+separate base-projection autograd nodes. The expansion-only, activation-only
+and combined consumer ablations do not copy an upstream implementation.
+They use the same standard first-order LoRA/SwiGLU equations and prior-work
+attribution as the preceding training experiments. `check_native_silu.py`
+screens Triton's ROCm math interfaces against the installed native Torch
+activation on a stated finite BF16 input range; it is not a new activation
+algorithm or a whole-model equivalence test. The numerical failures and
+limited complete-step gains remain explicit in `docs/qwen35-training.md`.
+The optional `--compile-backend cudagraphs` path calls Torch's installed AOT/
+graph backend through its public compile interface; it vendors no compiler or
+graph implementation. Backend-managed capture warnings and failed native gates
+are retained rather than relabeled as consumer-kernel improvements.
