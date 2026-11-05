@@ -386,3 +386,23 @@ reported discarded spectrum without materializing dense weight updates.
 The source and destination files, dimensions, scaling and hashes are recorded.
 The comparison is an inference throughput experiment, not trained compression
 quality; random spectra and changed outputs remain explicit in its results.
+
+### Qwen3.5 memory and phase accounting
+
+`qwen35_resource_audit.py`, `run_qwen35_resources.py` and
+`analyze_qwen35_resources.py` are new LoRAForge benchmark observers and CPU
+accounting tools. They use SGLang 0.5.22's model-load/pool/graph lifecycle and
+native profiling endpoint, PyTorch allocator counters and Chrome trace events.
+No upstream GPU kernel is copied or replaced by these observers. Runtime
+peak resets/snapshots use untimed sentinels; profiler windows run after
+throughput and memory measurements. Phase attribution uses enclosing GPU
+annotations or explicit CPU runtime correlation links, retaining unknowns.
+Generic attention names require a source-verified allowlist; fused LoRA
+consumers remain separate from pure A/B costs. GPU sums, activity unions and
+inclusive CPU ranges are reported separately. Component storage accounting
+counts unique storages within each component; categories can share backing
+storage and are not automatically additive. Initial logprob-enabled traces are
+retained as diagnostic evidence, and the corrected requests disable logprob
+returns to match throughput. A NumPy scalar byte-count serialization failure
+in the first corrected-profile attempt is retained separately from accepted
+measurements; explicit integer conversion is regression-tested.
