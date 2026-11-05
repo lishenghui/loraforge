@@ -420,3 +420,20 @@ weight shadow is reused across optimizer updates. GPU kernels run only through
 the explicit standalone benchmark, with a CPU dense path solely for derivative
 and checkpoint tests. See `docs/lora-swiglu-training.md` for measured scope,
 compiled-baseline comparisons and rejected rank-32 scheduling.
+
+### Whole-model Qwen3.5 training harness
+
+`prepare_qwen35_training.py`, `qwen35_training_mlp.py`,
+`benchmark_qwen35_training.py`, `run_qwen35_training.py` and
+`analyze_qwen35_training.py` are new standalone benchmark glue, not extracted
+model or FLA kernels. They call Transformers 5.10.1's native Qwen3.5 text model
+and PEFT 0.21.1, preserve actual trainable Parameter ownership, and compare
+complete forward/loss/backward/AdamW steps. Original HF weights are preserved
+with explicit text-only name mapping and a complete tensor audit.
+
+FLA 0.6.0 is a separate isolated test dependency, using its published MIT
+license and upstream implementation; no FLA source is vendored into LoRAForge.
+The dependency wheel hashes and numerical/timing scope are recorded in
+`docs/qwen35-training.md`. The dependency selection follows the upstream
+[backend installation guide](https://github.com/fla-org/flash-linear-attention/blob/main/INSTALL.md)
+without resolving or replacing the working ROCm Torch/Triton installation.
