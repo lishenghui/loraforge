@@ -140,7 +140,7 @@ Each of the NF4 and BF16 GDN pairs matches all44 validation sequences and saved
 logprobs exactly against its legacy control: maximum saved logprob difference0.
 All114 actual checkpoint projections and336 BF16 LoRA buffers are checked.
 The NF4 package path verifies96 exact reconstructions. The standalone GDN
-package path prepares18 shared parameter pairs, executes324 fused projections
+package path prepares18 shared parameter pairs, records324 fused-path dispatches
 and retains original prefill fallback. Eager/prefill and decode graphs execute;
 additional GDN owner storage beyond model parameters is zero. The two pairs
 share inputs and controls within that one allocation. Timings have one repeat
