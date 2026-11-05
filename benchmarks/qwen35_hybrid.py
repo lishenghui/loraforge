@@ -235,6 +235,20 @@ def observe(root):
     ModelRunner._forward_raw = forward
 
 
+def install_packed_experiment():
+    if os.environ.get("LORAFORGE_BENCH_QWEN35_PACKED") == "1":
+        from qwen35_packed_loader import install
+
+        install()
+
+
+def install_nf4_experiment():
+    if os.environ.get("LORAFORGE_BENCH_QWEN35_NF4") == "1":
+        from qwen35_nf4_compat import install
+
+        install()
+
+
 def install_cold_prefill_experiment():
     if os.environ.get("LORAFORGE_BENCH_QWEN35_COLD_PREFILL") == "1":
         from qwen35_cold_prefill_graph import install
@@ -243,6 +257,14 @@ def install_cold_prefill_experiment():
 
 
 def serve(root, mode, attempt, port):
+    model_path = Path(read(root / "manifest.json")["model"])
+    if any(
+        (model_path / name).is_file()
+        for name in ("packed-receipt.json", "quantization-receipt.json")
+    ):
+        os.environ["LORAFORGE_BENCH_QWEN35_PACKED"] = "1"
+    install_packed_experiment()
+    install_nf4_experiment()
     from sglang.srt.entrypoints.http_server import launch_server
     from sglang.srt.server_args import ServerArgs
 
@@ -268,6 +290,7 @@ def server_options(m, mode, port):
         host="127.0.0.1",
         port=port,
         dtype="bfloat16",
+        enable_multimodal=False,
         tp_size=1,
         random_seed=0,
         context_length=2048,
@@ -299,6 +322,13 @@ def server_options(m, mode, port):
                 dict(lora_name=a["name"], lora_path=a["path"], pinned=True)
                 for a in m["adapters"]
             ],
+        )
+    if os.environ.get("LORAFORGE_BENCH_QWEN35_NF4") == "1":
+        assert m["max_lora_rank"] == 4, "NF4 pilot requires compact rank4"
+        options.update(
+            quantization="bitsandbytes",
+            load_format="bitsandbytes",
+            enable_multimodal=False,
         )
     if os.environ.get("LORAFORGE_BENCH_QWEN35_COLD_PREFILL") == "1":
         assert m["max_lora_rank"] == 4, "cold-prefill pilot is scoped to cap4"
@@ -347,9 +377,12 @@ def numerical_check(reference, candidate):
         if key in reference or key in candidate:
             assert key in reference and key in candidate, "validation cases differ"
             pairs += list(zip(reference[key], candidate[key], strict=True))
-    assert all(math.isfinite(x[0]) for a, b in pairs for seq in (a, b) for x in seq), (
-        "nonfinite logprob"
-    )
+    assert all(
+        isinstance(x[0], (int, float)) and math.isfinite(x[0])
+        for a, b in pairs
+        for seq in (a, b)
+        for x in seq
+    ), "nonfinite logprob"
     same_tokens = all([x[1] for x in a] == [x[1] for x in b] for a, b in pairs)
     differences = []
     for a, b in pairs:
@@ -470,6 +503,9 @@ def run(
                     ], "mixed batch was not repeatable"
                     correctness[key] = values
                 dump(attempt / "correctness.json", correctness)
+                numerical_check(
+                    correctness, correctness
+                )  # Reject missing/nonfinite values before timing.
                 if reference is not None and mode == "fleet":
                     check = numerical_check(
                         read(reference), read(attempt / "correctness.json")
@@ -632,6 +668,8 @@ def compare(root, modes=("native", "fleet", "base")):
 
 if __name__ == "__mp_main__" and os.environ.get("HYBRID_AUDIT_DIR"):
     # SGLang workers spawn by re-importing this executable.
+    install_packed_experiment()
+    install_nf4_experiment()
     from loraforge.integrations.sglang import install
 
     install()
@@ -672,7 +710,15 @@ if __name__ == "__main__":
         action="store_true",
         help="Add 128-token prefill and 32-way 64-output checks in every reference/candidate",
     )
+    parser.add_argument(
+        "--nf4-experiment",
+        action="store_true",
+        help="Experimental gfx90a NF4 fixture + BF16 LoRA; model must be prepacked",
+    )
     args = parser.parse_args()
+    if args.nf4_experiment:
+        os.environ["LORAFORGE_BENCH_QWEN35_NF4"] = "1"
+        os.environ["LORAFORGE_BENCH_QWEN35_EXTENDED"] = "1"
     if args.cold_prefill_graph:
         os.environ["LORAFORGE_BENCH_QWEN35_COLD_PREFILL"] = "1"
         os.environ["LORAFORGE_BENCH_QWEN35_EXTENDED"] = "1"

@@ -333,3 +333,24 @@ attention, KV writes and LoRA computations retain their order. The capture
 fixture must also be 8x128, because the default 1024+empty-requests fixture
 captures different convolution/chunk grids. These helpers are explicit
 benchmark opt-ins, not an installed-library runtime change.
+
+
+### NF4 base with BF16 LoRA benchmark
+
+`prepare_qwen35_packed.py` and `prepare_qwen35_nf4.py` generate a canonical
+Qwen3.5-0.8B fixture using native BF16 row concatenation and bitsandbytes0.50.2
+NF4 block64/double-quantization operations. No quantization kernel is copied. The direct `check_qwen35_nf4.py` program
+uses those same library operations with the measured projection geometries.
+`qwen35_nf4_compat.py` is version-scoped process-local compatibility glue: it
+extends one SGLang0.5.22 ROCm method list while preserving the remaining
+verification, supplies the already-fused name map and separates the BF16
+adapter file loader configuration from the quantized base loader. It changes
+no installed library default or shared SGLang file.
+
+`qwen35_packed_loader.py` handles canonical fused checkpoint names directly
+through native full-weight loading and verifies114 actual projection tensors
+against their checkpoint values. This avoids upstream substring matching of
+`qkv_proj` as `v_proj` and `gate_up_proj` as `up_proj`, which silently skipped
+those parameters in rejected attempts. Other weights retain upstream loading.
+Numerical validation rejects null/nonfinite logprobs before any timing.
+See `docs/qwen35-nf4.md` for scope, rejected evidence and measured results.
