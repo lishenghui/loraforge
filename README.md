@@ -15,6 +15,18 @@ Selected NF4 and BF16 GDN implementations also expose installed alpha APIs,
 with inspectable `ExperimentalAPI` metadata and explicit per-worker opt-ins.
 See [experimental APIs](docs/experimental.md) for usage and support limits.
 
+## Documentation
+
+The [documentation website](https://lishenghui.github.io/loraforge/) includes
+installation, guides, generated API signatures and recorded experiment limits.
+It labels development snapshots with their source revision. To build locally
+with Python 3.11 or newer:
+
+```bash
+python -m pip install ".[docs]"
+python -m sphinx -W --keep-going -b html docs docs/_build/html
+```
+
 ## Install from source
 
 Python 3.10 or newer is required. From a checkout:

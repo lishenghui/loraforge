@@ -127,6 +127,14 @@ and legacy packed/package GDN serving paths at matching inputs. The numerical
 kernel ASTs match the measured `6b2e36a` source. Validation status and exact
 results are recorded separately after the allocated run completes.
 
+Installed-wheel job `23491911` passed all four public NF4 tensor tests on
+gfx90a, including graph replay, stream ordering and output alias rejection.
+The first complete-service attempt stopped because its test-only audit required
+all96 scale checks at model construction, before eager warmup populated them.
+That attempt is retained as a failed validation harness run; it is not evidence
+of a package-service pass. The audit is being retried after warmup in an isolated
+directory. Complete NF4/GDN service migration validation remains pending.
+
 Earlier compression/native numerical failures remain unchanged. Passing an
 incremental migration comparison does not establish trained-adapter quality,
 equal-quality compression or general upstream ROCm support. Historical

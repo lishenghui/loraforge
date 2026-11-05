@@ -60,6 +60,12 @@ support boundaries. Use warning wrappers only at explicit installation
 entrypoints, keeping numerical operations metadata-only. See
 [experimental APIs](docs/experimental.md) for lifecycle and validation rules.
 
+Documentation uses Sphinx, MyST and the PyData theme. Build with
+`python -m sphinx -W --keep-going -b html docs docs/_build/html` after installing
+`.[docs]` with Python 3.11 or newer. Warnings fail CI. Edit the existing Markdown
+guides and public docstrings directly; the website does not maintain duplicate
+copies. See [documentation development](docs/development/documentation.md).
+
 - Keep imports lightweight. Compile and initialize devices only when explicitly
   requested by an operation.
 - Pass devices and configuration explicitly; avoid cluster paths and global
