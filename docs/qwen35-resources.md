@@ -82,8 +82,68 @@ it is retained, not counted as completed profiling. Explicit integer conversion
 and a regression test fix the observer. The corrected retry is a separate
 single-card allocation; its phase ratios are paired within that allocation.
 
-**Corrected trace/observed component totals are pending.** No final phase-cost
-percentage is inferred from the legacy logprob-enabled windows.
+Corrected profile job **23488079** completes all 18 windows with logprob returns
+disabled. Component storage is counted once per underlying storage within each
+category; categories can share backing memory and are not automatically additive.
+
+
+## Confirmed components and phase costs
+
+Corrected job23488079 completes in9m55s on nid005035, one MI250 GCD,7CPUs,
+40GB and a15-minute cap. This is a separate allocation from the primary
+measurement, on the same node. Each phase's precision/policy comparisons stay
+within its own allocation. The corrected profile-only run records zero
+throughput repeats; primary throughput/peak figures above are unchanged.
+All final public worker-source hashes match the completed corrected payload.
+
+After graph capture, every arm has **1,269,964,800 bytes** of GDN state storage
+and **201,338,880 bytes** of KV tensors. Parameter storage is1,705,972,416 bytes
+in BF16 and959,550,144 bytes in NF4, excluding non-parameter metadata. NF4
+adds31,100,928 bytes of cached FP32 scales. LoRA pool storage drops from
+326,615,040 bytes at rank32 to40,826,880 bytes at rank4: exactly8x smaller.
+BF16 fast4 also holds **303,169,536 bytes** of additional GDN packed base
+weights, created with `torch.cat` while original projection parameters remain
+live. This offsets the **285,788,160 bytes** saved in the LoRA pool. NF4 fast4
+has no such BF16 packed-weight tensor. These owner-storage counts explain why
+BF16 fast4's observed peak stays close to native32. Cross-component categories
+can share backing storage in general and must not be summed without checking.
+
+The following C32 decode shares use only kernels attributed to the sampled
+DECODE forward ranges, excluding unattributed work. They are **GPU kernel-time
+shares**, not request wall-time percentages. Combined LoRA consumers also do
+activation/unpack work; dense GEMM includes the output head.
+
+| Configuration | Dequant | Dense GEMM | Separate LoRA A+B | LoRA fused consumers | GDN state/conv | Sampled kernel sum per decode step |
+| --- | ---: | ---: | ---: | ---: | ---: | ---: |
+| bf16-base | 0.00% | 59.37% | 0.00% | 0.00% | 23.64% | 6.411 ms |
+| nf4-base | 24.28% | 44.84% | 0.00% | 0.00% | 17.37% | 8.685 ms |
+| bf16-native32 | 0.00% | 43.87% | 26.69% | 0.00% | 16.42% | 9.061 ms |
+| nf4-native32 | 18.60% | 34.81% | 21.91% | 0.00% | 13.78% | 11.220 ms |
+| bf16-fleet4 | 0.00% | 51.88% | 1.42% | 10.89% | 20.89% | 6.959 ms |
+| nf4-fleet4 | 21.93% | 41.84% | 1.25% | 7.75% | 15.41% | 9.599 ms |
+
+For NF4 fast4, dequantization plus dense GEMM is about64% of sampled decode
+kernel time, while separately named LoRA and fused-consumer kernels are about
+9% (including non-LoRA consumer work). A/B rank reduction does not remove the
+roughly2.1ms of dequantization per sampled decode step. BF16 fast4 avoids that
+cost and uses the packed GDN projection; the memory/performance tradeoff is now
+measured rather than inferred from rank or checkpoint size.
+
+Prefill is sampled separately at1024 input tokens per forward:
+
+| Configuration | Sampled kernel sum per1024-token prefill | Separate LoRA A+B share | Fused consumer share | Dequant share |
+| --- | ---: | ---: | ---: | ---: |
+| bf16-native32 | 39.549 ms | 29.17% | 0.00% | 0.00% |
+| nf4-native32 | 41.716 ms | 27.72% | 0.00% | 5.21% |
+| bf16-fleet4 | 32.923 ms | 6.35% | 11.38% | 0.00% |
+| nf4-fleet4 | 35.113 ms | 6.01% | 10.66% | 6.19% |
+
+These are12-forward samples (C32 contains4 prefill and8 decode forwards), not
+complete request mixes. Unknowns and unattached sampling/metadata work remain
+in the evidence, and profiler timing is not used as serving throughput.
+Next candidates are GDN packed-weight ownership that avoids a duplicate BF16
+copy, and a faster large-batch NF4 dequantization/GEMM path. Neither candidate
+is implemented or claimed faster by this accounting change.
 
 ## Tools and checks
 
