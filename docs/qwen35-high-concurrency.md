@@ -319,7 +319,7 @@ logprob difference 0.120192. This is an existing fast-policy difference: graph
 versus that policy adds zero drift. It is no longer accurate to infer 64-token
 native parity from the earlier 8-token checks. The prior token-matched speed
 opt-in does not turn this expanded failure into a pass. Throughput here is a
-diagnostic of unchanged experimental arithmetic; retain the draft status and
+diagnostic of unchanged experimental arithmetic; retain the experimental status and
 do not enable these research fusions as an accepted native-equivalent runtime.
 The standalone graph adapter itself preserves native arithmetic in this suite.
 

@@ -33,6 +33,15 @@ projections control the DeltaNet update and decay; dropping them is a correctnes
 error when the adapter contains their weights. Convolution and recurrent-state
 updates remain native SGLang operations, with no LoRAForge replacement.
 
+## Merge and activation scope
+
+Including this integration in the repository does not enable it at startup.
+Qwen3.5 compatibility, tiny-rank dispatch and cold-prefill graph experiments
+require their separate explicit opt-ins. Research serving hooks remain benchmark
+prototypes. The fast research policy fails expanded native long-output parity;
+merging its code and evidence does not establish native-equivalent output or
+production readiness. See [the measured limits](qwen35-high-concurrency.md).
+
 ## Native batching and compatibility bridge
 
 SGLang's LoRA manager maps each request's adapter ID to a fixed pool slot and
