@@ -226,10 +226,20 @@ def observe(root):
                 report["backend"] = type(manager.lora_backend).__name__
                 if hasattr(manager.lora_backend, "fleet_snapshot"):
                     report["fleet"] = manager.lora_backend.fleet_snapshot()
+            import sglang.srt.models.qwen3_5 as gdn_model
+
+            report["cold_graph"] = dict(getattr(gdn_model, "_lf_cold_stats", {}))
             dump(root / f"audit-{os.getpid()}.json", report)
         return result
 
     ModelRunner._forward_raw = forward
+
+
+def install_cold_prefill_experiment():
+    if os.environ.get("LORAFORGE_BENCH_QWEN35_COLD_PREFILL") == "1":
+        from qwen35_cold_prefill_graph import install
+
+        install()
 
 
 def serve(root, mode, attempt, port):
@@ -243,6 +253,7 @@ def serve(root, mode, attempt, port):
         from loraforge.integrations.sglang import install_sglang_backend
 
         install_sglang_backend()
+    install_cold_prefill_experiment()
     observe(attempt)
     m = read(root / "manifest.json")
     options = server_options(m, mode, port)
@@ -289,6 +300,12 @@ def server_options(m, mode, port):
                 for a in m["adapters"]
             ],
         )
+    if os.environ.get("LORAFORGE_BENCH_QWEN35_COLD_PREFILL") == "1":
+        assert m["max_lora_rank"] == 4, "cold-prefill pilot is scoped to cap4"
+        options["disable_prefill_cuda_graph"] = False
+        options["cuda_graph_config"]["prefill"] = dict(
+            backend="full", bs=[1024], full_prefill_max_req=8, max_seq_len=2048
+        )
     return options
 
 
@@ -326,6 +343,10 @@ def numerical_check(reference, candidate):
             "validation cases differ"
         )
         pairs += list(zip(reference["mixed32"], candidate["mixed32"], strict=True))
+    for key in ("mixedprefill128", "long32"):
+        if key in reference or key in candidate:
+            assert key in reference and key in candidate, "validation cases differ"
+            pairs += list(zip(reference[key], candidate[key], strict=True))
     assert all(math.isfinite(x[0]) for a, b in pairs for seq in (a, b) for x in seq), (
         "nonfinite logprob"
     )
@@ -414,9 +435,10 @@ def run(
                 dump(attempt / "server-info.json", info)
                 status["state"] = "validation"
                 dump(root / f"{mode}-latest.json", status)
+                extended = os.environ.get("LORAFORGE_BENCH_QWEN35_EXTENDED") == "1"
                 cases = []
                 for index in range(4):
-                    for length in (17, 65, 129):
+                    for length in (17, 65, 129, 128) if extended else (17, 65, 129):
                         body = payload(m, mode, index, length, 8, True)
                         first = request(url, body)
                         request(url, payload(m, mode, index + 1, length, 8, True))
@@ -428,8 +450,13 @@ def run(
                         assert a == b, "same-request state was not reset"
                         cases.append(dict(adapter=index, length=length, tokens=a))
                 correctness = dict(serial=cases)
-                for count, key in ((8, "mixed"), (32, "mixed32")):
-                    mixed = [payload(m, mode, i, 65, 8, True) for i in range(count)]
+                groups = [(8, "mixed", 65, 8), (32, "mixed32", 65, 8)]
+                if extended:
+                    groups += [(8, "mixedprefill128", 128, 8), (32, "long32", 128, 64)]
+                for count, key, length, output in groups:
+                    mixed = [
+                        payload(m, mode, i, length, output, True) for i in range(count)
+                    ]
                     batched = dict(
                         mixed[0], input_ids=[body["input_ids"] for body in mixed]
                     )
@@ -569,6 +596,18 @@ def compare(root, modes=("native", "fleet", "base")):
         > 0
         for row in audits["fleet"]
     )
+    for mode, path in paths.items():
+        args = read(path / "server-args.json")
+        if (
+            args.get("cuda_graph_config", {}).get("prefill", {}).get("backend")
+            == "full"
+        ):
+            audit_pass &= bool(audits[mode]) and all(
+                row["counts"].get("EXTEND/graph", 0) > 0
+                and row.get("cold_graph", {}).get("replay_prepares", 0) > 0
+                and row.get("cold_graph", {}).get("gdn_replay", 0) > 0
+                for row in audits[mode]
+            )
     native_args = read(paths["native"] / "server-args.json")
     fleet_args = read(paths["fleet"] / "server-args.json")
     matched_server_options = (
@@ -596,6 +635,7 @@ if __name__ == "__mp_main__" and os.environ.get("HYBRID_AUDIT_DIR"):
     from loraforge.integrations.sglang import install
 
     install()
+    install_cold_prefill_experiment()
     observe(Path(os.environ["HYBRID_AUDIT_DIR"]))
 
 if __name__ == "__main__":
@@ -622,7 +662,22 @@ if __name__ == "__main__":
         action="store_true",
         help="Time matching token sequences even if the 0.05 logprob gate fails; record both results",
     )
+    parser.add_argument(
+        "--cold-prefill-graph",
+        action="store_true",
+        help="Experimental SGLang0.5.22 cold8x128 graph; requires compact rank4 fixture",
+    )
+    parser.add_argument(
+        "--extended-validation",
+        action="store_true",
+        help="Add 128-token prefill and 32-way 64-output checks in every reference/candidate",
+    )
     args = parser.parse_args()
+    if args.cold_prefill_graph:
+        os.environ["LORAFORGE_BENCH_QWEN35_COLD_PREFILL"] = "1"
+        os.environ["LORAFORGE_BENCH_QWEN35_EXTENDED"] = "1"
+    if args.extended_validation:
+        os.environ["LORAFORGE_BENCH_QWEN35_EXTENDED"] = "1"
     args.root = args.root.resolve()
     if args.action == "prepare":
         prepare(args.root.resolve(), args.model.resolve(), args.rank)

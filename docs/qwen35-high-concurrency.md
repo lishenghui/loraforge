@@ -191,3 +191,147 @@ configurations, each with multiple tiles and a null route. It runs operators,
 not an installed service backend. The kernel function ASTs match the measured
 screen after formatting; source checks, timings and limits are retained in
 [the evidence](qwen35-high-concurrency-mi250.json).
+
+
+## Follow-up: null routing and joint base/A projection
+
+Job **23480237**, nid005035, measures the preceding combined row policy,
+base, and a null-routing diagnostic on the same allocation. All retain C32,
+128 input tokens, 64 forced output tokens, 384 requests and three repeats.
+Medians are **3172.68** tokens/s for base, **2608.23** for current, and
+**2734.67** with LoRA enabled but every request's adapter set to null.
+Null routing is 86.19% of base; current is 95.38% of null routing. This points
+to fixed execution costs beyond useful LoRA arithmetic. It is not an arithmetic
+upper bound: active/null routing and graph/kernel choices can differ. Native
+`skip_inactive_lora_batches` is false on this path, so null requests still
+exercise the enabled-LoRA machinery.
+
+Null versus base keeps 64/64 short and 32/32 long token sequences, with maximum
+saved logprob differences 0.045371 and 0.049433. The long check uses a batched
+32-request call with 128 input and 64 forced output tokens, in addition to the
+short checks. CPU trace interval unions avoid counting nested runtime events
+twice; the remaining host time is unattributed, not proven removable Python
+cost or an end-to-end savings estimate.
+
+A joint-projection candidate appends the four pinned adapters' A rows to base
+weights and computes all resident A products with the base GEMM, then uses
+B-at-consumer kernels. The complete GDN projection operator improves 1.19–1.23x
+at batch 32. Whole-model short checks pass 64/64, but only **28/32 long token
+sequences match**. This candidate is rejected before service timing; it is not
+part of the maintained runtime or a valid full-model speedup. The change in
+GEMM/reduction geometry warrants investigation; this result does not establish
+that the drift is harmless.
+
+The same job's stock full-prefill-graph probe fails during initialization:
+`TritonAttnBackend._apply_cuda_graph_metadata` rejects `ForwardMode.EXTEND`.
+The GDN base graph metadata method also lacks plain EXTEND handling. This is
+a framework path gap, not an out-of-memory result. Exact-shape prefill graph
+metadata and larger prefill batches are subsequent experiments, not measured
+improvements in this diagnostic. See the [curated evidence](qwen35-fixed-cost-mi250.json).
+
+
+## Cold-prefill graph prototype
+
+The [process-local installer](../benchmarks/qwen35_cold_prefill_graph.py) supplies
+plain EXTEND metadata missing from the tested full-graph Triton/GDN backends.
+It captures **eight cold requests of exactly 128 tokens** in one 1024-token bucket.
+A capture fixture of 1024 + seven zero-length requests is insufficient: GDN's
+convolution grids and cached chunk tables must describe the same 8x128 layout.
+The full attention prefix KV table stays empty; native output-cache locations
+still receive K/V. GDN uses native eager physical state-slot translation, copied
+into independent fixed-address buffers before replay. Decode metadata never
+owns those buffers. Prefix cache and recurrent-state tracking are disabled.
+
+The admission guard rejects other batch counts, input lengths, cached prefixes,
+speculative/encoder and multimodal inputs. Those batches use eager prefill.
+Scope remains BF16 Qwen3.5-0.8B, TP1, SGLang 0.5.22, one MI250 GCD and capacity 4.
+SWA, MLA, DCP, DLLM and deterministic attention are excluded. No new LoRA
+approximation or state-update reordering is introduced by this graph adapter.
+
+Job **23481421**, nid005033, completes a pilot in 6m41s. C32 medians are
+2608.00 tokens/s for the preceding row policy, 2970.65 with the prefill graph,
+and 3173.62 for eager-prefill base. The graph candidate gains 13.91% over its
+same-card preceding policy. All 64 short and 32 long sequences and saved logprobs
+are **exactly equal to that preceding policy**. Audit records 117 prefill graph
+replays, 2787 decode graph calls, fixed-address loads and 456 positive rank 4
+entries. The graph is real; out-of-scope validation also exercises eager fallback.
+This pilot does not give native/base the graph and is not the final fair ratio.
+
+The standalone graph helper does not install the earlier private row/prefill
+serving hooks. In the measured combined experiment those existing hooks admit
+static prefill graph metadata while keeping their preceding kernels and BF16
+rounding. The installed Fleet runtime remains unchanged.
+
+For the public native/Fleet/base benchmark, add `--cold-prefill-graph` to
+`benchmarks/qwen35_hybrid.py run` or `serve`. This installs the graph adapter in
+each spawned worker and supplies the same full-prefill configuration to every
+mode. The flag also enables extended validation: four serial 128 samples, one
+8-way 128-input sample, and 32-way 64-output samples. Use
+`--extended-validation` for the corresponding eager reference. It checks 96
+sequences instead of the default 52; optional case sets must match the reference.
+Use a separate output directory for each configuration with identical manifests;
+`--validation-only` checks output/state repeatability without measuring throughput.
+A graph flag without observed `EXTEND/graph` and GDN replay counters is not proof
+of an optimized run.
+
+CPU checks cover ten admission failures, stable metadata storage, real request
+slot refresh after intervening decode, native fallback, idempotence and version
+rejection. The public computation matches the GPU-tested prototype; its only
+additional behavior is an explicit SGLang version guard and a worker CLI entry.
+
+
+### Same-graph, bracketed complete-model result
+
+Job **23481601**, nid005033, completes all eight arms in 16m36s. Three repeats
+of 384 C32 requests per arm retain 128 input and 64 forced output tokens.
+The native and Fleet graph server arguments are exactly equal. Medians:
+
+| Arm, execution order | Output tokens/s |
+| --- | ---: |
+| Preceding row policy, eager prefill | 2620.46 |
+| Row policy + cold-prefill graph, before | **2966.08** |
+| Native compact rank 4, eager prefill | 2265.47 |
+| Native compact rank 4 + same cold-prefill graph | 2529.99 |
+| Base, eager prefill | 3162.26 |
+| Base + same cold-prefill graph | 3445.90 |
+| Row policy + cold-prefill graph, after | **2978.45** |
+| Preceding row policy, eager prefill, after | 2618.20 |
+
+The two graph medians improve the two preceding-policy controls by
+**13.19–13.76%**; control drift is -0.086% and graph before/after drift is +0.417%.
+The graph candidate is **1.1724–1.1773x same-graph native** and
+**86.08–86.43% of same-graph base**, leaving 13.57–13.92% throughput gap.
+Comparing it only with eager-prefill native gives 1.31x, but that is a different
+execution configuration, not the same-graph algorithm ratio. The graph also
+helps native/base themselves. These are closed-loop, complete-service timings,
+not fixed arrival rates, kernel ratios, trained-quality results or confidence
+intervals across allocations.
+
+Graph versus its own eager arithmetic is **96/96 exact token/logprob sequences**
+for Fleet, native and base. The final current-after control is also exact versus
+current-before. Actual prefill/decode graphs, GDN state-index refresh,
+456 positive retained rank 4 entries and fixed-address loads are audited.
+
+**Expanded native parity fails:** the preceding fast research policy matches
+64/64 short native sequences but only 28/32 long sequences. Therefore the graph
+candidate matches 92/96 native sequences overall, with maximum common-prefix
+logprob difference 0.120192. This is an existing fast-policy difference: graph
+versus that policy adds zero drift. It is no longer accurate to infer 64-token
+native parity from the earlier 8-token checks. The prior token-matched speed
+opt-in does not turn this expanded failure into a pass. Throughput here is a
+diagnostic of unchanged experimental arithmetic; retain the draft status and
+do not enable these research fusions as an accepted native-equivalent runtime.
+The standalone graph adapter itself preserves native arithmetic in this suite.
+
+See [the full curated comparison](qwen35-cold-prefill-mi250.json) for repeated
+samples, all numerical flags, graph counters and pinned framework SHA256 hashes.
+Larger 2K/4K prefill batches have only been prepared as a follow-up; no speed or
+numerical claim is made for them.
+
+
+Job **23481853**, nid005037, then runs the public CLI and graph modules without
+private fusion hooks. Native and base each pass the expanded 96-case suite,
+including repeated long requests, and each is exactly equal to the earlier
+same-mode graph result. Prefill/GDN graph counters are positive in both modes.
+This validates the public worker/CLI wiring and version guard on a second MI250
+allocation; it is a validation-only run, not another throughput measurement.

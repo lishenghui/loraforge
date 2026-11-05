@@ -362,3 +362,22 @@ The row change adds zero saved logprob difference to that prefill candidate.
 The exact prefill consumer alone regresses complete serving throughput.
 These are benchmark prototypes, without installed integration defaults or
 trained-quality claims; the explicit timing opt-in preserves numerical flags.
+
+
+The [cold-prefill graph follow-up](qwen35-high-concurrency.md) adds an explicit
+benchmark-only SGLang 0.5.22 graph metadata adapter for eight cold 128-token
+requests. Triton/GDN plain EXTEND support and an exact capture fixture enable
+prefill replay while native state translation and all arithmetic remain intact.
+A public `--cold-prefill-graph` entry propagates to spawned workers and uses
+identical graph options in native/Fleet/base. Extended validation checks 96
+sequences, including 32-way 64-output generation; comparison requires actual
+prefill/GDN graph replay evidence. CPU checks total 148.
+
+Job 23481601 completes same-card bracketing and graph-enabled native/base in
+16m36s: the experimental combined policy reaches 2966–2978 tokens/s at C32,
+13.19–13.76% above its 2620/2618 controls, 1.1724–1.1773x same-graph native and
+86.08–86.43% of same-graph base. Each mode's graph is 96/96 exact against its
+own eager arithmetic. The expanded suite also reveals that the pre-existing
+fast research policy matches only 28/32 long native outputs (92/96 overall).
+This native parity failure is retained; graph adds no new difference. These
+remain synthetic benchmark prototypes, not a production/default runtime change.

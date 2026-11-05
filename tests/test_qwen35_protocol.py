@@ -179,6 +179,54 @@ def test_two_arm_comparison_checks_equal_pool_capacity(tmp_path):
     assert report["numerical_pass"] and report["execution_audit_pass"]
     assert report["performance"][0]["fleet_over_native"] == 1.2
     assert report["adapter_effect_observed"] is None
+    graph_args = dict(
+        max_lora_rank=4, cuda_graph_config=dict(prefill=dict(backend="full"))
+    )
+    for mode in ("native", "fleet"):
+        protocol.dump(tmp_path / f"results/{mode}/server-args.json", graph_args)
+    protocol.compare(tmp_path, ("native", "fleet"))
+    assert not protocol.read(tmp_path / "comparison.json")["execution_audit_pass"]
+    for mode in ("native", "fleet"):
+        audit_file = tmp_path / f"results/{mode}/audit-test.json"
+        audit = protocol.read(audit_file)
+        audit["counts"]["EXTEND/graph"] = 1
+        audit["cold_graph"] = dict(replay_prepares=1, gdn_replay=1)
+        protocol.dump(audit_file, audit)
+    protocol.compare(tmp_path, ("native", "fleet"))
+    assert protocol.read(tmp_path / "comparison.json")["execution_audit_pass"]
     protocol.dump(tmp_path / "results/native/server-args.json", dict(max_lora_rank=64))
     protocol.compare(tmp_path, ("native", "fleet"))
     assert not protocol.read(tmp_path / "comparison.json")["execution_audit_pass"]
+
+
+def test_cold_graph_configuration_matches_all_baselines(monkeypatch):
+    manifest = dict(
+        model="local-model",
+        max_lora_rank=4,
+        target_modules=["qkv_proj"],
+        adapters=[dict(name=f"a{i}", path=f"adapter-{i}") for i in range(4)],
+    )
+    monkeypatch.delenv("LORAFORGE_BENCH_QWEN35_COLD_PREFILL", raising=False)
+    assert protocol.server_options(manifest, "native", 1234)[
+        "disable_prefill_cuda_graph"
+    ]
+    monkeypatch.setenv("LORAFORGE_BENCH_QWEN35_COLD_PREFILL", "1")
+    for mode in ("native", "fleet", "base"):
+        options = protocol.server_options(manifest, mode, 1234)
+        assert not options["disable_prefill_cuda_graph"]
+        assert options["chunked_prefill_size"] == 1024
+        assert options["cuda_graph_config"]["prefill"] == dict(
+            backend="full", bs=[1024], full_prefill_max_req=8, max_seq_len=2048
+        )
+    with pytest.raises(AssertionError, match="cap4"):
+        protocol.server_options(dict(manifest, max_lora_rank=8), "fleet", 1234)
+
+
+def test_long_graph_validation_must_match_reference_cases_and_tokens():
+    native = dict(record([[-0.1, 1]]), long32=[[[-0.2, 2]]] * 32)
+    assert protocol.numerical_check(native, native)["same_token_cases"] == 33
+    candidate = dict(native, long32=[[[-0.2, 3]]] * 32)
+    report = protocol.numerical_check(native, candidate)
+    assert not protocol.timing_allowed(report, allow_logprob_drift=True)
+    with pytest.raises(AssertionError, match="cases differ"):
+        protocol.numerical_check(record([[-0.1, 1]]), candidate)

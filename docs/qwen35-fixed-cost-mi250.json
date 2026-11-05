@@ -1,0 +1,90 @@
+{
+  "job": 23480237,
+  "node": "nid005035",
+  "scope": "BF16 Qwen3.5-0.8B TP1 one MI250 GCD four compact rank4 adapters C32 128 input64 forced output384 requests three repeats",
+  "medians": {
+    "base": 3172.68415486649,
+    "current": 2608.2303202716475,
+    "null": 2734.6663431709194
+  },
+  "base": {
+    "tokens_per_second": [
+      3179.3166101285456,
+      3172.68415486649,
+      3162.3593833227637
+    ],
+    "status": {
+      "arm": "base",
+      "state": "complete"
+    }
+  },
+  "current": {
+    "tokens_per_second": [
+      2610.642374235094,
+      2608.2303202716475,
+      2603.755209072942
+    ],
+    "status": {
+      "arm": "current",
+      "state": "complete"
+    }
+  },
+  "null": {
+    "tokens_per_second": [
+      2734.6663431709194,
+      2720.062823317325,
+      2735.058521833155
+    ],
+    "comparison": {
+      "cases": 64,
+      "same_token_cases": 64,
+      "same_tokens": true,
+      "max_common_prefix_logprob_difference": 0.045370519161224365,
+      "numerical_pass": true
+    },
+    "long-comparison": {
+      "cases": 32,
+      "same_token_cases": 32,
+      "same_tokens": true,
+      "max_common_prefix_logprob_difference": 0.049432963132858276,
+      "numerical_pass": true
+    },
+    "status": {
+      "arm": "null",
+      "state": "complete"
+    }
+  },
+  "joint": {
+    "comparison": {
+      "cases": 64,
+      "same_token_cases": 64,
+      "same_tokens": true,
+      "max_common_prefix_logprob_difference": 0.024587079882621765,
+      "numerical_pass": true
+    },
+    "long-comparison": {
+      "cases": 32,
+      "same_token_cases": 28,
+      "same_tokens": false,
+      "max_common_prefix_logprob_difference": 0.07336258888244629,
+      "numerical_pass": false
+    },
+    "status": {
+      "arm": "joint",
+      "state": "failed",
+      "error": "AssertionError({'cases': 32, 'same_token_cases': 28, 'same_tokens': False, 'max_common_prefix_logprob_difference': 0.07336258888244629, 'numerical_pass': False})"
+    }
+  },
+  "graph": {
+    "status": {
+      "arm": "graph",
+      "state": "failed",
+      "error": "RuntimeError('server exited -9')"
+    }
+  },
+  "null_fraction_base": 0.8619409338229562,
+  "current_fraction_null": 0.9537654664105509,
+  "graph_failure": "TritonAttnBackend._apply_cuda_graph_metadata rejects plain EXTEND; no memory exhaustion observed",
+  "joint_candidate_accepted": false,
+  "joint_operator_scope": "1.19\u20131.23x includes base GEMM plus LoRA A/B/unpack at batch32; not service throughput"
+}

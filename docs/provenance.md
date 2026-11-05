@@ -319,3 +319,17 @@ rounding. The cache reuses only consecutive static decode metadata, scoped to
 Fleet TP1/no-overlap workers and non-DP execution. These benchmark helpers do
 not replace the installed backend. Their check programs and source comparison
 receipts are documented in `docs/qwen35-high-concurrency.md`.
+
+
+### Qwen3.5 cold-prefill graph experiment
+
+`benchmarks/qwen35_cold_prefill_metadata.py` and
+`qwen35_cold_prefill_graph.py` are new process-local benchmark glue against
+SGLang 0.5.22's `ForwardMetadata`, prefill graph runner and GDN eager metadata
+contracts. They add plain EXTEND preparation without copying upstream GPU
+kernels. Cold 8x128 queries use fixed independent metadata buffers; physical
+GDN state-slot translation remains native. Native convolution, recurrent,
+attention, KV writes and LoRA computations retain their order. The capture
+fixture must also be 8x128, because the default 1024+empty-requests fixture
+captures different convolution/chunk grids. These helpers are explicit
+benchmark opt-ins, not an installed-library runtime change.
