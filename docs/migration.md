@@ -346,13 +346,19 @@ logprob difference. These remain benchmark prototypes; the native strict gate
 and broader quality/hardware validation remain outside the measured speed claim.
 
 The [high-concurrency follow-up](qwen35-high-concurrency.md) adds standalone
-capacity-four prefill A+B and B-at-SiLU prototypes plus a consecutive-decode
-metadata cache candidate. The first MI250 screen rejects grouped decode
-gate/up fusion and narrow prefill fusion, retaining only measured wide
-128/1024-token candidates. CPU checks total134, including14 cache invalidation
-transitions. Cache-only passes64 exact model sequences. The initial prefill model attempt
-keeps64 token sequences but stops at its incremental logprob gate0.086396;
-its timings are not reported. A per-row decode consumer subsequently passes
-32 exact eager/changed-metadata graph cases and improves the operator segment
-1.39–1.73x at batch32. Matched C32 whole-model timing is pending; none of those
-operator ratios is an installed service speedup claim.
+capacity-four prefill A+B, B-at-SiLU and consecutive-decode metadata prototypes.
+The first MI250 screen rejects grouped decode gate/up and narrow prefill fusion.
+The per-row decode consumer passes 32 exact eager and 32 metadata-changing graph
+comparisons and improves that operator segment 1.39–1.73x at batch 32. CPU checks
+total 134, including 14 cache invalidation transitions; cache-only passes 64
+exact full-model sequences.
+
+Job **23476560** completes the C32 whole-model ablation: the combined row variant
+reaches **2611.61 tokens/s**, 1.94–2.53% above its controls, **1.1554x native**
+and **82.42%** of the same-card base. All 64 native token sequences match.
+Native maximum logprob drift 0.120192 and incremental prefill A+B drift 0.086396
+remain strict failures; aligning A's K chunk does not remove the latter.
+The row change adds zero saved logprob difference to that prefill candidate.
+The exact prefill consumer alone regresses complete serving throughput.
+These are benchmark prototypes, without installed integration defaults or
+trained-quality claims; the explicit timing opt-in preserves numerical flags.

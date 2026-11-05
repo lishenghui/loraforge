@@ -210,21 +210,19 @@ demonstrates a reliable result above 1.3x. This specialization study has no
 same-card base-only arm. The rank-4 synthetic/short numerical-sample boundary
 and lack of across-run confidence intervals remain.
 
-## Remaining experiments
+## High-concurrency follow-up and remaining experiments
 
-After fusion, further rank arithmetic reductions have limited measured leverage:
-shared A already showed little latency benefit, while specialization keeps the
-same launch count. Potential next experiments are correction-at-consumer for
-residual/RMSNorm and gate/up activation, preserving the BF16 correction before
-the nonlinear operation. Gate/up prefill and consecutive decode metadata reuse are now evaluated in
-the [high-concurrency follow-up](qwen35-high-concurrency.md); decode grouped
-gate/up fusion regresses in its operator screen.
+The [high-concurrency follow-up](qwen35-high-concurrency.md) measures prefill
+fusion, metadata reuse and B-at-SiLU. Grouped decode gate/up fusion regresses;
+a per-row consumer gives a modest whole-model gain. Its same-card C32 ablation
+reaches 1.1554x native and 82.42% of base, with the strict numerical failures
+recorded separately. The operator gains do not translate into a 1.3x service
+result. The preceding study above retains RowExpand at batch 32.
 
-At batch32, gate/up retains RowExpand because duplicating A per output tile
-regresses in the operator screen. A grouped fusion that preserves B reuse across
-an adapter's token rows is a separate candidate. Prefill is also outside the
-new decode fusions. These are reasons to target those paths in another study,
-not a prediction that the current C32 speedup can reach 1.3x.
+Further unmeasured candidates include correction at residual/RMSNorm consumers
+and base-projection epilogues, preserving BF16 rounding before nonlinear
+operations. Shared A already showed little rank-4 latency benefit, so further
+rank arithmetic reductions need complete-model evidence.
 
 ## Reproducing the operator screen
 

@@ -98,11 +98,50 @@ native shrink uses256. Aligning that partition is a targeted follow-up, not a
 claim that the failure is already fixed. No prefill timings, base arm or ending
 control were executed after the failure; the attempt and logs are retained.
 
-The follow-up model job **23476560** focuses on C32 with separate consumer,
-native-chunk256 prefill, and selected row-consumer arms, plus matched native,
-base and before/after controls. All tokens must still match before timing.
-Per the explicit speed-study opt-in, nonzero logprob drift is recorded without
-blocking those timing arms; strict numerical flags are preserved.
+Follow-up job **23476560** completes the C32 ablation in **14m05s** on
+**nid005026**, one MI250X GCD, 7 requested CPUs and 40GB host memory. It repeats
+three 384-request measurements per arm, with 128 input and 64 forced output
+tokens. All LoRA arms have identical server arguments, physical/pool rank 4,
+weights and scaling. The base is the same unfused no-AITER configuration.
+
+| Arm, in execution order | Output tokens/s |
+| --- | ---: |
+| Previous fused/specialized policy, before | 2562.02 |
+| Metadata cache + prefill SiLU consumer | 2539.69 |
+| Above + prefill A+B, K chunk 256 | 2571.33 |
+| Above + selected per-row decode consumer | **2611.61** |
+| Native compact-rank-4 SGLang | 2260.27 |
+| Base, without LoRA | 3168.47 |
+| Previous fused/specialized policy, after | 2547.17 |
+
+The ending control is 0.58% slower than the starting control. The combined row
+variant improves those controls by **1.94–2.53%**, and improves the prefill-A+B
+arm by 1.57%. It is **1.1554x native** and **82.42% of base**: throughput remains
+17.58% below base. This is a modest complete-service gain, not the operator's
+1.39–1.73x ratio and not a demonstrated 1.3x service result. These are pilot
+medians with three repetitions in one allocation, not across-run confidence
+intervals. C1/C8 complete-model gains of this new row policy were not measured.
+
+Every Fleet arm matches 64/64 native token sequences and repeated-request
+records. Cache plus prefill SiLU consumer has zero saved logprob difference
+from the preceding policy, but complete throughput **regresses by 0.29–0.87%**
+against its two controls. Operator savings alone do not justify selecting it.
+
+Adding prefill A+B produces **0.086396** maximum incremental logprob difference;
+aligning K chunks to 256 **does not remove it**. Row versus that prefill-A+B arm
+has zero new saved logprob difference. The largest native difference is now
+**0.120192**, including the four added serial 128 samples, and is shared by
+all Fleet arms. Both native and incremental A+B strict gates remain failed.
+The user's explicit nonblocking-logprob speed-study opt-in permits timing
+while requiring matching token IDs and finite comparisons; it never relabels
+those gates as passed. This is not evidence of trained quality or harmless
+rounding over long recurrent generations.
+
+Actual decode graphs, all 456 positive rank-4 entries, metadata cache hits,
+new prefill/row hooks and fixed-address loading are audited. The per-row
+combined arm is a research candidate; it is not enabled by a library flag.
+The optional scalar sequential-B follow-up is only an unsubmitted sketch,
+not another measured optimization.
 
 ## Per-row decode consumer
 
@@ -129,13 +168,12 @@ and, at batches1/8, the already selected wide-A+B/SiLU path.
 | 32 | 32 | 14.76 | 8.52 | 1.73x |
 
 A minimum3% improvement over the actual current path at every tested adapter
-count selects batches1/8/32, tile256. Untested2/4/16 retain their preceding
-path. These are operator ratios, not a service speedup prediction; model
-validation is pending the matched C32 job above.
+count selects batches 1/8/32, tile 256. Untested 2/4/16 retain their preceding
+path. These are operator ratios; the matched model result above is much smaller.
 
-The earlier native maximum logprob difference 0.1187558 still fails the strict
-0.05 gate. The authorized token-matched timing opt-in does not turn that result
-into a numerical pass.
+The earlier 52-case native maximum logprob difference 0.1187558 and the new
+64-case maximum 0.120192 both fail the strict 0.05 gate. The authorized
+token-matched timing opt-in does not turn either result into a numerical pass.
 
 ## Reproduce the operator screen
 
@@ -143,7 +181,8 @@ In the pinned ROCm/SGLang environment, prebuild RowExpand on CPU, then on an
 allocated MI250 GCD run:
 
 ```bash
-python benchmarks/check_qwen35_prefill_fusion.py --output prefill.json
+python benchmarks/check_qwen35_prefill_fusion.py --output prefill-k64.json --block-k 64
+python benchmarks/check_qwen35_prefill_fusion.py --output prefill-k256.json --block-k 256
 python benchmarks/check_qwen35_decode_silu.py --output decode-silu.json
 ```
 

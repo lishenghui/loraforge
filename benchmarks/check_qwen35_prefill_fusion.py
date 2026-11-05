@@ -24,6 +24,7 @@ from loraforge.ops.rowexpand import direct_shrink, row_expand, rowexpand_extensi
 def main():
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--output", type=Path, required=True)
+    parser.add_argument("--block-k", type=int, choices=(64, 256), default=64)
     args = parser.parse_args()
     args.output.parent.mkdir(parents=True, exist_ok=True)
     kw = dict(device="cuda", dtype=torch.bfloat16)
@@ -37,6 +38,7 @@ def main():
         activation=[],
         prefill=[],
         state="running",
+        ab_block_k=args.block_k,
     )
 
     def save():
@@ -257,6 +259,7 @@ def main():
                         slices,
                         offsets,
                         tile=tile,
+                        block_k=args.block_k,
                     )
 
                 d["y"].copy_(d["base"])
