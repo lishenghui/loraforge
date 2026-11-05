@@ -386,3 +386,17 @@ reported discarded spectrum without materializing dense weight updates.
 The source and destination files, dimensions, scaling and hashes are recorded.
 The comparison is an inference throughput experiment, not trained compression
 quality; random spectra and changed outputs remain explicit in its results.
+
+### Training transfer feasibility probe
+
+`benchmarks/lora_training.py` and `check_lora_training.py` are new LoRAForge
+experiments using standard frozen-base LoRA derivatives and the existing NF4
+decoder. No Unsloth kernel or autograd implementation was copied. The reviewed
+reference is Unsloth commit `157305f6596d6196189bbc3e393bb8fe8ed604a0`:
+`unsloth/kernels/fast_lora.py` blob `b61333c1261ef29980509ecd7b057267f0c11f2d`
+and `swiglu.py` blob `b82c396c2bf02243c38baece006f3cb0d3b6d554`, Apache-2.0,
+Daniel Han-Chen and the Unsloth team. The custom frozen-base lifetime and
+rematerialization concepts are attributed prior work, not new algorithm claims.
+The probe is first-order only and does not alter inference autograd restrictions
+or install training hooks. See `docs/lora-training-transfer.md` for exact
+forward/gradient evidence, scope, failed checker attempts and limitations.

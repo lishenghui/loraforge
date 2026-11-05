@@ -1,0 +1,5275 @@
+{
+  "state": "complete",
+  "scope": "Frozen actual NF4 decoder projections;BF16compute;FP32LoRA master parameters;dropout0;singleadapter;forward+backward graph timings;no wholemodel or Unsloth benchmark claim",
+  "torch": "2.11.0+rocm7.2_lumi_aif_20260929120822",
+  "bnb": "0.50.2",
+  "device": "AMD Instinct MI250X",
+  "cases": [
+    {
+      "name": "model.layers.0.linear_attn.in_proj_qkvz.weight",
+      "shape": [
+        8192,
+        1024
+      ],
+      "rank": 4,
+      "rows": 128,
+      "numerics": {
+        "bnb": {
+          "output": {
+            "max_abs": 0.0,
+            "exact": true
+          },
+          "dX": {
+            "max_abs": 0.0,
+            "exact": true
+          },
+          "dA": {
+            "max_abs": 0.0,
+            "exact": true
+          },
+          "dB": {
+            "max_abs": 0.0,
+            "exact": true
+          },
+          "updated_graph": {
+            "output": {
+              "max_abs": 0.0,
+              "exact": true
+            },
+            "dX": {
+              "max_abs": 0.0,
+              "exact": true
+            },
+            "dA": {
+              "max_abs": 0.0,
+              "exact": true
+            },
+            "dB": {
+              "max_abs": 0.0,
+              "exact": true
+            }
+          }
+        },
+        "cached": {
+          "output": {
+            "max_abs": 0.0,
+            "exact": true
+          },
+          "dX": {
+            "max_abs": 0.0,
+            "exact": true
+          },
+          "dA": {
+            "max_abs": 0.0,
+            "exact": true
+          },
+          "dB": {
+            "max_abs": 0.0,
+            "exact": true
+          },
+          "updated_graph": {
+            "output": {
+              "max_abs": 0.0,
+              "exact": true
+            },
+            "dX": {
+              "max_abs": 0.0,
+              "exact": true
+            },
+            "dA": {
+              "max_abs": 0.0,
+              "exact": true
+            },
+            "dB": {
+              "max_abs": 0.0,
+              "exact": true
+            }
+          }
+        },
+        "naive": {
+          "output": {
+            "max_abs": 0.0,
+            "exact": true
+          },
+          "dX": {
+            "max_abs": 0.0,
+            "exact": true
+          },
+          "dA": {
+            "max_abs": 0.0,
+            "exact": true
+          },
+          "dB": {
+            "max_abs": 0.0,
+            "exact": true
+          },
+          "updated_graph": {
+            "output": {
+              "max_abs": 0.0,
+              "exact": true
+            },
+            "dX": {
+              "max_abs": 0.0,
+              "exact": true
+            },
+            "dA": {
+              "max_abs": 0.0,
+              "exact": true
+            },
+            "dB": {
+              "max_abs": 0.0,
+              "exact": true
+            }
+          }
+        },
+        "recompute": {
+          "output": {
+            "max_abs": 0.0,
+            "exact": true
+          },
+          "dX": {
+            "max_abs": 0.0,
+            "exact": true
+          },
+          "dA": {
+            "max_abs": 0.0,
+            "exact": true
+          },
+          "dB": {
+            "max_abs": 0.0,
+            "exact": true
+          },
+          "updated_graph": {
+            "output": {
+              "max_abs": 0.0,
+              "exact": true
+            },
+            "dX": {
+              "max_abs": 0.0,
+              "exact": true
+            },
+            "dA": {
+              "max_abs": 0.0,
+              "exact": true
+            },
+            "dB": {
+              "max_abs": 0.0,
+              "exact": true
+            }
+          }
+        }
+      },
+      "memory": {
+        "bnb": {
+          "forward_live_delta_bytes": 2171904,
+          "peak_step_delta_bytes": 19922944,
+          "retained_bf16_base_weight_bytes": 0
+        },
+        "cached": {
+          "forward_live_delta_bytes": 2171904,
+          "peak_step_delta_bytes": 19546112,
+          "retained_bf16_base_weight_bytes": 0
+        },
+        "naive": {
+          "forward_live_delta_bytes": 18949120,
+          "peak_step_delta_bytes": 23143424,
+          "retained_bf16_base_weight_bytes": 16777216
+        },
+        "recompute": {
+          "forward_live_delta_bytes": 2097152,
+          "peak_step_delta_bytes": 21455872,
+          "retained_bf16_base_weight_bytes": 0
+        }
+      },
+      "timing": {
+        "bnb": {
+          "median_us": 465.80323576927185,
+          "samples_us": [
+            464.783251285553,
+            465.80323576927185,
+            465.92336893081665
+          ]
+        },
+        "cached": {
+          "median_us": 340.1023745536804,
+          "samples_us": [
+            338.022381067276,
+            340.1023745536804,
+            340.12237191200256
+          ]
+        },
+        "naive": {
+          "median_us": 305.50211668014526,
+          "samples_us": [
+            304.5821189880371,
+            307.08223581314087,
+            305.50211668014526
+          ]
+        },
+        "recompute": {
+          "median_us": 356.4024865627289,
+          "samples_us": [
+            354.3024957180023,
+            356.4024865627289,
+            357.5024902820587
+          ]
+        }
+      },
+      "cached_over_bnb_speed": 1.3695971290425415,
+      "recompute_over_bnb_speed": 1.3069584341614513
+    },
+    {
+      "name": "model.layers.0.linear_attn.in_proj_qkvz.weight",
+      "shape": [
+        8192,
+        1024
+      ],
+      "rank": 4,
+      "rows": 1024,
+      "numerics": {
+        "bnb": {
+          "output": {
+            "max_abs": 0.0,
+            "exact": true
+          },
+          "dX": {
+            "max_abs": 0.0,
+            "exact": true
+          },
+          "dA": {
+            "max_abs": 0.0,
+            "exact": true
+          },
+          "dB": {
+            "max_abs": 0.0,
+            "exact": true
+          },
+          "updated_graph": {
+            "output": {
+              "max_abs": 0.0,
+              "exact": true
+            },
+            "dX": {
+              "max_abs": 0.0,
+              "exact": true
+            },
+            "dA": {
+              "max_abs": 0.0,
+              "exact": true
+            },
+            "dB": {
+              "max_abs": 0.0,
+              "exact": true
+            }
+          }
+        },
+        "cached": {
+          "output": {
+            "max_abs": 0.0,
+            "exact": true
+          },
+          "dX": {
+            "max_abs": 0.0,
+            "exact": true
+          },
+          "dA": {
+            "max_abs": 0.0,
+            "exact": true
+          },
+          "dB": {
+            "max_abs": 0.0,
+            "exact": true
+          },
+          "updated_graph": {
+            "output": {
+              "max_abs": 0.0,
+              "exact": true
+            },
+            "dX": {
+              "max_abs": 0.0,
+              "exact": true
+            },
+            "dA": {
+              "max_abs": 0.0,
+              "exact": true
+            },
+            "dB": {
+              "max_abs": 0.0,
+              "exact": true
+            }
+          }
+        },
+        "naive": {
+          "output": {
+            "max_abs": 0.0,
+            "exact": true
+          },
+          "dX": {
+            "max_abs": 0.0,
+            "exact": true
+          },
+          "dA": {
+            "max_abs": 0.0,
+            "exact": true
+          },
+          "dB": {
+            "max_abs": 0.0,
+            "exact": true
+          },
+          "updated_graph": {
+            "output": {
+              "max_abs": 0.0,
+              "exact": true
+            },
+            "dX": {
+              "max_abs": 0.0,
+              "exact": true
+            },
+            "dA": {
+              "max_abs": 0.0,
+              "exact": true
+            },
+            "dB": {
+              "max_abs": 0.0,
+              "exact": true
+            }
+          }
+        },
+        "recompute": {
+          "output": {
+            "max_abs": 0.0,
+            "exact": true
+          },
+          "dX": {
+            "max_abs": 0.0,
+            "exact": true
+          },
+          "dA": {
+            "max_abs": 0.0,
+            "exact": true
+          },
+          "dB": {
+            "max_abs": 0.0,
+            "exact": true
+          },
+          "updated_graph": {
+            "output": {
+              "max_abs": 0.0,
+              "exact": true
+            },
+            "dX": {
+              "max_abs": 0.0,
+              "exact": true
+            },
+            "dA": {
+              "max_abs": 0.0,
+              "exact": true
+            },
+            "dB": {
+              "max_abs": 0.0,
+              "exact": true
+            }
+          }
+        }
+      },
+      "memory": {
+        "bnb": {
+          "forward_live_delta_bytes": 16859136,
+          "peak_step_delta_bytes": 50413568,
+          "retained_bf16_base_weight_bytes": 0
+        },
+        "cached": {
+          "forward_live_delta_bytes": 16859136,
+          "peak_step_delta_bytes": 50413568,
+          "retained_bf16_base_weight_bytes": 0
+        },
+        "naive": {
+          "forward_live_delta_bytes": 33636352,
+          "peak_step_delta_bytes": 67190784,
+          "retained_bf16_base_weight_bytes": 16777216
+        },
+        "recompute": {
+          "forward_live_delta_bytes": 16777216,
+          "peak_step_delta_bytes": 52658176,
+          "retained_bf16_base_weight_bytes": 0
+        }
+      },
+      "timing": {
+        "bnb": {
+          "median_us": 912.8663539886475,
+          "samples_us": [
+            912.2064709663391,
+            912.8663539886475,
+            914.8064851760864
+          ]
+        },
+        "cached": {
+          "median_us": 801.0657429695129,
+          "samples_us": [
+            801.0657429695129,
+            802.2056221961975,
+            800.0856041908264
+          ]
+        },
+        "naive": {
+          "median_us": 768.6653733253479,
+          "samples_us": [
+            768.6653733253479,
+            769.2654728889465,
+            768.6053514480591
+          ]
+        },
+        "recompute": {
+          "median_us": 815.9457445144653,
+          "samples_us": [
+            815.6057596206665,
+            817.5457715988159,
+            815.9457445144653
+          ]
+        }
+      },
+      "cached_over_bnb_speed": 1.1395648384671837,
+      "recompute_over_bnb_speed": 1.1187831545489038
+    },
+    {
+      "name": "model.layers.0.linear_attn.in_proj_qkvz.weight",
+      "shape": [
+        8192,
+        1024
+      ],
+      "rank": 4,
+      "rows": 4096,
+      "numerics": {
+        "bnb": {
+          "output": {
+            "max_abs": 0.0,
+            "exact": true
+          },
+          "dX": {
+            "max_abs": 0.0,
+            "exact": true
+          },
+          "dA": {
+            "max_abs": 0.0,
+            "exact": true
+          },
+          "dB": {
+            "max_abs": 0.0,
+            "exact": true
+          },
+          "updated_graph": {
+            "output": {
+              "max_abs": 0.0,
+              "exact": true
+            },
+            "dX": {
+              "max_abs": 0.0,
+              "exact": true
+            },
+            "dA": {
+              "max_abs": 0.0,
+              "exact": true
+            },
+            "dB": {
+              "max_abs": 0.0,
+              "exact": true
+            }
+          }
+        },
+        "cached": {
+          "output": {
+            "max_abs": 0.0,
+            "exact": true
+          },
+          "dX": {
+            "max_abs": 0.0,
+            "exact": true
+          },
+          "dA": {
+            "max_abs": 0.0,
+            "exact": true
+          },
+          "dB": {
+            "max_abs": 0.0,
+            "exact": true
+          },
+          "updated_graph": {
+            "output": {
+              "max_abs": 0.0,
+              "exact": true
+            },
+            "dX": {
+              "max_abs": 0.0,
+              "exact": true
+            },
+            "dA": {
+              "max_abs": 0.0,
+              "exact": true
+            },
+            "dB": {
+              "max_abs": 0.0,
+              "exact": true
+            }
+          }
+        },
+        "naive": {
+          "output": {
+            "max_abs": 0.0,
+            "exact": true
+          },
+          "dX": {
+            "max_abs": 0.0,
+            "exact": true
+          },
+          "dA": {
+            "max_abs": 0.0,
+            "exact": true
+          },
+          "dB": {
+            "max_abs": 0.0,
+            "exact": true
+          },
+          "updated_graph": {
+            "output": {
+              "max_abs": 0.0,
+              "exact": true
+            },
+            "dX": {
+              "max_abs": 0.0,
+              "exact": true
+            },
+            "dA": {
+              "max_abs": 0.0,
+              "exact": true
+            },
+            "dB": {
+              "max_abs": 0.0,
+              "exact": true
+            }
+          }
+        },
+        "recompute": {
+          "output": {
+            "max_abs": 0.0,
+            "exact": true
+          },
+          "dX": {
+            "max_abs": 0.0,
+            "exact": true
+          },
+          "dA": {
+            "max_abs": 0.0,
+            "exact": true
+          },
+          "dB": {
+            "max_abs": 0.0,
+            "exact": true
+          },
+          "updated_graph": {
+            "output": {
+              "max_abs": 0.0,
+              "exact": true
+            },
+            "dX": {
+              "max_abs": 0.0,
+              "exact": true
+            },
+            "dA": {
+              "max_abs": 0.0,
+              "exact": true
+            },
+            "dB": {
+              "max_abs": 0.0,
+              "exact": true
+            }
+          }
+        }
+      },
+      "memory": {
+        "bnb": {
+          "forward_live_delta_bytes": 67215360,
+          "peak_step_delta_bytes": 201433088,
+          "retained_bf16_base_weight_bytes": 0
+        },
+        "cached": {
+          "forward_live_delta_bytes": 67215360,
+          "peak_step_delta_bytes": 201433088,
+          "retained_bf16_base_weight_bytes": 0
+        },
+        "naive": {
+          "forward_live_delta_bytes": 83992576,
+          "peak_step_delta_bytes": 218210304,
+          "retained_bf16_base_weight_bytes": 16777216
+        },
+        "recompute": {
+          "forward_live_delta_bytes": 67108864,
+          "peak_step_delta_bytes": 201400320,
+          "retained_bf16_base_weight_bytes": 0
+        }
+      },
+      "timing": {
+        "bnb": {
+          "median_us": 2446.8371868133545,
+          "samples_us": [
+            2438.857078552246,
+            2446.8371868133545,
+            2466.797351837158
+          ]
+        },
+        "cached": {
+          "median_us": 2324.5365619659424,
+          "samples_us": [
+            2326.416492462158,
+            2312.836170196533,
+            2324.5365619659424
+          ]
+        },
+        "naive": {
+          "median_us": 2306.2360286712646,
+          "samples_us": [
+            2281.65602684021,
+            2306.2360286712646,
+            2308.595895767212
+          ]
+        },
+        "recompute": {
+          "median_us": 2355.3364276885986,
+          "samples_us": [
+            2363.9163970947266,
+            2355.3364276885986,
+            2348.1764793395996
+          ]
+        }
+      },
+      "cached_over_bnb_speed": 1.0526129065244636,
+      "recompute_over_bnb_speed": 1.0388482757915607
+    },
+    {
+      "name": "model.layers.0.linear_attn.in_proj_qkvz.weight",
+      "shape": [
+        8192,
+        1024
+      ],
+      "rank": 32,
+      "rows": 128,
+      "numerics": {
+        "bnb": {
+          "output": {
+            "max_abs": 0.0,
+            "exact": true
+          },
+          "dX": {
+            "max_abs": 0.0,
+            "exact": true
+          },
+          "dA": {
+            "max_abs": 0.0,
+            "exact": true
+          },
+          "dB": {
+            "max_abs": 0.0,
+            "exact": true
+          },
+          "updated_graph": {
+            "output": {
+              "max_abs": 0.0,
+              "exact": true
+            },
+            "dX": {
+              "max_abs": 0.0,
+              "exact": true
+            },
+            "dA": {
+              "max_abs": 0.0,
+              "exact": true
+            },
+            "dB": {
+              "max_abs": 0.0,
+              "exact": true
+            }
+          }
+        },
+        "cached": {
+          "output": {
+            "max_abs": 0.0,
+            "exact": true
+          },
+          "dX": {
+            "max_abs": 0.0,
+            "exact": true
+          },
+          "dA": {
+            "max_abs": 0.0,
+            "exact": true
+          },
+          "dB": {
+            "max_abs": 0.0,
+            "exact": true
+          },
+          "updated_graph": {
+            "output": {
+              "max_abs": 0.0,
+              "exact": true
+            },
+            "dX": {
+              "max_abs": 0.0,
+              "exact": true
+            },
+            "dA": {
+              "max_abs": 0.0,
+              "exact": true
+            },
+            "dB": {
+              "max_abs": 0.0,
+              "exact": true
+            }
+          }
+        },
+        "naive": {
+          "output": {
+            "max_abs": 0.0,
+            "exact": true
+          },
+          "dX": {
+            "max_abs": 0.0,
+            "exact": true
+          },
+          "dA": {
+            "max_abs": 0.0,
+            "exact": true
+          },
+          "dB": {
+            "max_abs": 0.0,
+            "exact": true
+          },
+          "updated_graph": {
+            "output": {
+              "max_abs": 0.0,
+              "exact": true
+            },
+            "dX": {
+              "max_abs": 0.0,
+              "exact": true
+            },
+            "dA": {
+              "max_abs": 0.0,
+              "exact": true
+            },
+            "dB": {
+              "max_abs": 0.0,
+              "exact": true
+            }
+          }
+        },
+        "recompute": {
+          "output": {
+            "max_abs": 0.0,
+            "exact": true
+          },
+          "dX": {
+            "max_abs": 0.0,
+            "exact": true
+          },
+          "dA": {
+            "max_abs": 0.0,
+            "exact": true
+          },
+          "dB": {
+            "max_abs": 0.0,
+            "exact": true
+          },
+          "updated_graph": {
+            "output": {
+              "max_abs": 0.0,
+              "exact": true
+            },
+            "dX": {
+              "max_abs": 0.0,
+              "exact": true
+            },
+            "dA": {
+              "max_abs": 0.0,
+              "exact": true
+            },
+            "dB": {
+              "max_abs": 0.0,
+              "exact": true
+            }
+          }
+        }
+      },
+      "memory": {
+        "bnb": {
+          "forward_live_delta_bytes": 2695168,
+          "peak_step_delta_bytes": 20840448,
+          "retained_bf16_base_weight_bytes": 0
+        },
+        "cached": {
+          "forward_live_delta_bytes": 2695168,
+          "peak_step_delta_bytes": 20578304,
+          "retained_bf16_base_weight_bytes": 0
+        },
+        "naive": {
+          "forward_live_delta_bytes": 19472384,
+          "peak_step_delta_bytes": 23666688,
+          "retained_bf16_base_weight_bytes": 16777216
+        },
+        "recompute": {
+          "forward_live_delta_bytes": 2097152,
+          "peak_step_delta_bytes": 23011328,
+          "retained_bf16_base_weight_bytes": 0
+        }
+      },
+      "timing": {
+        "bnb": {
+          "median_us": 438.84313106536865,
+          "samples_us": [
+            438.84313106536865,
+            438.9631152153015,
+            436.1231327056885
+          ]
+        },
+        "cached": {
+          "median_us": 323.9022493362427,
+          "samples_us": [
+            324.5622515678406,
+            323.9022493362427,
+            323.32223653793335
+          ]
+        },
+        "naive": {
+          "median_us": 291.04211926460266,
+          "samples_us": [
+            291.04211926460266,
+            290.5821204185486,
+            291.64212942123413
+          ]
+        },
+        "recompute": {
+          "median_us": 342.6024913787842,
+          "samples_us": [
+            342.6024913787842,
+            344.1624939441681,
+            341.4824903011322
+          ]
+        }
+      },
+      "cached_over_bnb_speed": 1.3548628697845377,
+      "recompute_over_bnb_speed": 1.2809105073908527
+    },
+    {
+      "name": "model.layers.0.linear_attn.in_proj_qkvz.weight",
+      "shape": [
+        8192,
+        1024
+      ],
+      "rank": 32,
+      "rows": 1024,
+      "numerics": {
+        "bnb": {
+          "output": {
+            "max_abs": 0.0,
+            "exact": true
+          },
+          "dX": {
+            "max_abs": 0.0,
+            "exact": true
+          },
+          "dA": {
+            "max_abs": 0.0,
+            "exact": true
+          },
+          "dB": {
+            "max_abs": 0.0,
+            "exact": true
+          },
+          "updated_graph": {
+            "output": {
+              "max_abs": 0.0,
+              "exact": true
+            },
+            "dX": {
+              "max_abs": 0.0,
+              "exact": true
+            },
+            "dA": {
+              "max_abs": 0.0,
+              "exact": true
+            },
+            "dB": {
+              "max_abs": 0.0,
+              "exact": true
+            }
+          }
+        },
+        "cached": {
+          "output": {
+            "max_abs": 0.0,
+            "exact": true
+          },
+          "dX": {
+            "max_abs": 0.0,
+            "exact": true
+          },
+          "dA": {
+            "max_abs": 0.0,
+            "exact": true
+          },
+          "dB": {
+            "max_abs": 0.0,
+            "exact": true
+          },
+          "updated_graph": {
+            "output": {
+              "max_abs": 0.0,
+              "exact": true
+            },
+            "dX": {
+              "max_abs": 0.0,
+              "exact": true
+            },
+            "dA": {
+              "max_abs": 0.0,
+              "exact": true
+            },
+            "dB": {
+              "max_abs": 0.0,
+              "exact": true
+            }
+          }
+        },
+        "naive": {
+          "output": {
+            "max_abs": 0.0,
+            "exact": true
+          },
+          "dX": {
+            "max_abs": 0.0,
+            "exact": true
+          },
+          "dA": {
+            "max_abs": 0.0,
+            "exact": true
+          },
+          "dB": {
+            "max_abs": 0.0,
+            "exact": true
+          },
+          "updated_graph": {
+            "output": {
+              "max_abs": 0.0,
+              "exact": true
+            },
+            "dX": {
+              "max_abs": 0.0,
+              "exact": true
+            },
+            "dA": {
+              "max_abs": 0.0,
+              "exact": true
+            },
+            "dB": {
+              "max_abs": 0.0,
+              "exact": true
+            }
+          }
+        },
+        "recompute": {
+          "output": {
+            "max_abs": 0.0,
+            "exact": true
+          },
+          "dX": {
+            "max_abs": 0.0,
+            "exact": true
+          },
+          "dA": {
+            "max_abs": 0.0,
+            "exact": true
+          },
+          "dB": {
+            "max_abs": 0.0,
+            "exact": true
+          },
+          "updated_graph": {
+            "output": {
+              "max_abs": 0.0,
+              "exact": true
+            },
+            "dX": {
+              "max_abs": 0.0,
+              "exact": true
+            },
+            "dA": {
+              "max_abs": 0.0,
+              "exact": true
+            },
+            "dB": {
+              "max_abs": 0.0,
+              "exact": true
+            }
+          }
+        }
+      },
+      "memory": {
+        "bnb": {
+          "forward_live_delta_bytes": 17432576,
+          "peak_step_delta_bytes": 50987008,
+          "retained_bf16_base_weight_bytes": 0
+        },
+        "cached": {
+          "forward_live_delta_bytes": 17432576,
+          "peak_step_delta_bytes": 50987008,
+          "retained_bf16_base_weight_bytes": 0
+        },
+        "naive": {
+          "forward_live_delta_bytes": 34209792,
+          "peak_step_delta_bytes": 67764224,
+          "retained_bf16_base_weight_bytes": 16777216
+        },
+        "recompute": {
+          "forward_live_delta_bytes": 16777216,
+          "peak_step_delta_bytes": 54263808,
+          "retained_bf16_base_weight_bytes": 0
+        }
+      },
+      "timing": {
+        "bnb": {
+          "median_us": 889.1861438751221,
+          "samples_us": [
+            888.9662623405457,
+            889.1861438751221,
+            889.4863724708557
+          ]
+        },
+        "cached": {
+          "median_us": 779.4455289840698,
+          "samples_us": [
+            780.6656360626221,
+            779.4455289840698,
+            777.4654030799866
+          ]
+        },
+        "naive": {
+          "median_us": 743.7052726745605,
+          "samples_us": [
+            738.1051182746887,
+            744.4052696228027,
+            743.7052726745605
+          ]
+        },
+        "recompute": {
+          "median_us": 793.3256030082703,
+          "samples_us": [
+            793.3256030082703,
+            793.6256527900696,
+            792.2056317329407
+          ]
+        }
+      },
+      "cached_over_bnb_speed": 1.1407931802932891,
+      "recompute_over_bnb_speed": 1.1208337919554734
+    },
+    {
+      "name": "model.layers.0.linear_attn.in_proj_qkvz.weight",
+      "shape": [
+        8192,
+        1024
+      ],
+      "rank": 32,
+      "rows": 4096,
+      "numerics": {
+        "bnb": {
+          "output": {
+            "max_abs": 0.0,
+            "exact": true
+          },
+          "dX": {
+            "max_abs": 0.0,
+            "exact": true
+          },
+          "dA": {
+            "max_abs": 0.0,
+            "exact": true
+          },
+          "dB": {
+            "max_abs": 0.0,
+            "exact": true
+          },
+          "updated_graph": {
+            "output": {
+              "max_abs": 0.0,
+              "exact": true
+            },
+            "dX": {
+              "max_abs": 0.0,
+              "exact": true
+            },
+            "dA": {
+              "max_abs": 0.0,
+              "exact": true
+            },
+            "dB": {
+              "max_abs": 0.0,
+              "exact": true
+            }
+          }
+        },
+        "cached": {
+          "output": {
+            "max_abs": 0.0,
+            "exact": true
+          },
+          "dX": {
+            "max_abs": 0.0,
+            "exact": true
+          },
+          "dA": {
+            "max_abs": 0.0,
+            "exact": true
+          },
+          "dB": {
+            "max_abs": 0.0,
+            "exact": true
+          },
+          "updated_graph": {
+            "output": {
+              "max_abs": 0.0,
+              "exact": true
+            },
+            "dX": {
+              "max_abs": 0.0,
+              "exact": true
+            },
+            "dA": {
+              "max_abs": 0.0,
+              "exact": true
+            },
+            "dB": {
+              "max_abs": 0.0,
+              "exact": true
+            }
+          }
+        },
+        "naive": {
+          "output": {
+            "max_abs": 0.0,
+            "exact": true
+          },
+          "dX": {
+            "max_abs": 0.0,
+            "exact": true
+          },
+          "dA": {
+            "max_abs": 0.0,
+            "exact": true
+          },
+          "dB": {
+            "max_abs": 0.0,
+            "exact": true
+          },
+          "updated_graph": {
+            "output": {
+              "max_abs": 0.0,
+              "exact": true
+            },
+            "dX": {
+              "max_abs": 0.0,
+              "exact": true
+            },
+            "dA": {
+              "max_abs": 0.0,
+              "exact": true
+            },
+            "dB": {
+              "max_abs": 0.0,
+              "exact": true
+            }
+          }
+        },
+        "recompute": {
+          "output": {
+            "max_abs": 0.0,
+            "exact": true
+          },
+          "dX": {
+            "max_abs": 0.0,
+            "exact": true
+          },
+          "dA": {
+            "max_abs": 0.0,
+            "exact": true
+          },
+          "dB": {
+            "max_abs": 0.0,
+            "exact": true
+          },
+          "updated_graph": {
+            "output": {
+              "max_abs": 0.0,
+              "exact": true
+            },
+            "dX": {
+              "max_abs": 0.0,
+              "exact": true
+            },
+            "dA": {
+              "max_abs": 0.0,
+              "exact": true
+            },
+            "dB": {
+              "max_abs": 0.0,
+              "exact": true
+            }
+          }
+        }
+      },
+      "memory": {
+        "bnb": {
+          "forward_live_delta_bytes": 67960832,
+          "peak_step_delta_bytes": 202178560,
+          "retained_bf16_base_weight_bytes": 0
+        },
+        "cached": {
+          "forward_live_delta_bytes": 67960832,
+          "peak_step_delta_bytes": 202178560,
+          "retained_bf16_base_weight_bytes": 0
+        },
+        "naive": {
+          "forward_live_delta_bytes": 84738048,
+          "peak_step_delta_bytes": 218955776,
+          "retained_bf16_base_weight_bytes": 16777216
+        },
+        "recompute": {
+          "forward_live_delta_bytes": 67108864,
+          "peak_step_delta_bytes": 201916416,
+          "retained_bf16_base_weight_bytes": 0
+        }
+      },
+      "timing": {
+        "bnb": {
+          "median_us": 2438.896894454956,
+          "samples_us": [
+            2439.157247543335,
+            2420.9771156311035,
+            2438.896894454956
+          ]
+        },
+        "cached": {
+          "median_us": 2305.0763607025146,
+          "samples_us": [
+            2310.7962608337402,
+            2305.0763607025146,
+            2296.936273574829
+          ]
+        },
+        "naive": {
+          "median_us": 2271.836042404175,
+          "samples_us": [
+            2270.5559730529785,
+            2271.836042404175,
+            2277.8561115264893
+          ]
+        },
+        "recompute": {
+          "median_us": 2340.0564193725586,
+          "samples_us": [
+            2330.1162719726562,
+            2340.0564193725586,
+            2340.116500854492
+          ]
+        }
+      },
+      "cached_over_bnb_speed": 1.0580547074421678,
+      "recompute_over_bnb_speed": 1.04223850086012
+    },
+    {
+      "name": "model.layers.0.mlp.gate_up_proj.weight",
+      "shape": [
+        7168,
+        1024
+      ],
+      "rank": 4,
+      "rows": 128,
+      "numerics": {
+        "bnb": {
+          "output": {
+            "max_abs": 0.0,
+            "exact": true
+          },
+          "dX": {
+            "max_abs": 0.0,
+            "exact": true
+          },
+          "dA": {
+            "max_abs": 0.0,
+            "exact": true
+          },
+          "dB": {
+            "max_abs": 0.0,
+            "exact": true
+          },
+          "updated_graph": {
+            "output": {
+              "max_abs": 0.0,
+              "exact": true
+            },
+            "dX": {
+              "max_abs": 0.0,
+              "exact": true
+            },
+            "dA": {
+              "max_abs": 0.0,
+              "exact": true
+            },
+            "dB": {
+              "max_abs": 0.0,
+              "exact": true
+            }
+          }
+        },
+        "cached": {
+          "output": {
+            "max_abs": 0.0,
+            "exact": true
+          },
+          "dX": {
+            "max_abs": 0.0,
+            "exact": true
+          },
+          "dA": {
+            "max_abs": 0.0,
+            "exact": true
+          },
+          "dB": {
+            "max_abs": 0.0,
+            "exact": true
+          },
+          "updated_graph": {
+            "output": {
+              "max_abs": 0.0,
+              "exact": true
+            },
+            "dX": {
+              "max_abs": 0.0,
+              "exact": true
+            },
+            "dA": {
+              "max_abs": 0.0,
+              "exact": true
+            },
+            "dB": {
+              "max_abs": 0.0,
+              "exact": true
+            }
+          }
+        },
+        "naive": {
+          "output": {
+            "max_abs": 0.0,
+            "exact": true
+          },
+          "dX": {
+            "max_abs": 0.0,
+            "exact": true
+          },
+          "dA": {
+            "max_abs": 0.0,
+            "exact": true
+          },
+          "dB": {
+            "max_abs": 0.0,
+            "exact": true
+          },
+          "updated_graph": {
+            "output": {
+              "max_abs": 0.0,
+              "exact": true
+            },
+            "dX": {
+              "max_abs": 0.0,
+              "exact": true
+            },
+            "dA": {
+              "max_abs": 0.0,
+              "exact": true
+            },
+            "dB": {
+              "max_abs": 0.0,
+              "exact": true
+            }
+          }
+        },
+        "recompute": {
+          "output": {
+            "max_abs": 0.0,
+            "exact": true
+          },
+          "dX": {
+            "max_abs": 0.0,
+            "exact": true
+          },
+          "dA": {
+            "max_abs": 0.0,
+            "exact": true
+          },
+          "dB": {
+            "max_abs": 0.0,
+            "exact": true
+          },
+          "updated_graph": {
+            "output": {
+              "max_abs": 0.0,
+              "exact": true
+            },
+            "dX": {
+              "max_abs": 0.0,
+              "exact": true
+            },
+            "dA": {
+              "max_abs": 0.0,
+              "exact": true
+            },
+            "dB": {
+              "max_abs": 0.0,
+              "exact": true
+            }
+          }
+        }
+      },
+      "memory": {
+        "bnb": {
+          "forward_live_delta_bytes": 1901568,
+          "peak_step_delta_bytes": 17432576,
+          "retained_bf16_base_weight_bytes": 0
+        },
+        "cached": {
+          "forward_live_delta_bytes": 1901568,
+          "peak_step_delta_bytes": 17170432,
+          "retained_bf16_base_weight_bytes": 0
+        },
+        "naive": {
+          "forward_live_delta_bytes": 16581632,
+          "peak_step_delta_bytes": 20251648,
+          "retained_bf16_base_weight_bytes": 14680064
+        },
+        "recompute": {
+          "forward_live_delta_bytes": 1835008,
+          "peak_step_delta_bytes": 18809856,
+          "retained_bf16_base_weight_bytes": 0
+        }
+      },
+      "timing": {
+        "bnb": {
+          "median_us": 439.2229914665222,
+          "samples_us": [
+            438.1231367588043,
+            443.46311688423157,
+            439.2229914665222
+          ]
+        },
+        "cached": {
+          "median_us": 315.28225541114807,
+          "samples_us": [
+            315.16212224960327,
+            315.28225541114807,
+            316.36226177215576
+          ]
+        },
+        "naive": {
+          "median_us": 283.4619879722595,
+          "samples_us": [
+            286.24212741851807,
+            283.1819951534271,
+            283.4619879722595
+          ]
+        },
+        "recompute": {
+          "median_us": 338.28237652778625,
+          "samples_us": [
+            339.32238817214966,
+            338.28237652778625,
+            338.14236521720886
+          ]
+        }
+      },
+      "cached_over_bnb_speed": 1.393110407985846,
+      "recompute_over_bnb_speed": 1.2983915862682984
+    },
+    {
+      "name": "model.layers.0.mlp.gate_up_proj.weight",
+      "shape": [
+        7168,
+        1024
+      ],
+      "rank": 4,
+      "rows": 1024,
+      "numerics": {
+        "bnb": {
+          "output": {
+            "max_abs": 0.0,
+            "exact": true
+          },
+          "dX": {
+            "max_abs": 0.0,
+            "exact": true
+          },
+          "dA": {
+            "max_abs": 0.0,
+            "exact": true
+          },
+          "dB": {
+            "max_abs": 0.0,
+            "exact": true
+          },
+          "updated_graph": {
+            "output": {
+              "max_abs": 0.0,
+              "exact": true
+            },
+            "dX": {
+              "max_abs": 0.0,
+              "exact": true
+            },
+            "dA": {
+              "max_abs": 0.0,
+              "exact": true
+            },
+            "dB": {
+              "max_abs": 0.0,
+              "exact": true
+            }
+          }
+        },
+        "cached": {
+          "output": {
+            "max_abs": 0.0,
+            "exact": true
+          },
+          "dX": {
+            "max_abs": 0.0,
+            "exact": true
+          },
+          "dA": {
+            "max_abs": 0.0,
+            "exact": true
+          },
+          "dB": {
+            "max_abs": 0.0,
+            "exact": true
+          },
+          "updated_graph": {
+            "output": {
+              "max_abs": 0.0,
+              "exact": true
+            },
+            "dX": {
+              "max_abs": 0.0,
+              "exact": true
+            },
+            "dA": {
+              "max_abs": 0.0,
+              "exact": true
+            },
+            "dB": {
+              "max_abs": 0.0,
+              "exact": true
+            }
+          }
+        },
+        "naive": {
+          "output": {
+            "max_abs": 0.0,
+            "exact": true
+          },
+          "dX": {
+            "max_abs": 0.0,
+            "exact": true
+          },
+          "dA": {
+            "max_abs": 0.0,
+            "exact": true
+          },
+          "dB": {
+            "max_abs": 0.0,
+            "exact": true
+          },
+          "updated_graph": {
+            "output": {
+              "max_abs": 0.0,
+              "exact": true
+            },
+            "dX": {
+              "max_abs": 0.0,
+              "exact": true
+            },
+            "dA": {
+              "max_abs": 0.0,
+              "exact": true
+            },
+            "dB": {
+              "max_abs": 0.0,
+              "exact": true
+            }
+          }
+        },
+        "recompute": {
+          "output": {
+            "max_abs": 0.0,
+            "exact": true
+          },
+          "dX": {
+            "max_abs": 0.0,
+            "exact": true
+          },
+          "dA": {
+            "max_abs": 0.0,
+            "exact": true
+          },
+          "dB": {
+            "max_abs": 0.0,
+            "exact": true
+          },
+          "updated_graph": {
+            "output": {
+              "max_abs": 0.0,
+              "exact": true
+            },
+            "dX": {
+              "max_abs": 0.0,
+              "exact": true
+            },
+            "dA": {
+              "max_abs": 0.0,
+              "exact": true
+            },
+            "dB": {
+              "max_abs": 0.0,
+              "exact": true
+            }
+          }
+        }
+      },
+      "memory": {
+        "bnb": {
+          "forward_live_delta_bytes": 14753792,
+          "peak_step_delta_bytes": 44113920,
+          "retained_bf16_base_weight_bytes": 0
+        },
+        "cached": {
+          "forward_live_delta_bytes": 14753792,
+          "peak_step_delta_bytes": 44113920,
+          "retained_bf16_base_weight_bytes": 0
+        },
+        "naive": {
+          "forward_live_delta_bytes": 29433856,
+          "peak_step_delta_bytes": 58793984,
+          "retained_bf16_base_weight_bytes": 14680064
+        },
+        "recompute": {
+          "forward_live_delta_bytes": 14680064,
+          "peak_step_delta_bytes": 46342144,
+          "retained_bf16_base_weight_bytes": 0
+        }
+      },
+      "timing": {
+        "bnb": {
+          "median_us": 846.6658592224121,
+          "samples_us": [
+            844.9058532714844,
+            846.6658592224121,
+            847.0057249069214
+          ]
+        },
+        "cached": {
+          "median_us": 734.4052791595459,
+          "samples_us": [
+            733.0051064491272,
+            734.7251176834106,
+            734.4052791595459
+          ]
+        },
+        "naive": {
+          "median_us": 703.1450271606445,
+          "samples_us": [
+            703.1450271606445,
+            701.324999332428,
+            703.9448618888855
+          ]
+        },
+        "recompute": {
+          "median_us": 748.3452558517456,
+          "samples_us": [
+            747.6252317428589,
+            748.3452558517456,
+            749.1652369499207
+          ]
+        }
+      },
+      "cached_over_bnb_speed": 1.1528591681575837,
+      "recompute_over_bnb_speed": 1.131384013731417
+    },
+    {
+      "name": "model.layers.0.mlp.gate_up_proj.weight",
+      "shape": [
+        7168,
+        1024
+      ],
+      "rank": 4,
+      "rows": 4096,
+      "numerics": {
+        "bnb": {
+          "output": {
+            "max_abs": 0.0,
+            "exact": true
+          },
+          "dX": {
+            "max_abs": 0.0,
+            "exact": true
+          },
+          "dA": {
+            "max_abs": 0.0,
+            "exact": true
+          },
+          "dB": {
+            "max_abs": 0.0,
+            "exact": true
+          },
+          "updated_graph": {
+            "output": {
+              "max_abs": 0.0,
+              "exact": true
+            },
+            "dX": {
+              "max_abs": 0.0,
+              "exact": true
+            },
+            "dA": {
+              "max_abs": 0.0,
+              "exact": true
+            },
+            "dB": {
+              "max_abs": 0.0,
+              "exact": true
+            }
+          }
+        },
+        "cached": {
+          "output": {
+            "max_abs": 0.0,
+            "exact": true
+          },
+          "dX": {
+            "max_abs": 0.0,
+            "exact": true
+          },
+          "dA": {
+            "max_abs": 0.0,
+            "exact": true
+          },
+          "dB": {
+            "max_abs": 0.0,
+            "exact": true
+          },
+          "updated_graph": {
+            "output": {
+              "max_abs": 0.0,
+              "exact": true
+            },
+            "dX": {
+              "max_abs": 0.0,
+              "exact": true
+            },
+            "dA": {
+              "max_abs": 0.0,
+              "exact": true
+            },
+            "dB": {
+              "max_abs": 0.0,
+              "exact": true
+            }
+          }
+        },
+        "naive": {
+          "output": {
+            "max_abs": 0.0,
+            "exact": true
+          },
+          "dX": {
+            "max_abs": 0.0,
+            "exact": true
+          },
+          "dA": {
+            "max_abs": 0.0,
+            "exact": true
+          },
+          "dB": {
+            "max_abs": 0.0,
+            "exact": true
+          },
+          "updated_graph": {
+            "output": {
+              "max_abs": 0.0,
+              "exact": true
+            },
+            "dX": {
+              "max_abs": 0.0,
+              "exact": true
+            },
+            "dA": {
+              "max_abs": 0.0,
+              "exact": true
+            },
+            "dB": {
+              "max_abs": 0.0,
+              "exact": true
+            }
+          }
+        },
+        "recompute": {
+          "output": {
+            "max_abs": 0.0,
+            "exact": true
+          },
+          "dX": {
+            "max_abs": 0.0,
+            "exact": true
+          },
+          "dA": {
+            "max_abs": 0.0,
+            "exact": true
+          },
+          "dB": {
+            "max_abs": 0.0,
+            "exact": true
+          },
+          "updated_graph": {
+            "output": {
+              "max_abs": 0.0,
+              "exact": true
+            },
+            "dX": {
+              "max_abs": 0.0,
+              "exact": true
+            },
+            "dA": {
+              "max_abs": 0.0,
+              "exact": true
+            },
+            "dB": {
+              "max_abs": 0.0,
+              "exact": true
+            }
+          }
+        }
+      },
+      "memory": {
+        "bnb": {
+          "forward_live_delta_bytes": 58818560,
+          "peak_step_delta_bytes": 176259072,
+          "retained_bf16_base_weight_bytes": 0
+        },
+        "cached": {
+          "forward_live_delta_bytes": 58818560,
+          "peak_step_delta_bytes": 176259072,
+          "retained_bf16_base_weight_bytes": 0
+        },
+        "naive": {
+          "forward_live_delta_bytes": 73498624,
+          "peak_step_delta_bytes": 190939136,
+          "retained_bf16_base_weight_bytes": 14680064
+        },
+        "recompute": {
+          "forward_live_delta_bytes": 58720256,
+          "peak_step_delta_bytes": 176226304,
+          "retained_bf16_base_weight_bytes": 0
+        }
+      },
+      "timing": {
+        "bnb": {
+          "median_us": 2174.6151447296143,
+          "samples_us": [
+            2164.4155979156494,
+            2175.975561141968,
+            2174.6151447296143
+          ]
+        },
+        "cached": {
+          "median_us": 2048.7942695617676,
+          "samples_us": [
+            2048.7942695617676,
+            2045.7344055175781,
+            2061.734676361084
+          ]
+        },
+        "naive": {
+          "median_us": 2026.3943672180176,
+          "samples_us": [
+            2026.3943672180176,
+            2025.8142948150635,
+            2044.7742938995361
+          ]
+        },
+        "recompute": {
+          "median_us": 2086.4946842193604,
+          "samples_us": [
+            2086.7345333099365,
+            2081.9146633148193,
+            2086.4946842193604
+          ]
+        }
+      },
+      "cached_over_bnb_speed": 1.0614121569144956,
+      "recompute_over_bnb_speed": 1.0422337335324787
+    },
+    {
+      "name": "model.layers.0.mlp.gate_up_proj.weight",
+      "shape": [
+        7168,
+        1024
+      ],
+      "rank": 32,
+      "rows": 128,
+      "numerics": {
+        "bnb": {
+          "output": {
+            "max_abs": 0.0,
+            "exact": true
+          },
+          "dX": {
+            "max_abs": 0.0,
+            "exact": true
+          },
+          "dA": {
+            "max_abs": 0.0,
+            "exact": true
+          },
+          "dB": {
+            "max_abs": 0.0,
+            "exact": true
+          },
+          "updated_graph": {
+            "output": {
+              "max_abs": 0.0,
+              "exact": true
+            },
+            "dX": {
+              "max_abs": 0.0,
+              "exact": true
+            },
+            "dA": {
+              "max_abs": 0.0,
+              "exact": true
+            },
+            "dB": {
+              "max_abs": 0.0,
+              "exact": true
+            }
+          }
+        },
+        "cached": {
+          "output": {
+            "max_abs": 0.0,
+            "exact": true
+          },
+          "dX": {
+            "max_abs": 0.0,
+            "exact": true
+          },
+          "dA": {
+            "max_abs": 0.0,
+            "exact": true
+          },
+          "dB": {
+            "max_abs": 0.0,
+            "exact": true
+          },
+          "updated_graph": {
+            "output": {
+              "max_abs": 0.0,
+              "exact": true
+            },
+            "dX": {
+              "max_abs": 0.0,
+              "exact": true
+            },
+            "dA": {
+              "max_abs": 0.0,
+              "exact": true
+            },
+            "dB": {
+              "max_abs": 0.0,
+              "exact": true
+            }
+          }
+        },
+        "naive": {
+          "output": {
+            "max_abs": 0.0,
+            "exact": true
+          },
+          "dX": {
+            "max_abs": 0.0,
+            "exact": true
+          },
+          "dA": {
+            "max_abs": 0.0,
+            "exact": true
+          },
+          "dB": {
+            "max_abs": 0.0,
+            "exact": true
+          },
+          "updated_graph": {
+            "output": {
+              "max_abs": 0.0,
+              "exact": true
+            },
+            "dX": {
+              "max_abs": 0.0,
+              "exact": true
+            },
+            "dA": {
+              "max_abs": 0.0,
+              "exact": true
+            },
+            "dB": {
+              "max_abs": 0.0,
+              "exact": true
+            }
+          }
+        },
+        "recompute": {
+          "output": {
+            "max_abs": 0.0,
+            "exact": true
+          },
+          "dX": {
+            "max_abs": 0.0,
+            "exact": true
+          },
+          "dA": {
+            "max_abs": 0.0,
+            "exact": true
+          },
+          "dB": {
+            "max_abs": 0.0,
+            "exact": true
+          },
+          "updated_graph": {
+            "output": {
+              "max_abs": 0.0,
+              "exact": true
+            },
+            "dX": {
+              "max_abs": 0.0,
+              "exact": true
+            },
+            "dA": {
+              "max_abs": 0.0,
+              "exact": true
+            },
+            "dB": {
+              "max_abs": 0.0,
+              "exact": true
+            }
+          }
+        }
+      },
+      "memory": {
+        "bnb": {
+          "forward_live_delta_bytes": 2367488,
+          "peak_step_delta_bytes": 18284544,
+          "retained_bf16_base_weight_bytes": 0
+        },
+        "cached": {
+          "forward_live_delta_bytes": 2367488,
+          "peak_step_delta_bytes": 18087936,
+          "retained_bf16_base_weight_bytes": 0
+        },
+        "naive": {
+          "forward_live_delta_bytes": 17047552,
+          "peak_step_delta_bytes": 20717568,
+          "retained_bf16_base_weight_bytes": 14680064
+        },
+        "recompute": {
+          "forward_live_delta_bytes": 1835008,
+          "peak_step_delta_bytes": 20193280,
+          "retained_bf16_base_weight_bytes": 0
+        }
+      },
+      "timing": {
+        "bnb": {
+          "median_us": 410.6628894805908,
+          "samples_us": [
+            410.462886095047,
+            412.2428894042969,
+            410.6628894805908
+          ]
+        },
+        "cached": {
+          "median_us": 301.54213309288025,
+          "samples_us": [
+            303.0621111392975,
+            301.54213309288025,
+            300.9621202945709
+          ]
+        },
+        "naive": {
+          "median_us": 273.7619876861572,
+          "samples_us": [
+            274.36187863349915,
+            271.16188406944275,
+            273.7619876861572
+          ]
+        },
+        "recompute": {
+          "median_us": 324.88223910331726,
+          "samples_us": [
+            324.88223910331726,
+            321.7623829841614,
+            325.30224323272705
+          ]
+        }
+      },
+      "cached_over_bnb_speed": 1.361875653224551,
+      "recompute_over_bnb_speed": 1.2640361338743238
+    },
+    {
+      "name": "model.layers.0.mlp.gate_up_proj.weight",
+      "shape": [
+        7168,
+        1024
+      ],
+      "rank": 32,
+      "rows": 1024,
+      "numerics": {
+        "bnb": {
+          "output": {
+            "max_abs": 0.0,
+            "exact": true
+          },
+          "dX": {
+            "max_abs": 0.0,
+            "exact": true
+          },
+          "dA": {
+            "max_abs": 0.0,
+            "exact": true
+          },
+          "dB": {
+            "max_abs": 0.0,
+            "exact": true
+          },
+          "updated_graph": {
+            "output": {
+              "max_abs": 0.0,
+              "exact": true
+            },
+            "dX": {
+              "max_abs": 0.0,
+              "exact": true
+            },
+            "dA": {
+              "max_abs": 0.0,
+              "exact": true
+            },
+            "dB": {
+              "max_abs": 0.0,
+              "exact": true
+            }
+          }
+        },
+        "cached": {
+          "output": {
+            "max_abs": 0.0,
+            "exact": true
+          },
+          "dX": {
+            "max_abs": 0.0,
+            "exact": true
+          },
+          "dA": {
+            "max_abs": 0.0,
+            "exact": true
+          },
+          "dB": {
+            "max_abs": 0.0,
+            "exact": true
+          },
+          "updated_graph": {
+            "output": {
+              "max_abs": 0.0,
+              "exact": true
+            },
+            "dX": {
+              "max_abs": 0.0,
+              "exact": true
+            },
+            "dA": {
+              "max_abs": 0.0,
+              "exact": true
+            },
+            "dB": {
+              "max_abs": 0.0,
+              "exact": true
+            }
+          }
+        },
+        "naive": {
+          "output": {
+            "max_abs": 0.0,
+            "exact": true
+          },
+          "dX": {
+            "max_abs": 0.0,
+            "exact": true
+          },
+          "dA": {
+            "max_abs": 0.0,
+            "exact": true
+          },
+          "dB": {
+            "max_abs": 0.0,
+            "exact": true
+          },
+          "updated_graph": {
+            "output": {
+              "max_abs": 0.0,
+              "exact": true
+            },
+            "dX": {
+              "max_abs": 0.0,
+              "exact": true
+            },
+            "dA": {
+              "max_abs": 0.0,
+              "exact": true
+            },
+            "dB": {
+              "max_abs": 0.0,
+              "exact": true
+            }
+          }
+        },
+        "recompute": {
+          "output": {
+            "max_abs": 0.0,
+            "exact": true
+          },
+          "dX": {
+            "max_abs": 0.0,
+            "exact": true
+          },
+          "dA": {
+            "max_abs": 0.0,
+            "exact": true
+          },
+          "dB": {
+            "max_abs": 0.0,
+            "exact": true
+          },
+          "updated_graph": {
+            "output": {
+              "max_abs": 0.0,
+              "exact": true
+            },
+            "dX": {
+              "max_abs": 0.0,
+              "exact": true
+            },
+            "dA": {
+              "max_abs": 0.0,
+              "exact": true
+            },
+            "dB": {
+              "max_abs": 0.0,
+              "exact": true
+            }
+          }
+        }
+      },
+      "memory": {
+        "bnb": {
+          "forward_live_delta_bytes": 15269888,
+          "peak_step_delta_bytes": 44630016,
+          "retained_bf16_base_weight_bytes": 0
+        },
+        "cached": {
+          "forward_live_delta_bytes": 15269888,
+          "peak_step_delta_bytes": 44630016,
+          "retained_bf16_base_weight_bytes": 0
+        },
+        "naive": {
+          "forward_live_delta_bytes": 29949952,
+          "peak_step_delta_bytes": 59310080,
+          "retained_bf16_base_weight_bytes": 14680064
+        },
+        "recompute": {
+          "forward_live_delta_bytes": 14680064,
+          "peak_step_delta_bytes": 47775744,
+          "retained_bf16_base_weight_bytes": 0
+        }
+      },
+      "timing": {
+        "bnb": {
+          "median_us": 817.925751209259,
+          "samples_us": [
+            816.5257573127747,
+            818.3057308197021,
+            817.925751209259
+          ]
+        },
+        "cached": {
+          "median_us": 708.0450057983398,
+          "samples_us": [
+            708.0450057983398,
+            707.8049778938293,
+            708.2650065422058
+          ]
+        },
+        "naive": {
+          "median_us": 684.1848492622375,
+          "samples_us": [
+            685.6448650360107,
+            684.1848492622375,
+            682.8847527503967
+          ]
+        },
+        "recompute": {
+          "median_us": 725.3651022911072,
+          "samples_us": [
+            724.0251302719116,
+            725.3651022911072,
+            726.3851165771484
+          ]
+        }
+      },
+      "cached_over_bnb_speed": 1.1551889279792684,
+      "recompute_over_bnb_speed": 1.12760559975355
+    },
+    {
+      "name": "model.layers.0.mlp.gate_up_proj.weight",
+      "shape": [
+        7168,
+        1024
+      ],
+      "rank": 32,
+      "rows": 4096,
+      "numerics": {
+        "bnb": {
+          "output": {
+            "max_abs": 0.0,
+            "exact": true
+          },
+          "dX": {
+            "max_abs": 0.0,
+            "exact": true
+          },
+          "dA": {
+            "max_abs": 0.0,
+            "exact": true
+          },
+          "dB": {
+            "max_abs": 0.0,
+            "exact": true
+          },
+          "updated_graph": {
+            "output": {
+              "max_abs": 0.0,
+              "exact": true
+            },
+            "dX": {
+              "max_abs": 0.0,
+              "exact": true
+            },
+            "dA": {
+              "max_abs": 0.0,
+              "exact": true
+            },
+            "dB": {
+              "max_abs": 0.0,
+              "exact": true
+            }
+          }
+        },
+        "cached": {
+          "output": {
+            "max_abs": 0.0,
+            "exact": true
+          },
+          "dX": {
+            "max_abs": 0.0,
+            "exact": true
+          },
+          "dA": {
+            "max_abs": 0.0,
+            "exact": true
+          },
+          "dB": {
+            "max_abs": 0.0,
+            "exact": true
+          },
+          "updated_graph": {
+            "output": {
+              "max_abs": 0.0,
+              "exact": true
+            },
+            "dX": {
+              "max_abs": 0.0,
+              "exact": true
+            },
+            "dA": {
+              "max_abs": 0.0,
+              "exact": true
+            },
+            "dB": {
+              "max_abs": 0.0,
+              "exact": true
+            }
+          }
+        },
+        "naive": {
+          "output": {
+            "max_abs": 0.0,
+            "exact": true
+          },
+          "dX": {
+            "max_abs": 0.0,
+            "exact": true
+          },
+          "dA": {
+            "max_abs": 0.0,
+            "exact": true
+          },
+          "dB": {
+            "max_abs": 0.0,
+            "exact": true
+          },
+          "updated_graph": {
+            "output": {
+              "max_abs": 0.0,
+              "exact": true
+            },
+            "dX": {
+              "max_abs": 0.0,
+              "exact": true
+            },
+            "dA": {
+              "max_abs": 0.0,
+              "exact": true
+            },
+            "dB": {
+              "max_abs": 0.0,
+              "exact": true
+            }
+          }
+        },
+        "recompute": {
+          "output": {
+            "max_abs": 0.0,
+            "exact": true
+          },
+          "dX": {
+            "max_abs": 0.0,
+            "exact": true
+          },
+          "dA": {
+            "max_abs": 0.0,
+            "exact": true
+          },
+          "dB": {
+            "max_abs": 0.0,
+            "exact": true
+          },
+          "updated_graph": {
+            "output": {
+              "max_abs": 0.0,
+              "exact": true
+            },
+            "dX": {
+              "max_abs": 0.0,
+              "exact": true
+            },
+            "dA": {
+              "max_abs": 0.0,
+              "exact": true
+            },
+            "dB": {
+              "max_abs": 0.0,
+              "exact": true
+            }
+          }
+        }
+      },
+      "memory": {
+        "bnb": {
+          "forward_live_delta_bytes": 59506688,
+          "peak_step_delta_bytes": 176947200,
+          "retained_bf16_base_weight_bytes": 0
+        },
+        "cached": {
+          "forward_live_delta_bytes": 59506688,
+          "peak_step_delta_bytes": 176947200,
+          "retained_bf16_base_weight_bytes": 0
+        },
+        "naive": {
+          "forward_live_delta_bytes": 74186752,
+          "peak_step_delta_bytes": 191627264,
+          "retained_bf16_base_weight_bytes": 14680064
+        },
+        "recompute": {
+          "forward_live_delta_bytes": 58720256,
+          "peak_step_delta_bytes": 176685056,
+          "retained_bf16_base_weight_bytes": 0
+        }
+      },
+      "timing": {
+        "bnb": {
+          "median_us": 2157.095193862915,
+          "samples_us": [
+            2138.9150619506836,
+            2159.7952842712402,
+            2157.095193862915
+          ]
+        },
+        "cached": {
+          "median_us": 2050.2145290374756,
+          "samples_us": [
+            2057.3344230651855,
+            2045.194387435913,
+            2050.2145290374756
+          ]
+        },
+        "naive": {
+          "median_us": 2008.6543560028076,
+          "samples_us": [
+            1999.5341300964355,
+            2013.7341022491455,
+            2008.6543560028076
+          ]
+        },
+        "recompute": {
+          "median_us": 2065.5345916748047,
+          "samples_us": [
+            2060.194492340088,
+            2065.7145977020264,
+            2065.5345916748047
+          ]
+        }
+      },
+      "cached_over_bnb_speed": 1.0521314542023157,
+      "recompute_over_bnb_speed": 1.0443277989907058
+    },
+    {
+      "name": "model.layers.0.linear_attn.out_proj.weight",
+      "shape": [
+        1024,
+        2048
+      ],
+      "rank": 4,
+      "rows": 128,
+      "numerics": {
+        "bnb": {
+          "output": {
+            "max_abs": 0.0,
+            "exact": true
+          },
+          "dX": {
+            "max_abs": 0.0,
+            "exact": true
+          },
+          "dA": {
+            "max_abs": 0.0,
+            "exact": true
+          },
+          "dB": {
+            "max_abs": 0.0,
+            "exact": true
+          },
+          "updated_graph": {
+            "output": {
+              "max_abs": 0.0,
+              "exact": true
+            },
+            "dX": {
+              "max_abs": 0.0,
+              "exact": true
+            },
+            "dA": {
+              "max_abs": 0.0,
+              "exact": true
+            },
+            "dB": {
+              "max_abs": 0.0,
+              "exact": true
+            }
+          }
+        },
+        "cached": {
+          "output": {
+            "max_abs": 0.0,
+            "exact": true
+          },
+          "dX": {
+            "max_abs": 0.0,
+            "exact": true
+          },
+          "dA": {
+            "max_abs": 0.0,
+            "exact": true
+          },
+          "dB": {
+            "max_abs": 0.0,
+            "exact": true
+          },
+          "updated_graph": {
+            "output": {
+              "max_abs": 0.0,
+              "exact": true
+            },
+            "dX": {
+              "max_abs": 0.0,
+              "exact": true
+            },
+            "dA": {
+              "max_abs": 0.0,
+              "exact": true
+            },
+            "dB": {
+              "max_abs": 0.0,
+              "exact": true
+            }
+          }
+        },
+        "naive": {
+          "output": {
+            "max_abs": 0.0,
+            "exact": true
+          },
+          "dX": {
+            "max_abs": 0.0,
+            "exact": true
+          },
+          "dA": {
+            "max_abs": 0.0,
+            "exact": true
+          },
+          "dB": {
+            "max_abs": 0.0,
+            "exact": true
+          },
+          "updated_graph": {
+            "output": {
+              "max_abs": 0.0,
+              "exact": true
+            },
+            "dX": {
+              "max_abs": 0.0,
+              "exact": true
+            },
+            "dA": {
+              "max_abs": 0.0,
+              "exact": true
+            },
+            "dB": {
+              "max_abs": 0.0,
+              "exact": true
+            }
+          }
+        },
+        "recompute": {
+          "output": {
+            "max_abs": 0.0,
+            "exact": true
+          },
+          "dX": {
+            "max_abs": 0.0,
+            "exact": true
+          },
+          "dA": {
+            "max_abs": 0.0,
+            "exact": true
+          },
+          "dB": {
+            "max_abs": 0.0,
+            "exact": true
+          },
+          "updated_graph": {
+            "output": {
+              "max_abs": 0.0,
+              "exact": true
+            },
+            "dX": {
+              "max_abs": 0.0,
+              "exact": true
+            },
+            "dA": {
+              "max_abs": 0.0,
+              "exact": true
+            },
+            "dB": {
+              "max_abs": 0.0,
+              "exact": true
+            }
+          }
+        }
+      },
+      "memory": {
+        "bnb": {
+          "forward_live_delta_bytes": 287744,
+          "peak_step_delta_bytes": 5554176,
+          "retained_bf16_base_weight_bytes": 0
+        },
+        "cached": {
+          "forward_live_delta_bytes": 287744,
+          "peak_step_delta_bytes": 5554176,
+          "retained_bf16_base_weight_bytes": 0
+        },
+        "naive": {
+          "forward_live_delta_bytes": 4482048,
+          "peak_step_delta_bytes": 5554176,
+          "retained_bf16_base_weight_bytes": 4194304
+        },
+        "recompute": {
+          "forward_live_delta_bytes": 262144,
+          "peak_step_delta_bytes": 5317632,
+          "retained_bf16_base_weight_bytes": 0
+        }
+      },
+      "timing": {
+        "bnb": {
+          "median_us": 230.46162724494934,
+          "samples_us": [
+            229.58162426948547,
+            231.3416302204132,
+            230.46162724494934
+          ]
+        },
+        "cached": {
+          "median_us": 157.301127910614,
+          "samples_us": [
+            157.301127910614,
+            156.18112683296204,
+            157.36111998558044
+          ]
+        },
+        "naive": {
+          "median_us": 147.18112349510193,
+          "samples_us": [
+            150.72111785411835,
+            147.18112349510193,
+            146.7610001564026
+          ]
+        },
+        "recompute": {
+          "median_us": 179.04125154018402,
+          "samples_us": [
+            179.04125154018402,
+            178.9812445640564,
+            179.9013763666153
+          ]
+        }
+      },
+      "cached_over_bnb_speed": 1.4650983772723398,
+      "recompute_over_bnb_speed": 1.287198482262757
+    },
+    {
+      "name": "model.layers.0.linear_attn.out_proj.weight",
+      "shape": [
+        1024,
+        2048
+      ],
+      "rank": 4,
+      "rows": 1024,
+      "numerics": {
+        "bnb": {
+          "output": {
+            "max_abs": 0.0,
+            "exact": true
+          },
+          "dX": {
+            "max_abs": 0.0,
+            "exact": true
+          },
+          "dA": {
+            "max_abs": 0.0,
+            "exact": true
+          },
+          "dB": {
+            "max_abs": 0.0,
+            "exact": true
+          },
+          "updated_graph": {
+            "output": {
+              "max_abs": 0.0,
+              "exact": true
+            },
+            "dX": {
+              "max_abs": 0.0,
+              "exact": true
+            },
+            "dA": {
+              "max_abs": 0.0,
+              "exact": true
+            },
+            "dB": {
+              "max_abs": 0.0,
+              "exact": true
+            }
+          }
+        },
+        "cached": {
+          "output": {
+            "max_abs": 0.0,
+            "exact": true
+          },
+          "dX": {
+            "max_abs": 0.0,
+            "exact": true
+          },
+          "dA": {
+            "max_abs": 0.0,
+            "exact": true
+          },
+          "dB": {
+            "max_abs": 0.0,
+            "exact": true
+          },
+          "updated_graph": {
+            "output": {
+              "max_abs": 0.0,
+              "exact": true
+            },
+            "dX": {
+              "max_abs": 0.0,
+              "exact": true
+            },
+            "dA": {
+              "max_abs": 0.0,
+              "exact": true
+            },
+            "dB": {
+              "max_abs": 0.0,
+              "exact": true
+            }
+          }
+        },
+        "naive": {
+          "output": {
+            "max_abs": 0.0,
+            "exact": true
+          },
+          "dX": {
+            "max_abs": 0.0,
+            "exact": true
+          },
+          "dA": {
+            "max_abs": 0.0,
+            "exact": true
+          },
+          "dB": {
+            "max_abs": 0.0,
+            "exact": true
+          },
+          "updated_graph": {
+            "output": {
+              "max_abs": 0.0,
+              "exact": true
+            },
+            "dX": {
+              "max_abs": 0.0,
+              "exact": true
+            },
+            "dA": {
+              "max_abs": 0.0,
+              "exact": true
+            },
+            "dB": {
+              "max_abs": 0.0,
+              "exact": true
+            }
+          }
+        },
+        "recompute": {
+          "output": {
+            "max_abs": 0.0,
+            "exact": true
+          },
+          "dX": {
+            "max_abs": 0.0,
+            "exact": true
+          },
+          "dA": {
+            "max_abs": 0.0,
+            "exact": true
+          },
+          "dB": {
+            "max_abs": 0.0,
+            "exact": true
+          },
+          "updated_graph": {
+            "output": {
+              "max_abs": 0.0,
+              "exact": true
+            },
+            "dX": {
+              "max_abs": 0.0,
+              "exact": true
+            },
+            "dA": {
+              "max_abs": 0.0,
+              "exact": true
+            },
+            "dB": {
+              "max_abs": 0.0,
+              "exact": true
+            }
+          }
+        }
+      },
+      "memory": {
+        "bnb": {
+          "forward_live_delta_bytes": 2129920,
+          "peak_step_delta_bytes": 14729216,
+          "retained_bf16_base_weight_bytes": 0
+        },
+        "cached": {
+          "forward_live_delta_bytes": 2129920,
+          "peak_step_delta_bytes": 14729216,
+          "retained_bf16_base_weight_bytes": 0
+        },
+        "naive": {
+          "forward_live_delta_bytes": 6324224,
+          "peak_step_delta_bytes": 14729216,
+          "retained_bf16_base_weight_bytes": 4194304
+        },
+        "recompute": {
+          "forward_live_delta_bytes": 2097152,
+          "peak_step_delta_bytes": 16859136,
+          "retained_bf16_base_weight_bytes": 0
+        }
+      },
+      "timing": {
+        "bnb": {
+          "median_us": 418.82288455963135,
+          "samples_us": [
+            418.14300417900085,
+            418.82288455963135,
+            419.1029965877533
+          ]
+        },
+        "cached": {
+          "median_us": 357.62250423431396,
+          "samples_us": [
+            358.46251249313354,
+            355.5625081062317,
+            357.62250423431396
+          ]
+        },
+        "naive": {
+          "median_us": 347.04238176345825,
+          "samples_us": [
+            347.82248735427856,
+            347.04238176345825,
+            347.04238176345825
+          ]
+        },
+        "recompute": {
+          "median_us": 381.64275884628296,
+          "samples_us": [
+            382.34275579452515,
+            381.1827600002289,
+            381.64275884628296
+          ]
+        }
+      },
+      "cached_over_bnb_speed": 1.1711312336351711,
+      "recompute_over_bnb_speed": 1.0974212790666984
+    },
+    {
+      "name": "model.layers.0.linear_attn.out_proj.weight",
+      "shape": [
+        1024,
+        2048
+      ],
+      "rank": 4,
+      "rows": 4096,
+      "numerics": {
+        "bnb": {
+          "output": {
+            "max_abs": 0.0,
+            "exact": true
+          },
+          "dX": {
+            "max_abs": 0.0,
+            "exact": true
+          },
+          "dA": {
+            "max_abs": 0.0,
+            "exact": true
+          },
+          "dB": {
+            "max_abs": 0.0,
+            "exact": true
+          },
+          "updated_graph": {
+            "output": {
+              "max_abs": 0.0,
+              "exact": true
+            },
+            "dX": {
+              "max_abs": 0.0,
+              "exact": true
+            },
+            "dA": {
+              "max_abs": 0.0,
+              "exact": true
+            },
+            "dB": {
+              "max_abs": 0.0,
+              "exact": true
+            }
+          }
+        },
+        "cached": {
+          "output": {
+            "max_abs": 0.0,
+            "exact": true
+          },
+          "dX": {
+            "max_abs": 0.0,
+            "exact": true
+          },
+          "dA": {
+            "max_abs": 0.0,
+            "exact": true
+          },
+          "dB": {
+            "max_abs": 0.0,
+            "exact": true
+          },
+          "updated_graph": {
+            "output": {
+              "max_abs": 0.0,
+              "exact": true
+            },
+            "dX": {
+              "max_abs": 0.0,
+              "exact": true
+            },
+            "dA": {
+              "max_abs": 0.0,
+              "exact": true
+            },
+            "dB": {
+              "max_abs": 0.0,
+              "exact": true
+            }
+          }
+        },
+        "naive": {
+          "output": {
+            "max_abs": 0.0,
+            "exact": true
+          },
+          "dX": {
+            "max_abs": 0.0,
+            "exact": true
+          },
+          "dA": {
+            "max_abs": 0.0,
+            "exact": true
+          },
+          "dB": {
+            "max_abs": 0.0,
+            "exact": true
+          },
+          "updated_graph": {
+            "output": {
+              "max_abs": 0.0,
+              "exact": true
+            },
+            "dX": {
+              "max_abs": 0.0,
+              "exact": true
+            },
+            "dA": {
+              "max_abs": 0.0,
+              "exact": true
+            },
+            "dB": {
+              "max_abs": 0.0,
+              "exact": true
+            }
+          }
+        },
+        "recompute": {
+          "output": {
+            "max_abs": 0.0,
+            "exact": true
+          },
+          "dX": {
+            "max_abs": 0.0,
+            "exact": true
+          },
+          "dA": {
+            "max_abs": 0.0,
+            "exact": true
+          },
+          "dB": {
+            "max_abs": 0.0,
+            "exact": true
+          },
+          "updated_graph": {
+            "output": {
+              "max_abs": 0.0,
+              "exact": true
+            },
+            "dX": {
+              "max_abs": 0.0,
+              "exact": true
+            },
+            "dA": {
+              "max_abs": 0.0,
+              "exact": true
+            },
+            "dB": {
+              "max_abs": 0.0,
+              "exact": true
+            }
+          }
+        }
+      },
+      "memory": {
+        "bnb": {
+          "forward_live_delta_bytes": 8445952,
+          "peak_step_delta_bytes": 46186496,
+          "retained_bf16_base_weight_bytes": 0
+        },
+        "cached": {
+          "forward_live_delta_bytes": 8445952,
+          "peak_step_delta_bytes": 46186496,
+          "retained_bf16_base_weight_bytes": 0
+        },
+        "naive": {
+          "forward_live_delta_bytes": 12640256,
+          "peak_step_delta_bytes": 46186496,
+          "retained_bf16_base_weight_bytes": 4194304
+        },
+        "recompute": {
+          "forward_live_delta_bytes": 8388608,
+          "peak_step_delta_bytes": 67215360,
+          "retained_bf16_base_weight_bytes": 0
+        }
+      },
+      "timing": {
+        "bnb": {
+          "median_us": 813.285768032074,
+          "samples_us": [
+            809.7657561302185,
+            814.0856027603149,
+            813.285768032074
+          ]
+        },
+        "cached": {
+          "median_us": 758.885383605957,
+          "samples_us": [
+            758.3852410316467,
+            760.7653737068176,
+            758.885383605957
+          ]
+        },
+        "naive": {
+          "median_us": 749.8852610588074,
+          "samples_us": [
+            750.3252625465393,
+            749.4853734970093,
+            749.8852610588074
+          ]
+        },
+        "recompute": {
+          "median_us": 794.3456172943115,
+          "samples_us": [
+            796.825647354126,
+            794.3456172943115,
+            793.1455969810486
+          ]
+        }
+      },
+      "cached_over_bnb_speed": 1.0716845858430233,
+      "recompute_over_bnb_speed": 1.0238437152863966
+    },
+    {
+      "name": "model.layers.0.linear_attn.out_proj.weight",
+      "shape": [
+        1024,
+        2048
+      ],
+      "rank": 32,
+      "rows": 128,
+      "numerics": {
+        "bnb": {
+          "output": {
+            "max_abs": 0.0,
+            "exact": true
+          },
+          "dX": {
+            "max_abs": 0.0,
+            "exact": true
+          },
+          "dA": {
+            "max_abs": 0.0,
+            "exact": true
+          },
+          "dB": {
+            "max_abs": 0.0,
+            "exact": true
+          },
+          "updated_graph": {
+            "output": {
+              "max_abs": 0.0,
+              "exact": true
+            },
+            "dX": {
+              "max_abs": 0.0,
+              "exact": true
+            },
+            "dA": {
+              "max_abs": 0.0,
+              "exact": true
+            },
+            "dB": {
+              "max_abs": 0.0,
+              "exact": true
+            }
+          }
+        },
+        "cached": {
+          "output": {
+            "max_abs": 0.0,
+            "exact": true
+          },
+          "dX": {
+            "max_abs": 0.0,
+            "exact": true
+          },
+          "dA": {
+            "max_abs": 0.0,
+            "exact": true
+          },
+          "dB": {
+            "max_abs": 0.0,
+            "exact": true
+          },
+          "updated_graph": {
+            "output": {
+              "max_abs": 0.0,
+              "exact": true
+            },
+            "dX": {
+              "max_abs": 0.0,
+              "exact": true
+            },
+            "dA": {
+              "max_abs": 0.0,
+              "exact": true
+            },
+            "dB": {
+              "max_abs": 0.0,
+              "exact": true
+            }
+          }
+        },
+        "naive": {
+          "output": {
+            "max_abs": 0.0,
+            "exact": true
+          },
+          "dX": {
+            "max_abs": 0.0,
+            "exact": true
+          },
+          "dA": {
+            "max_abs": 0.0,
+            "exact": true
+          },
+          "dB": {
+            "max_abs": 0.0,
+            "exact": true
+          },
+          "updated_graph": {
+            "output": {
+              "max_abs": 0.0,
+              "exact": true
+            },
+            "dX": {
+              "max_abs": 0.0,
+              "exact": true
+            },
+            "dA": {
+              "max_abs": 0.0,
+              "exact": true
+            },
+            "dB": {
+              "max_abs": 0.0,
+              "exact": true
+            }
+          }
+        },
+        "recompute": {
+          "output": {
+            "max_abs": 0.0,
+            "exact": true
+          },
+          "dX": {
+            "max_abs": 0.0,
+            "exact": true
+          },
+          "dA": {
+            "max_abs": 0.0,
+            "exact": true
+          },
+          "dB": {
+            "max_abs": 0.0,
+            "exact": true
+          },
+          "updated_graph": {
+            "output": {
+              "max_abs": 0.0,
+              "exact": true
+            },
+            "dX": {
+              "max_abs": 0.0,
+              "exact": true
+            },
+            "dA": {
+              "max_abs": 0.0,
+              "exact": true
+            },
+            "dB": {
+              "max_abs": 0.0,
+              "exact": true
+            }
+          }
+        }
+      },
+      "memory": {
+        "bnb": {
+          "forward_live_delta_bytes": 466944,
+          "peak_step_delta_bytes": 5898240,
+          "retained_bf16_base_weight_bytes": 0
+        },
+        "cached": {
+          "forward_live_delta_bytes": 466944,
+          "peak_step_delta_bytes": 5898240,
+          "retained_bf16_base_weight_bytes": 0
+        },
+        "naive": {
+          "forward_live_delta_bytes": 4661248,
+          "peak_step_delta_bytes": 5898240,
+          "retained_bf16_base_weight_bytes": 4194304
+        },
+        "recompute": {
+          "forward_live_delta_bytes": 262144,
+          "peak_step_delta_bytes": 5840896,
+          "retained_bf16_base_weight_bytes": 0
+        }
+      },
+      "timing": {
+        "bnb": {
+          "median_us": 233.42162370681763,
+          "samples_us": [
+            236.70175671577454,
+            233.42162370681763,
+            231.26162588596344
+          ]
+        },
+        "cached": {
+          "median_us": 158.5611253976822,
+          "samples_us": [
+            158.5611253976822,
+            158.8411182165146,
+            158.06113183498383
+          ]
+        },
+        "naive": {
+          "median_us": 151.2211263179779,
+          "samples_us": [
+            151.2211263179779,
+            149.22112226486206,
+            152.08099782466888
+          ]
+        },
+        "recompute": {
+          "median_us": 178.68125438690186,
+          "samples_us": [
+            178.68125438690186,
+            176.1612445116043,
+            179.5012503862381
+          ]
+        }
+      },
+      "cached_over_bnb_speed": 1.4721239088167428,
+      "recompute_over_bnb_speed": 1.3063576507101602
+    },
+    {
+      "name": "model.layers.0.linear_attn.out_proj.weight",
+      "shape": [
+        1024,
+        2048
+      ],
+      "rank": 32,
+      "rows": 1024,
+      "numerics": {
+        "bnb": {
+          "output": {
+            "max_abs": 0.0,
+            "exact": true
+          },
+          "dX": {
+            "max_abs": 0.0,
+            "exact": true
+          },
+          "dA": {
+            "max_abs": 0.0,
+            "exact": true
+          },
+          "dB": {
+            "max_abs": 0.0,
+            "exact": true
+          },
+          "updated_graph": {
+            "output": {
+              "max_abs": 0.0,
+              "exact": true
+            },
+            "dX": {
+              "max_abs": 0.0,
+              "exact": true
+            },
+            "dA": {
+              "max_abs": 0.0,
+              "exact": true
+            },
+            "dB": {
+              "max_abs": 0.0,
+              "exact": true
+            }
+          }
+        },
+        "cached": {
+          "output": {
+            "max_abs": 0.0,
+            "exact": true
+          },
+          "dX": {
+            "max_abs": 0.0,
+            "exact": true
+          },
+          "dA": {
+            "max_abs": 0.0,
+            "exact": true
+          },
+          "dB": {
+            "max_abs": 0.0,
+            "exact": true
+          },
+          "updated_graph": {
+            "output": {
+              "max_abs": 0.0,
+              "exact": true
+            },
+            "dX": {
+              "max_abs": 0.0,
+              "exact": true
+            },
+            "dA": {
+              "max_abs": 0.0,
+              "exact": true
+            },
+            "dB": {
+              "max_abs": 0.0,
+              "exact": true
+            }
+          }
+        },
+        "naive": {
+          "output": {
+            "max_abs": 0.0,
+            "exact": true
+          },
+          "dX": {
+            "max_abs": 0.0,
+            "exact": true
+          },
+          "dA": {
+            "max_abs": 0.0,
+            "exact": true
+          },
+          "dB": {
+            "max_abs": 0.0,
+            "exact": true
+          },
+          "updated_graph": {
+            "output": {
+              "max_abs": 0.0,
+              "exact": true
+            },
+            "dX": {
+              "max_abs": 0.0,
+              "exact": true
+            },
+            "dA": {
+              "max_abs": 0.0,
+              "exact": true
+            },
+            "dB": {
+              "max_abs": 0.0,
+              "exact": true
+            }
+          }
+        },
+        "recompute": {
+          "output": {
+            "max_abs": 0.0,
+            "exact": true
+          },
+          "dX": {
+            "max_abs": 0.0,
+            "exact": true
+          },
+          "dA": {
+            "max_abs": 0.0,
+            "exact": true
+          },
+          "dB": {
+            "max_abs": 0.0,
+            "exact": true
+          },
+          "updated_graph": {
+            "output": {
+              "max_abs": 0.0,
+              "exact": true
+            },
+            "dX": {
+              "max_abs": 0.0,
+              "exact": true
+            },
+            "dA": {
+              "max_abs": 0.0,
+              "exact": true
+            },
+            "dB": {
+              "max_abs": 0.0,
+              "exact": true
+            }
+          }
+        }
+      },
+      "memory": {
+        "bnb": {
+          "forward_live_delta_bytes": 2359296,
+          "peak_step_delta_bytes": 15073280,
+          "retained_bf16_base_weight_bytes": 0
+        },
+        "cached": {
+          "forward_live_delta_bytes": 2359296,
+          "peak_step_delta_bytes": 15073280,
+          "retained_bf16_base_weight_bytes": 0
+        },
+        "naive": {
+          "forward_live_delta_bytes": 6553600,
+          "peak_step_delta_bytes": 15073280,
+          "retained_bf16_base_weight_bytes": 4194304
+        },
+        "recompute": {
+          "forward_live_delta_bytes": 2097152,
+          "peak_step_delta_bytes": 17432576,
+          "retained_bf16_base_weight_bytes": 0
+        }
+      },
+      "timing": {
+        "bnb": {
+          "median_us": 389.0427350997925,
+          "samples_us": [
+            389.88274335861206,
+            389.0427350997925,
+            387.5427544116974
+          ]
+        },
+        "cached": {
+          "median_us": 332.9223692417145,
+          "samples_us": [
+            332.10238814353943,
+            332.9223692417145,
+            332.96236395835876
+          ]
+        },
+        "naive": {
+          "median_us": 321.44224643707275,
+          "samples_us": [
+            318.76224279403687,
+            321.58225774765015,
+            321.44224643707275
+          ]
+        },
+        "recompute": {
+          "median_us": 358.94250869750977,
+          "samples_us": [
+            359.7624897956848,
+            358.94250869750977,
+            357.0224940776825
+          ]
+        }
+      },
+      "cached_over_bnb_speed": 1.1685689248995235,
+      "recompute_over_bnb_speed": 1.0838580710641017
+    },
+    {
+      "name": "model.layers.0.linear_attn.out_proj.weight",
+      "shape": [
+        1024,
+        2048
+      ],
+      "rank": 32,
+      "rows": 4096,
+      "numerics": {
+        "bnb": {
+          "output": {
+            "max_abs": 0.0,
+            "exact": true
+          },
+          "dX": {
+            "max_abs": 0.0,
+            "exact": true
+          },
+          "dA": {
+            "max_abs": 0.0,
+            "exact": true
+          },
+          "dB": {
+            "max_abs": 0.0,
+            "exact": true
+          },
+          "updated_graph": {
+            "output": {
+              "max_abs": 0.0,
+              "exact": true
+            },
+            "dX": {
+              "max_abs": 0.0,
+              "exact": true
+            },
+            "dA": {
+              "max_abs": 0.0,
+              "exact": true
+            },
+            "dB": {
+              "max_abs": 0.0,
+              "exact": true
+            }
+          }
+        },
+        "cached": {
+          "output": {
+            "max_abs": 0.0,
+            "exact": true
+          },
+          "dX": {
+            "max_abs": 0.0,
+            "exact": true
+          },
+          "dA": {
+            "max_abs": 0.0,
+            "exact": true
+          },
+          "dB": {
+            "max_abs": 0.0,
+            "exact": true
+          },
+          "updated_graph": {
+            "output": {
+              "max_abs": 0.0,
+              "exact": true
+            },
+            "dX": {
+              "max_abs": 0.0,
+              "exact": true
+            },
+            "dA": {
+              "max_abs": 0.0,
+              "exact": true
+            },
+            "dB": {
+              "max_abs": 0.0,
+              "exact": true
+            }
+          }
+        },
+        "naive": {
+          "output": {
+            "max_abs": 0.0,
+            "exact": true
+          },
+          "dX": {
+            "max_abs": 0.0,
+            "exact": true
+          },
+          "dA": {
+            "max_abs": 0.0,
+            "exact": true
+          },
+          "dB": {
+            "max_abs": 0.0,
+            "exact": true
+          },
+          "updated_graph": {
+            "output": {
+              "max_abs": 0.0,
+              "exact": true
+            },
+            "dX": {
+              "max_abs": 0.0,
+              "exact": true
+            },
+            "dA": {
+              "max_abs": 0.0,
+              "exact": true
+            },
+            "dB": {
+              "max_abs": 0.0,
+              "exact": true
+            }
+          }
+        },
+        "recompute": {
+          "output": {
+            "max_abs": 0.0,
+            "exact": true
+          },
+          "dX": {
+            "max_abs": 0.0,
+            "exact": true
+          },
+          "dA": {
+            "max_abs": 0.0,
+            "exact": true
+          },
+          "dB": {
+            "max_abs": 0.0,
+            "exact": true
+          },
+          "updated_graph": {
+            "output": {
+              "max_abs": 0.0,
+              "exact": true
+            },
+            "dX": {
+              "max_abs": 0.0,
+              "exact": true
+            },
+            "dA": {
+              "max_abs": 0.0,
+              "exact": true
+            },
+            "dB": {
+              "max_abs": 0.0,
+              "exact": true
+            }
+          }
+        }
+      },
+      "memory": {
+        "bnb": {
+          "forward_live_delta_bytes": 8847360,
+          "peak_step_delta_bytes": 46530560,
+          "retained_bf16_base_weight_bytes": 0
+        },
+        "cached": {
+          "forward_live_delta_bytes": 8847360,
+          "peak_step_delta_bytes": 46530560,
+          "retained_bf16_base_weight_bytes": 0
+        },
+        "naive": {
+          "forward_live_delta_bytes": 13041664,
+          "peak_step_delta_bytes": 46530560,
+          "retained_bf16_base_weight_bytes": 4194304
+        },
+        "recompute": {
+          "forward_live_delta_bytes": 8388608,
+          "peak_step_delta_bytes": 67960832,
+          "retained_bf16_base_weight_bytes": 0
+        }
+      },
+      "timing": {
+        "bnb": {
+          "median_us": 802.405595779419,
+          "samples_us": [
+            795.5456376075745,
+            802.7254939079285,
+            802.405595779419
+          ]
+        },
+        "cached": {
+          "median_us": 743.7052726745605,
+          "samples_us": [
+            743.7052726745605,
+            741.7852282524109,
+            744.0652251243591
+          ]
+        },
+        "naive": {
+          "median_us": 736.5452647209167,
+          "samples_us": [
+            736.5452647209167,
+            738.7052774429321,
+            735.985279083252
+          ]
+        },
+        "recompute": {
+          "median_us": 778.8655161857605,
+          "samples_us": [
+            778.8655161857605,
+            778.3654928207397,
+            779.925525188446
+          ]
+        }
+      },
+      "cached_over_bnb_speed": 1.0789295508068089,
+      "recompute_over_bnb_speed": 1.0302235483590778
+    },
+    {
+      "name": "model.layers.0.mlp.down_proj.weight",
+      "shape": [
+        1024,
+        3584
+      ],
+      "rank": 4,
+      "rows": 128,
+      "numerics": {
+        "bnb": {
+          "output": {
+            "max_abs": 0.0,
+            "exact": true
+          },
+          "dX": {
+            "max_abs": 0.0,
+            "exact": true
+          },
+          "dA": {
+            "max_abs": 0.0,
+            "exact": true
+          },
+          "dB": {
+            "max_abs": 0.0,
+            "exact": true
+          },
+          "updated_graph": {
+            "output": {
+              "max_abs": 0.0,
+              "exact": true
+            },
+            "dX": {
+              "max_abs": 0.0,
+              "exact": true
+            },
+            "dA": {
+              "max_abs": 0.0,
+              "exact": true
+            },
+            "dB": {
+              "max_abs": 0.0,
+              "exact": true
+            }
+          }
+        },
+        "cached": {
+          "output": {
+            "max_abs": 0.0,
+            "exact": true
+          },
+          "dX": {
+            "max_abs": 0.0,
+            "exact": true
+          },
+          "dA": {
+            "max_abs": 0.0,
+            "exact": true
+          },
+          "dB": {
+            "max_abs": 0.0,
+            "exact": true
+          },
+          "updated_graph": {
+            "output": {
+              "max_abs": 0.0,
+              "exact": true
+            },
+            "dX": {
+              "max_abs": 0.0,
+              "exact": true
+            },
+            "dA": {
+              "max_abs": 0.0,
+              "exact": true
+            },
+            "dB": {
+              "max_abs": 0.0,
+              "exact": true
+            }
+          }
+        },
+        "naive": {
+          "output": {
+            "max_abs": 0.0,
+            "exact": true
+          },
+          "dX": {
+            "max_abs": 0.0,
+            "exact": true
+          },
+          "dA": {
+            "max_abs": 0.0,
+            "exact": true
+          },
+          "dB": {
+            "max_abs": 0.0,
+            "exact": true
+          },
+          "updated_graph": {
+            "output": {
+              "max_abs": 0.0,
+              "exact": true
+            },
+            "dX": {
+              "max_abs": 0.0,
+              "exact": true
+            },
+            "dA": {
+              "max_abs": 0.0,
+              "exact": true
+            },
+            "dB": {
+              "max_abs": 0.0,
+              "exact": true
+            }
+          }
+        },
+        "recompute": {
+          "output": {
+            "max_abs": 0.0,
+            "exact": true
+          },
+          "dX": {
+            "max_abs": 0.0,
+            "exact": true
+          },
+          "dA": {
+            "max_abs": 0.0,
+            "exact": true
+          },
+          "dB": {
+            "max_abs": 0.0,
+            "exact": true
+          },
+          "updated_graph": {
+            "output": {
+              "max_abs": 0.0,
+              "exact": true
+            },
+            "dX": {
+              "max_abs": 0.0,
+              "exact": true
+            },
+            "dA": {
+              "max_abs": 0.0,
+              "exact": true
+            },
+            "dB": {
+              "max_abs": 0.0,
+              "exact": true
+            }
+          }
+        }
+      },
+      "memory": {
+        "bnb": {
+          "forward_live_delta_bytes": 300032,
+          "peak_step_delta_bytes": 9510912,
+          "retained_bf16_base_weight_bytes": 0
+        },
+        "cached": {
+          "forward_live_delta_bytes": 300032,
+          "peak_step_delta_bytes": 9510912,
+          "retained_bf16_base_weight_bytes": 0
+        },
+        "naive": {
+          "forward_live_delta_bytes": 7640064,
+          "peak_step_delta_bytes": 9510912,
+          "retained_bf16_base_weight_bytes": 7340032
+        },
+        "recompute": {
+          "forward_live_delta_bytes": 262144,
+          "peak_step_delta_bytes": 8893440,
+          "retained_bf16_base_weight_bytes": 0
+        }
+      },
+      "timing": {
+        "bnb": {
+          "median_us": 296.5221107006073,
+          "samples_us": [
+            296.702116727829,
+            296.5221107006073,
+            294.42211985588074
+          ]
+        },
+        "cached": {
+          "median_us": 223.2816219329834,
+          "samples_us": [
+            222.20149636268616,
+            223.78163039684296,
+            223.2816219329834
+          ]
+        },
+        "naive": {
+          "median_us": 207.02150464057922,
+          "samples_us": [
+            207.2415053844452,
+            206.7214995622635,
+            207.02150464057922
+          ]
+        },
+        "recompute": {
+          "median_us": 237.54163086414337,
+          "samples_us": [
+            235.96163094043732,
+            237.54163086414337,
+            237.66162991523743
+          ]
+        }
+      },
+      "cached_over_bnb_speed": 1.328018437583755,
+      "recompute_over_bnb_speed": 1.2482953393133707
+    },
+    {
+      "name": "model.layers.0.mlp.down_proj.weight",
+      "shape": [
+        1024,
+        3584
+      ],
+      "rank": 4,
+      "rows": 1024,
+      "numerics": {
+        "bnb": {
+          "output": {
+            "max_abs": 0.0,
+            "exact": true
+          },
+          "dX": {
+            "max_abs": 0.0,
+            "exact": true
+          },
+          "dA": {
+            "max_abs": 0.0,
+            "exact": true
+          },
+          "dB": {
+            "max_abs": 0.0,
+            "exact": true
+          },
+          "updated_graph": {
+            "output": {
+              "max_abs": 0.0,
+              "exact": true
+            },
+            "dX": {
+              "max_abs": 0.0,
+              "exact": true
+            },
+            "dA": {
+              "max_abs": 0.0,
+              "exact": true
+            },
+            "dB": {
+              "max_abs": 0.0,
+              "exact": true
+            }
+          }
+        },
+        "cached": {
+          "output": {
+            "max_abs": 0.0,
+            "exact": true
+          },
+          "dX": {
+            "max_abs": 0.0,
+            "exact": true
+          },
+          "dA": {
+            "max_abs": 0.0,
+            "exact": true
+          },
+          "dB": {
+            "max_abs": 0.0,
+            "exact": true
+          },
+          "updated_graph": {
+            "output": {
+              "max_abs": 0.0,
+              "exact": true
+            },
+            "dX": {
+              "max_abs": 0.0,
+              "exact": true
+            },
+            "dA": {
+              "max_abs": 0.0,
+              "exact": true
+            },
+            "dB": {
+              "max_abs": 0.0,
+              "exact": true
+            }
+          }
+        },
+        "naive": {
+          "output": {
+            "max_abs": 0.0,
+            "exact": true
+          },
+          "dX": {
+            "max_abs": 0.0,
+            "exact": true
+          },
+          "dA": {
+            "max_abs": 0.0,
+            "exact": true
+          },
+          "dB": {
+            "max_abs": 0.0,
+            "exact": true
+          },
+          "updated_graph": {
+            "output": {
+              "max_abs": 0.0,
+              "exact": true
+            },
+            "dX": {
+              "max_abs": 0.0,
+              "exact": true
+            },
+            "dA": {
+              "max_abs": 0.0,
+              "exact": true
+            },
+            "dB": {
+              "max_abs": 0.0,
+              "exact": true
+            }
+          }
+        },
+        "recompute": {
+          "output": {
+            "max_abs": 0.0,
+            "exact": true
+          },
+          "dX": {
+            "max_abs": 0.0,
+            "exact": true
+          },
+          "dA": {
+            "max_abs": 0.0,
+            "exact": true
+          },
+          "dB": {
+            "max_abs": 0.0,
+            "exact": true
+          },
+          "updated_graph": {
+            "output": {
+              "max_abs": 0.0,
+              "exact": true
+            },
+            "dX": {
+              "max_abs": 0.0,
+              "exact": true
+            },
+            "dA": {
+              "max_abs": 0.0,
+              "exact": true
+            },
+            "dB": {
+              "max_abs": 0.0,
+              "exact": true
+            }
+          }
+        }
+      },
+      "memory": {
+        "bnb": {
+          "forward_live_delta_bytes": 2142208,
+          "peak_step_delta_bytes": 24190976,
+          "retained_bf16_base_weight_bytes": 0
+        },
+        "cached": {
+          "forward_live_delta_bytes": 2142208,
+          "peak_step_delta_bytes": 24190976,
+          "retained_bf16_base_weight_bytes": 0
+        },
+        "naive": {
+          "forward_live_delta_bytes": 9482240,
+          "peak_step_delta_bytes": 24190976,
+          "retained_bf16_base_weight_bytes": 7340032
+        },
+        "recompute": {
+          "forward_live_delta_bytes": 2097152,
+          "peak_step_delta_bytes": 26333184,
+          "retained_bf16_base_weight_bytes": 0
+        }
+      },
+      "timing": {
+        "bnb": {
+          "median_us": 581.6441178321838,
+          "samples_us": [
+            579.8439979553223,
+            581.7239880561829,
+            581.6441178321838
+          ]
+        },
+        "cached": {
+          "median_us": 505.56349754333496,
+          "samples_us": [
+            505.56349754333496,
+            504.82362508773804,
+            506.30348920822144
+          ]
+        },
+        "naive": {
+          "median_us": 489.64351415634155,
+          "samples_us": [
+            489.64351415634155,
+            489.68350887298584,
+            488.5033667087555
+          ]
+        },
+        "recompute": {
+          "median_us": 542.1837568283081,
+          "samples_us": [
+            542.1837568283081,
+            541.1237478256226,
+            542.5038933753967
+          ]
+        }
+      },
+      "cached_over_bnb_speed": 1.1504867749719758,
+      "recompute_over_bnb_speed": 1.0727804190127583
+    },
+    {
+      "name": "model.layers.0.mlp.down_proj.weight",
+      "shape": [
+        1024,
+        3584
+      ],
+      "rank": 4,
+      "rows": 4096,
+      "numerics": {
+        "bnb": {
+          "output": {
+            "max_abs": 0.0,
+            "exact": true
+          },
+          "dX": {
+            "max_abs": 0.0,
+            "exact": true
+          },
+          "dA": {
+            "max_abs": 0.0,
+            "exact": true
+          },
+          "dB": {
+            "max_abs": 0.0,
+            "exact": true
+          },
+          "updated_graph": {
+            "output": {
+              "max_abs": 0.0,
+              "exact": true
+            },
+            "dX": {
+              "max_abs": 0.0,
+              "exact": true
+            },
+            "dA": {
+              "max_abs": 0.0,
+              "exact": true
+            },
+            "dB": {
+              "max_abs": 0.0,
+              "exact": true
+            }
+          }
+        },
+        "cached": {
+          "output": {
+            "max_abs": 0.0,
+            "exact": true
+          },
+          "dX": {
+            "max_abs": 0.0,
+            "exact": true
+          },
+          "dA": {
+            "max_abs": 0.0,
+            "exact": true
+          },
+          "dB": {
+            "max_abs": 0.0,
+            "exact": true
+          },
+          "updated_graph": {
+            "output": {
+              "max_abs": 0.0,
+              "exact": true
+            },
+            "dX": {
+              "max_abs": 0.0,
+              "exact": true
+            },
+            "dA": {
+              "max_abs": 0.0,
+              "exact": true
+            },
+            "dB": {
+              "max_abs": 0.0,
+              "exact": true
+            }
+          }
+        },
+        "naive": {
+          "output": {
+            "max_abs": 0.0,
+            "exact": true
+          },
+          "dX": {
+            "max_abs": 0.0,
+            "exact": true
+          },
+          "dA": {
+            "max_abs": 0.0,
+            "exact": true
+          },
+          "dB": {
+            "max_abs": 0.0,
+            "exact": true
+          },
+          "updated_graph": {
+            "output": {
+              "max_abs": 0.0,
+              "exact": true
+            },
+            "dX": {
+              "max_abs": 0.0,
+              "exact": true
+            },
+            "dA": {
+              "max_abs": 0.0,
+              "exact": true
+            },
+            "dB": {
+              "max_abs": 0.0,
+              "exact": true
+            }
+          }
+        },
+        "recompute": {
+          "output": {
+            "max_abs": 0.0,
+            "exact": true
+          },
+          "dX": {
+            "max_abs": 0.0,
+            "exact": true
+          },
+          "dA": {
+            "max_abs": 0.0,
+            "exact": true
+          },
+          "dB": {
+            "max_abs": 0.0,
+            "exact": true
+          },
+          "updated_graph": {
+            "output": {
+              "max_abs": 0.0,
+              "exact": true
+            },
+            "dX": {
+              "max_abs": 0.0,
+              "exact": true
+            },
+            "dA": {
+              "max_abs": 0.0,
+              "exact": true
+            },
+            "dB": {
+              "max_abs": 0.0,
+              "exact": true
+            }
+          }
+        }
+      },
+      "memory": {
+        "bnb": {
+          "forward_live_delta_bytes": 8458240,
+          "peak_step_delta_bytes": 75571200,
+          "retained_bf16_base_weight_bytes": 0
+        },
+        "cached": {
+          "forward_live_delta_bytes": 8458240,
+          "peak_step_delta_bytes": 74522624,
+          "retained_bf16_base_weight_bytes": 0
+        },
+        "naive": {
+          "forward_live_delta_bytes": 15798272,
+          "peak_step_delta_bytes": 74522624,
+          "retained_bf16_base_weight_bytes": 7340032
+        },
+        "recompute": {
+          "forward_live_delta_bytes": 8388608,
+          "peak_step_delta_bytes": 105000960,
+          "retained_bf16_base_weight_bytes": 0
+        }
+      },
+      "timing": {
+        "bnb": {
+          "median_us": 1195.2683925628662,
+          "samples_us": [
+            1179.1883707046509,
+            1195.2683925628662,
+            1198.6284255981445
+          ]
+        },
+        "cached": {
+          "median_us": 1120.047926902771,
+          "samples_us": [
+            1121.147871017456,
+            1117.908000946045,
+            1120.047926902771
+          ]
+        },
+        "naive": {
+          "median_us": 1104.5677661895752,
+          "samples_us": [
+            1102.5477647781372,
+            1105.5676937103271,
+            1104.5677661895752
+          ]
+        },
+        "recompute": {
+          "median_us": 1165.0882959365845,
+          "samples_us": [
+            1165.0882959365845,
+            1164.3882989883423,
+            1166.0282611846924
+          ]
+        }
+      },
+      "cached_over_bnb_speed": 1.0671582562257846,
+      "recompute_over_bnb_speed": 1.0259036990857595
+    },
+    {
+      "name": "model.layers.0.mlp.down_proj.weight",
+      "shape": [
+        1024,
+        3584
+      ],
+      "rank": 32,
+      "rows": 128,
+      "numerics": {
+        "bnb": {
+          "output": {
+            "max_abs": 0.0,
+            "exact": true
+          },
+          "dX": {
+            "max_abs": 0.0,
+            "exact": true
+          },
+          "dA": {
+            "max_abs": 0.0,
+            "exact": true
+          },
+          "dB": {
+            "max_abs": 0.0,
+            "exact": true
+          },
+          "updated_graph": {
+            "output": {
+              "max_abs": 0.0,
+              "exact": true
+            },
+            "dX": {
+              "max_abs": 0.0,
+              "exact": true
+            },
+            "dA": {
+              "max_abs": 0.0,
+              "exact": true
+            },
+            "dB": {
+              "max_abs": 0.0,
+              "exact": true
+            }
+          }
+        },
+        "cached": {
+          "output": {
+            "max_abs": 0.0,
+            "exact": true
+          },
+          "dX": {
+            "max_abs": 0.0,
+            "exact": true
+          },
+          "dA": {
+            "max_abs": 0.0,
+            "exact": true
+          },
+          "dB": {
+            "max_abs": 0.0,
+            "exact": true
+          },
+          "updated_graph": {
+            "output": {
+              "max_abs": 0.0,
+              "exact": true
+            },
+            "dX": {
+              "max_abs": 0.0,
+              "exact": true
+            },
+            "dA": {
+              "max_abs": 0.0,
+              "exact": true
+            },
+            "dB": {
+              "max_abs": 0.0,
+              "exact": true
+            }
+          }
+        },
+        "naive": {
+          "output": {
+            "max_abs": 0.0,
+            "exact": true
+          },
+          "dX": {
+            "max_abs": 0.0,
+            "exact": true
+          },
+          "dA": {
+            "max_abs": 0.0,
+            "exact": true
+          },
+          "dB": {
+            "max_abs": 0.0,
+            "exact": true
+          },
+          "updated_graph": {
+            "output": {
+              "max_abs": 0.0,
+              "exact": true
+            },
+            "dX": {
+              "max_abs": 0.0,
+              "exact": true
+            },
+            "dA": {
+              "max_abs": 0.0,
+              "exact": true
+            },
+            "dB": {
+              "max_abs": 0.0,
+              "exact": true
+            }
+          }
+        },
+        "recompute": {
+          "output": {
+            "max_abs": 0.0,
+            "exact": true
+          },
+          "dX": {
+            "max_abs": 0.0,
+            "exact": true
+          },
+          "dA": {
+            "max_abs": 0.0,
+            "exact": true
+          },
+          "dB": {
+            "max_abs": 0.0,
+            "exact": true
+          },
+          "updated_graph": {
+            "output": {
+              "max_abs": 0.0,
+              "exact": true
+            },
+            "dX": {
+              "max_abs": 0.0,
+              "exact": true
+            },
+            "dA": {
+              "max_abs": 0.0,
+              "exact": true
+            },
+            "dB": {
+              "max_abs": 0.0,
+              "exact": true
+            }
+          }
+        }
+      },
+      "memory": {
+        "bnb": {
+          "forward_live_delta_bytes": 565248,
+          "peak_step_delta_bytes": 10027008,
+          "retained_bf16_base_weight_bytes": 0
+        },
+        "cached": {
+          "forward_live_delta_bytes": 565248,
+          "peak_step_delta_bytes": 10027008,
+          "retained_bf16_base_weight_bytes": 0
+        },
+        "naive": {
+          "forward_live_delta_bytes": 7905280,
+          "peak_step_delta_bytes": 10027008,
+          "retained_bf16_base_weight_bytes": 7340032
+        },
+        "recompute": {
+          "forward_live_delta_bytes": 262144,
+          "peak_step_delta_bytes": 9674752,
+          "retained_bf16_base_weight_bytes": 0
+        }
+      },
+      "timing": {
+        "bnb": {
+          "median_us": 281.64198994636536,
+          "samples_us": [
+            284.60198640823364,
+            281.64198994636536,
+            281.6219925880432
+          ]
+        },
+        "cached": {
+          "median_us": 208.46149325370789,
+          "samples_us": [
+            208.46149325370789,
+            208.0014944076538,
+            210.08136868476868
+          ]
+        },
+        "naive": {
+          "median_us": 194.18136775493622,
+          "samples_us": [
+            194.6413815021515,
+            193.32124292850494,
+            194.18136775493622
+          ]
+        },
+        "recompute": {
+          "median_us": 221.6416299343109,
+          "samples_us": [
+            225.4215031862259,
+            220.68162262439728,
+            221.6416299343109
+          ]
+        }
+      },
+      "cached_over_bnb_speed": 1.351050429268456,
+      "recompute_over_bnb_speed": 1.2707088917810119
+    },
+    {
+      "name": "model.layers.0.mlp.down_proj.weight",
+      "shape": [
+        1024,
+        3584
+      ],
+      "rank": 32,
+      "rows": 1024,
+      "numerics": {
+        "bnb": {
+          "output": {
+            "max_abs": 0.0,
+            "exact": true
+          },
+          "dX": {
+            "max_abs": 0.0,
+            "exact": true
+          },
+          "dA": {
+            "max_abs": 0.0,
+            "exact": true
+          },
+          "dB": {
+            "max_abs": 0.0,
+            "exact": true
+          },
+          "updated_graph": {
+            "output": {
+              "max_abs": 0.0,
+              "exact": true
+            },
+            "dX": {
+              "max_abs": 0.0,
+              "exact": true
+            },
+            "dA": {
+              "max_abs": 0.0,
+              "exact": true
+            },
+            "dB": {
+              "max_abs": 0.0,
+              "exact": true
+            }
+          }
+        },
+        "cached": {
+          "output": {
+            "max_abs": 0.0,
+            "exact": true
+          },
+          "dX": {
+            "max_abs": 0.0,
+            "exact": true
+          },
+          "dA": {
+            "max_abs": 0.0,
+            "exact": true
+          },
+          "dB": {
+            "max_abs": 0.0,
+            "exact": true
+          },
+          "updated_graph": {
+            "output": {
+              "max_abs": 0.0,
+              "exact": true
+            },
+            "dX": {
+              "max_abs": 0.0,
+              "exact": true
+            },
+            "dA": {
+              "max_abs": 0.0,
+              "exact": true
+            },
+            "dB": {
+              "max_abs": 0.0,
+              "exact": true
+            }
+          }
+        },
+        "naive": {
+          "output": {
+            "max_abs": 0.0,
+            "exact": true
+          },
+          "dX": {
+            "max_abs": 0.0,
+            "exact": true
+          },
+          "dA": {
+            "max_abs": 0.0,
+            "exact": true
+          },
+          "dB": {
+            "max_abs": 0.0,
+            "exact": true
+          },
+          "updated_graph": {
+            "output": {
+              "max_abs": 0.0,
+              "exact": true
+            },
+            "dX": {
+              "max_abs": 0.0,
+              "exact": true
+            },
+            "dA": {
+              "max_abs": 0.0,
+              "exact": true
+            },
+            "dB": {
+              "max_abs": 0.0,
+              "exact": true
+            }
+          }
+        },
+        "recompute": {
+          "output": {
+            "max_abs": 0.0,
+            "exact": true
+          },
+          "dX": {
+            "max_abs": 0.0,
+            "exact": true
+          },
+          "dA": {
+            "max_abs": 0.0,
+            "exact": true
+          },
+          "dB": {
+            "max_abs": 0.0,
+            "exact": true
+          },
+          "updated_graph": {
+            "output": {
+              "max_abs": 0.0,
+              "exact": true
+            },
+            "dX": {
+              "max_abs": 0.0,
+              "exact": true
+            },
+            "dA": {
+              "max_abs": 0.0,
+              "exact": true
+            },
+            "dB": {
+              "max_abs": 0.0,
+              "exact": true
+            }
+          }
+        }
+      },
+      "memory": {
+        "bnb": {
+          "forward_live_delta_bytes": 2457600,
+          "peak_step_delta_bytes": 24707072,
+          "retained_bf16_base_weight_bytes": 0
+        },
+        "cached": {
+          "forward_live_delta_bytes": 2457600,
+          "peak_step_delta_bytes": 24707072,
+          "retained_bf16_base_weight_bytes": 0
+        },
+        "naive": {
+          "forward_live_delta_bytes": 9797632,
+          "peak_step_delta_bytes": 24707072,
+          "retained_bf16_base_weight_bytes": 7340032
+        },
+        "recompute": {
+          "forward_live_delta_bytes": 2097152,
+          "peak_step_delta_bytes": 27164672,
+          "retained_bf16_base_weight_bytes": 0
+        }
+      },
+      "timing": {
+        "bnb": {
+          "median_us": 562.6238584518433,
+          "samples_us": [
+            563.1639957427979,
+            562.0038509368896,
+            562.6238584518433
+          ]
+        },
+        "cached": {
+          "median_us": 488.26348781585693,
+          "samples_us": [
+            484.1634929180145,
+            488.86337876319885,
+            488.26348781585693
+          ]
+        },
+        "naive": {
+          "median_us": 468.5433804988861,
+          "samples_us": [
+            468.5433804988861,
+            467.12324023246765,
+            470.22324800491333
+          ]
+        },
+        "recompute": {
+          "median_us": 521.283745765686,
+          "samples_us": [
+            516.9236063957214,
+            522.8236317634583,
+            521.283745765686
+          ]
+        }
+      },
+      "cached_over_bnb_speed": 1.1522955791116425,
+      "recompute_over_bnb_speed": 1.0793044345271785
+    },
+    {
+      "name": "model.layers.0.mlp.down_proj.weight",
+      "shape": [
+        1024,
+        3584
+      ],
+      "rank": 32,
+      "rows": 4096,
+      "numerics": {
+        "bnb": {
+          "output": {
+            "max_abs": 0.0,
+            "exact": true
+          },
+          "dX": {
+            "max_abs": 0.0,
+            "exact": true
+          },
+          "dA": {
+            "max_abs": 0.0,
+            "exact": true
+          },
+          "dB": {
+            "max_abs": 0.0,
+            "exact": true
+          },
+          "updated_graph": {
+            "output": {
+              "max_abs": 0.0,
+              "exact": true
+            },
+            "dX": {
+              "max_abs": 0.0,
+              "exact": true
+            },
+            "dA": {
+              "max_abs": 0.0,
+              "exact": true
+            },
+            "dB": {
+              "max_abs": 0.0,
+              "exact": true
+            }
+          }
+        },
+        "cached": {
+          "output": {
+            "max_abs": 0.0,
+            "exact": true
+          },
+          "dX": {
+            "max_abs": 0.0,
+            "exact": true
+          },
+          "dA": {
+            "max_abs": 0.0,
+            "exact": true
+          },
+          "dB": {
+            "max_abs": 0.0,
+            "exact": true
+          },
+          "updated_graph": {
+            "output": {
+              "max_abs": 0.0,
+              "exact": true
+            },
+            "dX": {
+              "max_abs": 0.0,
+              "exact": true
+            },
+            "dA": {
+              "max_abs": 0.0,
+              "exact": true
+            },
+            "dB": {
+              "max_abs": 0.0,
+              "exact": true
+            }
+          }
+        },
+        "naive": {
+          "output": {
+            "max_abs": 0.0,
+            "exact": true
+          },
+          "dX": {
+            "max_abs": 0.0,
+            "exact": true
+          },
+          "dA": {
+            "max_abs": 0.0,
+            "exact": true
+          },
+          "dB": {
+            "max_abs": 0.0,
+            "exact": true
+          },
+          "updated_graph": {
+            "output": {
+              "max_abs": 0.0,
+              "exact": true
+            },
+            "dX": {
+              "max_abs": 0.0,
+              "exact": true
+            },
+            "dA": {
+              "max_abs": 0.0,
+              "exact": true
+            },
+            "dB": {
+              "max_abs": 0.0,
+              "exact": true
+            }
+          }
+        },
+        "recompute": {
+          "output": {
+            "max_abs": 0.0,
+            "exact": true
+          },
+          "dX": {
+            "max_abs": 0.0,
+            "exact": true
+          },
+          "dA": {
+            "max_abs": 0.0,
+            "exact": true
+          },
+          "dB": {
+            "max_abs": 0.0,
+            "exact": true
+          },
+          "updated_graph": {
+            "output": {
+              "max_abs": 0.0,
+              "exact": true
+            },
+            "dX": {
+              "max_abs": 0.0,
+              "exact": true
+            },
+            "dA": {
+              "max_abs": 0.0,
+              "exact": true
+            },
+            "dB": {
+              "max_abs": 0.0,
+              "exact": true
+            }
+          }
+        }
+      },
+      "memory": {
+        "bnb": {
+          "forward_live_delta_bytes": 8945664,
+          "peak_step_delta_bytes": 76087296,
+          "retained_bf16_base_weight_bytes": 0
+        },
+        "cached": {
+          "forward_live_delta_bytes": 8945664,
+          "peak_step_delta_bytes": 75038720,
+          "retained_bf16_base_weight_bytes": 0
+        },
+        "naive": {
+          "forward_live_delta_bytes": 16285696,
+          "peak_step_delta_bytes": 75038720,
+          "retained_bf16_base_weight_bytes": 7340032
+        },
+        "recompute": {
+          "forward_live_delta_bytes": 8388608,
+          "peak_step_delta_bytes": 106004480,
+          "retained_bf16_base_weight_bytes": 0
+        }
+      },
+      "timing": {
+        "bnb": {
+          "median_us": 1174.408197402954,
+          "samples_us": [
+            1162.668228149414,
+            1174.5882034301758,
+            1174.408197402954
+          ]
+        },
+        "cached": {
+          "median_us": 1099.9878644943237,
+          "samples_us": [
+            1099.9878644943237,
+            1101.5077829360962,
+            1099.3677377700806
+          ]
+        },
+        "naive": {
+          "median_us": 1084.4075679779053,
+          "samples_us": [
+            1084.4075679779053,
+            1083.647608757019,
+            1086.687445640564
+          ]
+        },
+        "recompute": {
+          "median_us": 1157.9481363296509,
+          "samples_us": [
+            1156.1481952667236,
+            1157.9481363296509,
+            1158.2082509994507
+          ]
+        }
+      },
+      "cached_over_bnb_speed": 1.067655594494074,
+      "recompute_over_bnb_speed": 1.0142148517337544
+    }
+  ],
+  "optimizer_checks": [
+    {
+      "name": "model.layers.0.linear_attn.in_proj_qkvz.weight",
+      "backend": "bnb",
+      "losses": [
+        0.01290020439773798,
+        0.012898675166070461,
+        0.012895338237285614
+      ]
+    },
+    {
+      "name": "model.layers.0.linear_attn.in_proj_qkvz.weight",
+      "backend": "cached",
+      "losses": [
+        0.01290020439773798,
+        0.012898675166070461,
+        0.012895338237285614
+      ]
+    },
+    {
+      "name": "model.layers.0.linear_attn.in_proj_qkvz.weight",
+      "backend": "recompute",
+      "losses": [
+        0.01290020439773798,
+        0.012898675166070461,
+        0.012895338237285614
+      ]
+    },
+    {
+      "name": "model.layers.0.mlp.gate_up_proj.weight",
+      "backend": "bnb",
+      "losses": [
+        0.011131176725029945,
+        0.011129205115139484,
+        0.011126132681965828
+      ]
+    },
+    {
+      "name": "model.layers.0.mlp.gate_up_proj.weight",
+      "backend": "cached",
+      "losses": [
+        0.011131176725029945,
+        0.011129205115139484,
+        0.011126132681965828
+      ]
+    },
+    {
+      "name": "model.layers.0.mlp.gate_up_proj.weight",
+      "backend": "recompute",
+      "losses": [
+        0.011131176725029945,
+        0.011129205115139484,
+        0.011126132681965828
+      ]
+    },
+    {
+      "name": "model.layers.0.linear_attn.out_proj.weight",
+      "backend": "bnb",
+      "losses": [
+        0.013126449659466743,
+        0.013123304583132267,
+        0.013117472641170025
+      ]
+    },
+    {
+      "name": "model.layers.0.linear_attn.out_proj.weight",
+      "backend": "cached",
+      "losses": [
+        0.013126449659466743,
+        0.013123304583132267,
+        0.013117472641170025
+      ]
+    },
+    {
+      "name": "model.layers.0.linear_attn.out_proj.weight",
+      "backend": "recompute",
+      "losses": [
+        0.013126449659466743,
+        0.013123304583132267,
+        0.013117472641170025
+      ]
+    },
+    {
+      "name": "model.layers.0.mlp.down_proj.weight",
+      "backend": "bnb",
+      "losses": [
+        0.01259444560855627,
+        0.012589763849973679,
+        0.012582778930664062
+      ]
+    },
+    {
+      "name": "model.layers.0.mlp.down_proj.weight",
+      "backend": "cached",
+      "losses": [
+        0.01259444560855627,
+        0.012589763849973679,
+        0.012582778930664062
+      ]
+    },
+    {
+      "name": "model.layers.0.mlp.down_proj.weight",
+      "backend": "recompute",
+      "losses": [
+        0.01259444560855627,
+        0.012589763849973679,
+        0.012582778930664062
+      ]
+    }
+  ],
+  "source_sha256": {
+    "lora_training.py": "15b320e27438b4df2be796b88977649e46c3ad6deb529be56c2b62df4951f158",
+    "qwen35_nf4_ops.py": "5ddf30c8ce36597bd51bcffe0bcfb73e65e2af3e8e8c51926235df1da8a3e535",
+    "check_lora_training.py": "b01eff974a4f67aceac5ddab585383a196a47f3ad278107d643431c836665092"
+  },
+  "job": 23487644,
+  "node": "nid005060",
+  "elapsed": "00:00:41",
+  "failed_checker_jobs": [
+    23487434,
+    23487557
+  ],
+  "upstream_reference": {
+    "repository": "unslothai/unsloth",
+    "commit": "157305f6596d6196189bbc3e393bb8fe8ed604a0",
+    "files": {
+      "fast_lora.py": "b61333c1261ef29980509ecd7b057267f0c11f2d",
+      "swiglu.py": "b82c396c2bf02243c38baece006f3cb0d3b6d554"
+    }
+  },
+  "summary": {
+    "128": {
+      "minimum": 1.328018437583755,
+      "median": 1.3657363911335463,
+      "maximum": 1.4721239088167428
+    },
+    "1024": {
+      "minimum": 1.1395648384671837,
+      "median": 1.152577373634613,
+      "maximum": 1.1711312336351711
+    },
+    "4096": {
+      "minimum": 1.0521314542023157,
+      "median": 1.06428520657014,
+      "maximum": 1.0789295508068089
+    }
+  },
+  "limitations": [
+    "Projection fwd+bwd timings, not wholemodel training or optimizer throughput.",
+    "No Unsloth performance comparison.",
+    "FP32 trainable master factors and BF16 compute; single adapter,dropout0,biasnone.",
+    "Resident scale cache is prepared for all arms before memory deltas; not totalVRAM.",
+    "No trained quality or SFT convergence result."
+  ]
+}
