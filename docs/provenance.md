@@ -406,3 +406,27 @@ retained as diagnostic evidence, and the corrected requests disable logprob
 returns to match throughput. A NumPy scalar byte-count serialization failure
 in the first corrected-profile attempt is retained separately from accepted
 measurements; explicit integer conversion is regression-tested.
+
+### GDN storage sharing and NF4 byte-pair reconstruction
+
+`qwen35_gdn_storage.py` is new benchmark ownership code for the existing
+BF16 packed GDN prototype. It validates immutable TP1 weights before making
+the original parameter objects contiguous views into the packed owner. It
+preserves parameter metadata and covers explicit and closure-based lazy
+initialization before graph capture; no framework source is copied. Initial
+class-method-only interception failed to reach the prototype's lazy closure.
+That no-op attempt is retained separately; regression coverage exercises the
+actual closure-based pattern. Storage accounting now measures the union of
+parameters and packed owners, making aliases and duplicate bytes explicit.
+
+The byte-pair and split-K candidates extend the project's NF4 Triton benchmark
+code above; no vendor implementation is copied. The selected byte-pair path
+loads each NF4 byte once, decodes its two values through the canonical FP32
+codebook and interleaves exact BF16 reconstruction. It retains native linear
+accumulation and does not cache BF16 weights. Split-K candidates use FP32
+partials with a separate reduction, were slower, and remain isolated screening
+code rather than serving dispatch. `check_qwen35_nf4_candidates.py` exposes the
+screen as a portable fixture-based program. Its numerical/timing-loop AST
+matches the GPU screen after equivalent function/output-path normalization.
+Opt-ins, paired controls, source hashes, failures and limits are recorded in
+[the follow-up](qwen35-storage-nf4.md).

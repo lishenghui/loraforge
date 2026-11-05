@@ -1,5 +1,9 @@
 # Qwen3.5 BF16/NF4 memory and phase audit
 
+The subsequent [storage/dequantization follow-up](qwen35-storage-nf4.md)
+eliminates the measured duplicate GDN storage and tests exact NF4 byte-pair
+reconstruction. The historical measurements below remain unchanged.
+
 This study measures allocation stages, unprofiled serving peaks and throughput,
 and separately samples GPU traces. Four synthetic rank32 sources and their
 actual FlashTSQR-compressed rank4 files are reused unchanged. This is fixed-work

@@ -69,8 +69,15 @@ def install():
     if getattr(BitsAndBytesLinearMethod, "_lf_nf4_cached_scales", False):
         return
     original = BitsAndBytesLinearMethod._apply_4bit_weight
+    byte_pairs = os.environ.get("LORAFORGE_BENCH_QWEN35_NF4_PAIRS") == "1"
     stats = dict(
-        optimized_calls=0, fallback_calls=0, scale_prepares=0, layers={}, executions={}
+        optimized_calls=0,
+        fallback_calls=0,
+        scale_prepares=0,
+        pair_exact_checks=0,
+        byte_pairs=byte_pairs,
+        layers={},
+        executions={},
     )
 
     def apply(self, layer, x, bias=None):
@@ -94,12 +101,24 @@ def install():
                 scale_bytes=scales.numel() * scales.element_size(),
                 weight_dtype=str(weight.dtype),
             )
+            if byte_pairs and state.shape[0] > 32:
+                if not torch.equal(
+                    ops.dequantize(weight, scales, state.code, state.shape),
+                    ops.dequantize_pairs(
+                        weight, scales, state.code, state.shape, lookup=True
+                    ),
+                ):
+                    raise RuntimeError("NF4 byte-pair reconstruction is not exact")
+                stats["pair_exact_checks"] += 1
         scales = weight._lf_nf4_scales[1]
         shape = x.shape
         flat = x.reshape(-1, shape[-1])
-        y = functional.linear(
-            flat, ops.dequantize(weight, scales, state.code, state.shape)
+        dense = (
+            ops.dequantize_pairs(weight, scales, state.code, state.shape, lookup=True)
+            if byte_pairs and state.shape[0] > 32
+            else ops.dequantize(weight, scales, state.code, state.shape)
         )
+        y = functional.linear(flat, dense)
         y = y.reshape(*shape[:-1], state.shape[0])
         if bias is not None:
             y += bias

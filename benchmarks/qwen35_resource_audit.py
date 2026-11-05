@@ -60,6 +60,9 @@ def install():
         kv = getattr(self, "token_to_kv_pool", None)
         return dict(
             parameter_storage_bytes=tensor_bytes(params),
+            parameter_and_gdn_storage_bytes=tensor_bytes(params + packed),
+            gdn_extra_storage_bytes=tensor_bytes(params + packed)
+            - tensor_bytes(params),
             lora_pool_bytes=tensor_bytes(lora),
             gdn_packed_base_bytes=tensor_bytes(packed),
             nf4_scale_cache_bytes=tensor_bytes(scales),

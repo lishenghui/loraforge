@@ -129,6 +129,26 @@ def run(root):
                     correctness[key] = values
                 q.numerical_check(correctness, correctness)
                 q.dump(attempt / "correctness.json", correctness)
+                if arm.get("expect_gdn_shared_storage", False):
+                    captured = [
+                        stage["components"]
+                        for path in attempt.glob("resource-audit-*.json")
+                        for stage in q.read(path)["stages"]
+                        if stage["label"] == "graphs_captured"
+                    ]
+                    assert captured and all(
+                        row["gdn_packed_base_bytes"] == 303169536
+                        and row["gdn_extra_storage_bytes"] == 0
+                        for row in captured
+                    ), "shared GDN storage did not take effect before graph capture"
+                if arm.get("expect_nf4_byte_pairs", False):
+                    checked = [
+                        q.read(path) for path in attempt.glob("nf4-linear-audit-*.json")
+                    ]
+                    assert checked and all(
+                        row["byte_pairs"] and row["pair_exact_checks"] == 96
+                        for row in checked
+                    ), "NF4 byte-pair path did not verify all 96 selected projections"
                 measurements = []
 
                 def measure(concurrency, count):
@@ -174,7 +194,7 @@ def run(root):
                     root / "status.json",
                     dict(arm=name, state="profiling", attempt=str(attempt)),
                 )
-                for c in (1, 8, 32):
+                for c in study.get("profile_concurrencies", (1, 8, 32)):
                     target = attempt / f"profile-c{c}"
                     target.mkdir()
                     q.request(url, batched(m, mode, c, logprobs=False))
