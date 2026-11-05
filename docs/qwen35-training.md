@@ -5,6 +5,14 @@ to the complete Qwen3.5-0.8B text model. It measures real optimizer steps, not
 manual CUDA-graph replay. It is a standalone first-order training feasibility
 study with fixed text batches, not a convergence or Unsloth comparison.
 
+Full-model GPU validation remains pending. CPU checks pass (199 passed, three
+skipped, 49 GPU cases deselected), including actual PEFT parameter ownership,
+checkpointed updates and numerical-comparison failure gates. Job `23491457`
+was cancelled before starting, with zero allocated GPU time, after waiting for
+priority. Its replacement `23492718` requests a 10-minute main comparison;
+the optional complete-model compiler worker is deferred. No MLP-only timing
+is presented here as a measured full-model training result.
+
 ## Model and parameter contract
 
 The original local Hugging Face checkpoint is extracted without numerical
