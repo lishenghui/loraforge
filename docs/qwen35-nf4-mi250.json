@@ -1,5 +1,5 @@
 {
-  "status": "NF4 phase complete; BF16 paired phase pending",
+  "status": "complete checked-weight NF4/BF16 inference study; research numerical failures retained",
   "nf4_job": 23482836,
   "nf4_node": "nid005035",
   "nf4_completion": "four NF4 arms complete; allocation intentionally cancelled at12m42s before remaining BF16 phase; no interrupted result included",
@@ -735,7 +735,11 @@
   "nf4_checkpoint_sha256": "9420f022127da275458790ffd5d161c657ec49b2cf93c9dd56a068aab53e3dc4",
   "arms": {
     "nf4-native": {
-      "medians": {
+      "state": "complete",
+      "job": 23482836,
+      "node": "nid005035",
+      "attempt": "/pfs/lustrep2/scratch/project_465003417/lishengh/loraforge-qwen35-nf4-checked-20261105/nf4-native/results/native-23482836-1793855141355524856",
+      "median_tokens_per_second": {
         "1": 146.05372992701245,
         "8": 473.57341817564316,
         "32": 1562.8503209783694
@@ -814,14 +818,17 @@
           "repeat": 2
         }
       ],
-      "checked_projection_count": 114,
-      "all_weights_equal_checkpoint": true,
       "parameter_bytes": 959550144,
       "cuda_allocated": 1085923328,
+      "cuda_reserved": 1111490560,
+      "checked_projection_count": 114,
+      "all_weights_equal_checkpoint": true,
       "lora_buffer_count": 336,
       "lora_dtypes": [
         "torch.bfloat16"
       ],
+      "quantized_projection_count": 114,
+      "fixed_address_loads": true,
       "counts": {
         "EXTEND/eager": 166,
         "DECODE/graph": 5685,
@@ -834,11 +841,14 @@
         "scope_rejections": 166,
         "gdn_capture": 1,
         "gdn_replay": 40
-      },
-      "native_numerics": null
+      }
     },
     "nf4-conservative": {
-      "medians": {
+      "state": "complete",
+      "job": 23482836,
+      "node": "nid005035",
+      "attempt": "/pfs/lustrep2/scratch/project_465003417/lishengh/loraforge-qwen35-nf4-checked-20261105/nf4-conservative/results/fleet-23482836-1793855388952674846",
+      "median_tokens_per_second": {
         "1": 147.56937542084603,
         "8": 478.01041280996594,
         "32": 1563.2662623041085
@@ -917,14 +927,17 @@
           "repeat": 2
         }
       ],
-      "checked_projection_count": 114,
-      "all_weights_equal_checkpoint": true,
       "parameter_bytes": 959550144,
       "cuda_allocated": 1099351552,
+      "cuda_reserved": 1124073472,
+      "checked_projection_count": 114,
+      "all_weights_equal_checkpoint": true,
       "lora_buffer_count": 336,
       "lora_dtypes": [
         "torch.bfloat16"
       ],
+      "quantized_projection_count": 114,
+      "fixed_address_loads": true,
       "counts": {
         "EXTEND/eager": 166,
         "DECODE/graph": 5685,
@@ -944,10 +957,15 @@
         "same_tokens": true,
         "max_common_prefix_logprob_difference": 0.0,
         "numerical_pass": true
-      }
+      },
+      "native_control": "nf4-native"
     },
     "nf4-fast": {
-      "medians": {
+      "state": "complete",
+      "job": 23482836,
+      "node": "nid005035",
+      "attempt": "/pfs/lustrep2/scratch/project_465003417/lishengh/loraforge-qwen35-nf4-checked-20261105/nf4-fast/results/fleet-23482836-1793855578130489528",
+      "median_tokens_per_second": {
         "1": 188.98412320932817,
         "8": 528.3912721507326,
         "32": 1701.9754606501817
@@ -1026,14 +1044,17 @@
           "repeat": 2
         }
       ],
-      "checked_projection_count": 114,
-      "all_weights_equal_checkpoint": true,
       "parameter_bytes": 959550144,
       "cuda_allocated": 1099351552,
+      "cuda_reserved": 1124073472,
+      "checked_projection_count": 114,
+      "all_weights_equal_checkpoint": true,
       "lora_buffer_count": 336,
       "lora_dtypes": [
         "torch.bfloat16"
       ],
+      "quantized_projection_count": 114,
+      "fixed_address_loads": true,
       "counts": {
         "EXTEND/eager": 166,
         "DECODE/graph": 5684,
@@ -1053,10 +1074,15 @@
         "same_tokens": true,
         "max_common_prefix_logprob_difference": 0.0999453067779541,
         "numerical_pass": false
-      }
+      },
+      "native_control": "nf4-native"
     },
     "nf4-base": {
-      "medians": {
+      "state": "complete",
+      "job": 23482836,
+      "node": "nid005035",
+      "attempt": "/pfs/lustrep2/scratch/project_465003417/lishengh/loraforge-qwen35-nf4-checked-20261105/nf4-base/results/base-23482836-1793855716613225028",
+      "median_tokens_per_second": {
         "1": 221.71139397472166,
         "8": 578.1208328610846,
         "32": 1887.0130383911671
@@ -1135,12 +1161,233 @@
           "repeat": 2
         }
       ],
-      "checked_projection_count": 114,
-      "all_weights_equal_checkpoint": true,
       "parameter_bytes": 959550144,
       "cuda_allocated": 1045031936,
+      "cuda_reserved": 1069547520,
+      "checked_projection_count": 114,
+      "all_weights_equal_checkpoint": true,
       "lora_buffer_count": 0,
       "lora_dtypes": [],
+      "quantized_projection_count": 114,
+      "fixed_address_loads": true,
+      "counts": {
+        "EXTEND/eager": 166,
+        "DECODE/graph": 5688,
+        "EXTEND/graph": 40
+      },
+      "cold_graph": {
+        "buffers": 1,
+        "capture_prepares": 1,
+        "replay_prepares": 40,
+        "scope_rejections": 166,
+        "gdn_capture": 1,
+        "gdn_replay": 40
+      }
+    },
+    "bf16-native": {
+      "state": "complete",
+      "job": 23482975,
+      "node": "nid005035",
+      "attempt": "/pfs/lustrep2/scratch/project_465003417/lishengh/loraforge-qwen35-nf4-checked-bf16-20261105/bf16-native/results/native-23482975-1793855952840593944",
+      "median_tokens_per_second": {
+        "1": 122.00066895481339,
+        "8": 831.5291644096723,
+        "32": 2484.4217014164537
+      },
+      "samples": [
+        {
+          "concurrency": 1,
+          "seconds": 4.195920833008131,
+          "requests": 8,
+          "output_tokens": 512,
+          "tokens_per_second": 122.0232745985672,
+          "repeat": 0
+        },
+        {
+          "concurrency": 1,
+          "seconds": 4.1966982999874745,
+          "requests": 8,
+          "output_tokens": 512,
+          "tokens_per_second": 122.00066895481339,
+          "repeat": 1
+        },
+        {
+          "concurrency": 1,
+          "seconds": 4.19771449000109,
+          "requests": 8,
+          "output_tokens": 512,
+          "tokens_per_second": 121.97113482100282,
+          "repeat": 2
+        },
+        {
+          "concurrency": 8,
+          "seconds": 2.46293225500267,
+          "requests": 32,
+          "output_tokens": 2048,
+          "tokens_per_second": 831.5291644096723,
+          "repeat": 0
+        },
+        {
+          "concurrency": 8,
+          "seconds": 2.4647842929989565,
+          "requests": 32,
+          "output_tokens": 2048,
+          "tokens_per_second": 830.9043537064065,
+          "repeat": 1
+        },
+        {
+          "concurrency": 8,
+          "seconds": 2.4600664009922184,
+          "requests": 32,
+          "output_tokens": 2048,
+          "tokens_per_second": 832.4978541936837,
+          "repeat": 2
+        },
+        {
+          "concurrency": 32,
+          "seconds": 2.473010115994839,
+          "requests": 96,
+          "output_tokens": 6144,
+          "tokens_per_second": 2484.4217014164537,
+          "repeat": 0
+        },
+        {
+          "concurrency": 32,
+          "seconds": 2.4708792569872458,
+          "requests": 96,
+          "output_tokens": 6144,
+          "tokens_per_second": 2486.564239278696,
+          "repeat": 1
+        },
+        {
+          "concurrency": 32,
+          "seconds": 2.476173397997627,
+          "requests": 96,
+          "output_tokens": 6144,
+          "tokens_per_second": 2481.247882304359,
+          "repeat": 2
+        }
+      ],
+      "parameter_bytes": 1705972416,
+      "cuda_allocated": 1822622720,
+      "cuda_reserved": 1895825408,
+      "checked_projection_count": 114,
+      "all_weights_equal_checkpoint": true,
+      "lora_buffer_count": 336,
+      "lora_dtypes": [
+        "torch.bfloat16"
+      ],
+      "quantized_projection_count": 0,
+      "fixed_address_loads": true,
+      "counts": {
+        "EXTEND/eager": 166,
+        "DECODE/graph": 5685,
+        "EXTEND/graph": 40
+      },
+      "cold_graph": {
+        "buffers": 1,
+        "capture_prepares": 1,
+        "replay_prepares": 40,
+        "scope_rejections": 166,
+        "gdn_capture": 1,
+        "gdn_replay": 40
+      }
+    },
+    "bf16-conservative": {
+      "state": "complete",
+      "job": 23482975,
+      "node": "nid005035",
+      "attempt": "/pfs/lustrep2/scratch/project_465003417/lishengh/loraforge-qwen35-nf4-checked-bf16-20261105/bf16-conservative/results/fleet-23482975-1793856099340645635",
+      "median_tokens_per_second": {
+        "1": 124.40276014649437,
+        "8": 835.1861242234928,
+        "32": 2469.140001861799
+      },
+      "samples": [
+        {
+          "concurrency": 1,
+          "seconds": 4.115664309996646,
+          "requests": 8,
+          "output_tokens": 512,
+          "tokens_per_second": 124.40276014649437,
+          "repeat": 0
+        },
+        {
+          "concurrency": 1,
+          "seconds": 4.113529561989708,
+          "requests": 8,
+          "output_tokens": 512,
+          "tokens_per_second": 124.46731992181098,
+          "repeat": 1
+        },
+        {
+          "concurrency": 1,
+          "seconds": 4.116449880995788,
+          "requests": 8,
+          "output_tokens": 512,
+          "tokens_per_second": 124.37901949534847,
+          "repeat": 2
+        },
+        {
+          "concurrency": 8,
+          "seconds": 2.452148018986918,
+          "requests": 32,
+          "output_tokens": 2048,
+          "tokens_per_second": 835.1861242234928,
+          "repeat": 0
+        },
+        {
+          "concurrency": 8,
+          "seconds": 2.451447910978459,
+          "requests": 32,
+          "output_tokens": 2048,
+          "tokens_per_second": 835.42464468787,
+          "repeat": 1
+        },
+        {
+          "concurrency": 8,
+          "seconds": 2.4523350210220087,
+          "requests": 32,
+          "output_tokens": 2048,
+          "tokens_per_second": 835.1224373684871,
+          "repeat": 2
+        },
+        {
+          "concurrency": 32,
+          "seconds": 2.487998801021604,
+          "requests": 96,
+          "output_tokens": 6144,
+          "tokens_per_second": 2469.454566247056,
+          "repeat": 0
+        },
+        {
+          "concurrency": 32,
+          "seconds": 2.4905490730016027,
+          "requests": 96,
+          "output_tokens": 6144,
+          "tokens_per_second": 2466.9258946161895,
+          "repeat": 1
+        },
+        {
+          "concurrency": 32,
+          "seconds": 2.4883157679869328,
+          "requests": 96,
+          "output_tokens": 6144,
+          "tokens_per_second": 2469.140001861799,
+          "repeat": 2
+        }
+      ],
+      "parameter_bytes": 1705972416,
+      "cuda_allocated": 1836050944,
+      "cuda_reserved": 1908408320,
+      "checked_projection_count": 114,
+      "all_weights_equal_checkpoint": true,
+      "lora_buffer_count": 336,
+      "lora_dtypes": [
+        "torch.bfloat16"
+      ],
+      "quantized_projection_count": 0,
+      "fixed_address_loads": true,
       "counts": {
         "EXTEND/eager": 166,
         "DECODE/graph": 5688,
@@ -1154,7 +1401,423 @@
         "gdn_capture": 1,
         "gdn_replay": 40
       },
-      "native_numerics": null
+      "native_numerics": {
+        "cases": 96,
+        "same_token_cases": 96,
+        "same_tokens": true,
+        "max_common_prefix_logprob_difference": 0.08147269487380981,
+        "numerical_pass": false
+      },
+      "native_control": "bf16-native"
+    },
+    "bf16-base": {
+      "state": "complete",
+      "job": 23482975,
+      "node": "nid005035",
+      "attempt": "/pfs/lustrep2/scratch/project_465003417/lishengh/loraforge-qwen35-nf4-checked-bf16-20261105/bf16-base/results/base-23482975-1793856312917689404",
+      "median_tokens_per_second": {
+        "1": 185.25101093766753,
+        "8": 1224.3433771246919,
+        "32": 3457.0073201104824
+      },
+      "samples": [
+        {
+          "concurrency": 1,
+          "seconds": 2.7632497669837903,
+          "requests": 8,
+          "output_tokens": 512,
+          "tokens_per_second": 185.28907741802533,
+          "repeat": 0
+        },
+        {
+          "concurrency": 1,
+          "seconds": 2.7638175759930164,
+          "requests": 8,
+          "output_tokens": 512,
+          "tokens_per_second": 185.25101093766753,
+          "repeat": 1
+        },
+        {
+          "concurrency": 1,
+          "seconds": 2.7640382639947347,
+          "requests": 8,
+          "output_tokens": 512,
+          "tokens_per_second": 185.2362200152868,
+          "repeat": 2
+        },
+        {
+          "concurrency": 8,
+          "seconds": 1.6718268440163229,
+          "requests": 32,
+          "output_tokens": 2048,
+          "tokens_per_second": 1225.0072472098698,
+          "repeat": 0
+        },
+        {
+          "concurrency": 8,
+          "seconds": 1.6727333510061726,
+          "requests": 32,
+          "output_tokens": 2048,
+          "tokens_per_second": 1224.3433771246919,
+          "repeat": 1
+        },
+        {
+          "concurrency": 8,
+          "seconds": 1.6746702649979852,
+          "requests": 32,
+          "output_tokens": 2048,
+          "tokens_per_second": 1222.9273086200428,
+          "repeat": 2
+        },
+        {
+          "concurrency": 32,
+          "seconds": 1.7772597599832807,
+          "requests": 96,
+          "output_tokens": 6144,
+          "tokens_per_second": 3457.0073201104824,
+          "repeat": 0
+        },
+        {
+          "concurrency": 32,
+          "seconds": 1.8936768030107487,
+          "requests": 96,
+          "output_tokens": 6144,
+          "tokens_per_second": 3244.4818409517825,
+          "repeat": 1
+        },
+        {
+          "concurrency": 32,
+          "seconds": 1.776208893978037,
+          "requests": 96,
+          "output_tokens": 6144,
+          "tokens_per_second": 3459.052604021006,
+          "repeat": 2
+        }
+      ],
+      "parameter_bytes": 1705972416,
+      "cuda_allocated": 1781731328,
+      "cuda_reserved": 1853882368,
+      "checked_projection_count": 114,
+      "all_weights_equal_checkpoint": true,
+      "lora_buffer_count": 0,
+      "lora_dtypes": [],
+      "quantized_projection_count": 0,
+      "fixed_address_loads": true,
+      "counts": {
+        "EXTEND/eager": 166,
+        "DECODE/graph": 5688,
+        "EXTEND/graph": 40
+      },
+      "cold_graph": {
+        "buffers": 1,
+        "capture_prepares": 1,
+        "replay_prepares": 40,
+        "scope_rejections": 166,
+        "gdn_capture": 1,
+        "gdn_replay": 40
+      }
+    },
+    "bf16-retest-native": {
+      "state": "complete",
+      "job": 23483167,
+      "node": "nid005032",
+      "attempt": "/pfs/lustrep2/scratch/project_465003417/lishengh/loraforge-qwen35-nf4-bf16-fast-20261105/bf16-native/results/native-23483167-1793856604280509294",
+      "median_tokens_per_second": {
+        "1": 122.16430060146891,
+        "8": 846.2205366215026,
+        "32": 2533.4597344461927
+      },
+      "samples": [
+        {
+          "concurrency": 1,
+          "seconds": 4.183967676013708,
+          "requests": 8,
+          "output_tokens": 512,
+          "tokens_per_second": 122.37188230091921,
+          "repeat": 0
+        },
+        {
+          "concurrency": 1,
+          "seconds": 4.191077077994123,
+          "requests": 8,
+          "output_tokens": 512,
+          "tokens_per_second": 122.16430060146891,
+          "repeat": 1
+        },
+        {
+          "concurrency": 1,
+          "seconds": 4.206854597985512,
+          "requests": 8,
+          "output_tokens": 512,
+          "tokens_per_second": 121.7061317605737,
+          "repeat": 2
+        },
+        {
+          "concurrency": 8,
+          "seconds": 2.4201728879997972,
+          "requests": 32,
+          "output_tokens": 2048,
+          "tokens_per_second": 846.2205366215026,
+          "repeat": 0
+        },
+        {
+          "concurrency": 8,
+          "seconds": 2.4213550229906105,
+          "requests": 32,
+          "output_tokens": 2048,
+          "tokens_per_second": 845.8074014567759,
+          "repeat": 1
+        },
+        {
+          "concurrency": 8,
+          "seconds": 2.4165327709924895,
+          "requests": 32,
+          "output_tokens": 2048,
+          "tokens_per_second": 847.4952314256718,
+          "repeat": 2
+        },
+        {
+          "concurrency": 32,
+          "seconds": 2.4260645959875546,
+          "requests": 96,
+          "output_tokens": 6144,
+          "tokens_per_second": 2532.496459559034,
+          "repeat": 0
+        },
+        {
+          "concurrency": 32,
+          "seconds": 2.425142154999776,
+          "requests": 96,
+          "output_tokens": 6144,
+          "tokens_per_second": 2533.4597344461927,
+          "repeat": 1
+        },
+        {
+          "concurrency": 32,
+          "seconds": 2.42381351601216,
+          "requests": 96,
+          "output_tokens": 6144,
+          "tokens_per_second": 2534.848477166911,
+          "repeat": 2
+        }
+      ],
+      "parameter_bytes": 1705972416,
+      "cuda_allocated": 1822622720,
+      "cuda_reserved": 1895825408,
+      "checked_projection_count": 114,
+      "all_weights_equal_checkpoint": true,
+      "lora_buffer_count": 336,
+      "lora_dtypes": [
+        "torch.bfloat16"
+      ],
+      "quantized_projection_count": 0,
+      "fixed_address_loads": true,
+      "counts": {
+        "EXTEND/eager": 166,
+        "DECODE/graph": 5685,
+        "EXTEND/graph": 40
+      },
+      "cold_graph": {
+        "buffers": 1,
+        "capture_prepares": 1,
+        "replay_prepares": 40,
+        "scope_rejections": 166,
+        "gdn_capture": 1,
+        "gdn_replay": 40
+      }
+    },
+    "bf16-retest-fast": {
+      "state": "complete",
+      "job": 23483167,
+      "node": "nid005032",
+      "attempt": "/pfs/lustrep2/scratch/project_465003417/lishengh/loraforge-qwen35-nf4-bf16-fast-20261105/bf16-fast/results/fleet-23483167-1793856812989039836",
+      "median_tokens_per_second": {
+        "1": 165.82602147502755,
+        "8": 1060.1710006038309,
+        "32": 2924.7524572260627
+      },
+      "samples": [
+        {
+          "concurrency": 1,
+          "seconds": 3.0859331889951136,
+          "requests": 8,
+          "output_tokens": 512,
+          "tokens_per_second": 165.91415583003106,
+          "repeat": 0
+        },
+        {
+          "concurrency": 1,
+          "seconds": 3.0883932299911976,
+          "requests": 8,
+          "output_tokens": 512,
+          "tokens_per_second": 165.78199791011045,
+          "repeat": 1
+        },
+        {
+          "concurrency": 1,
+          "seconds": 3.0875733220018446,
+          "requests": 8,
+          "output_tokens": 512,
+          "tokens_per_second": 165.82602147502755,
+          "repeat": 2
+        },
+        {
+          "concurrency": 8,
+          "seconds": 1.9317638369975612,
+          "requests": 32,
+          "output_tokens": 2048,
+          "tokens_per_second": 1060.1710006038309,
+          "repeat": 0
+        },
+        {
+          "concurrency": 8,
+          "seconds": 1.9316707449906971,
+          "requests": 32,
+          "output_tokens": 2048,
+          "tokens_per_second": 1060.222092875286,
+          "repeat": 1
+        },
+        {
+          "concurrency": 8,
+          "seconds": 1.9320781340065878,
+          "requests": 32,
+          "output_tokens": 2048,
+          "tokens_per_second": 1059.9985393722266,
+          "repeat": 2
+        },
+        {
+          "concurrency": 32,
+          "seconds": 2.1010710389818996,
+          "requests": 96,
+          "output_tokens": 6144,
+          "tokens_per_second": 2924.222877764834,
+          "repeat": 0
+        },
+        {
+          "concurrency": 32,
+          "seconds": 2.100690601975657,
+          "requests": 96,
+          "output_tokens": 6144,
+          "tokens_per_second": 2924.7524572260627,
+          "repeat": 1
+        },
+        {
+          "concurrency": 32,
+          "seconds": 2.099777069990523,
+          "requests": 96,
+          "output_tokens": 6144,
+          "tokens_per_second": 2926.024904171246,
+          "repeat": 2
+        }
+      ],
+      "parameter_bytes": 1705972416,
+      "cuda_allocated": 1836050944,
+      "cuda_reserved": 1908408320,
+      "checked_projection_count": 114,
+      "all_weights_equal_checkpoint": true,
+      "lora_buffer_count": 336,
+      "lora_dtypes": [
+        "torch.bfloat16"
+      ],
+      "quantized_projection_count": 0,
+      "fixed_address_loads": true,
+      "counts": {
+        "EXTEND/eager": 166,
+        "DECODE/graph": 5688,
+        "EXTEND/graph": 40
+      },
+      "cold_graph": {
+        "buffers": 1,
+        "capture_prepares": 1,
+        "replay_prepares": 40,
+        "scope_rejections": 166,
+        "gdn_capture": 1,
+        "gdn_replay": 40
+      },
+      "native_numerics": {
+        "cases": 96,
+        "same_token_cases": 96,
+        "same_tokens": true,
+        "max_common_prefix_logprob_difference": 0.12019228935241699,
+        "numerical_pass": false
+      },
+      "native_control": "bf16-retest-native",
+      "gdn_cache_checks": [
+        [
+          {
+            "name": "model.layers.0.linear_attn",
+            "exact": true
+          },
+          {
+            "name": "model.layers.1.linear_attn",
+            "exact": true
+          },
+          {
+            "name": "model.layers.2.linear_attn",
+            "exact": true
+          },
+          {
+            "name": "model.layers.4.linear_attn",
+            "exact": true
+          },
+          {
+            "name": "model.layers.5.linear_attn",
+            "exact": true
+          },
+          {
+            "name": "model.layers.6.linear_attn",
+            "exact": true
+          },
+          {
+            "name": "model.layers.8.linear_attn",
+            "exact": true
+          },
+          {
+            "name": "model.layers.9.linear_attn",
+            "exact": true
+          },
+          {
+            "name": "model.layers.10.linear_attn",
+            "exact": true
+          },
+          {
+            "name": "model.layers.12.linear_attn",
+            "exact": true
+          },
+          {
+            "name": "model.layers.13.linear_attn",
+            "exact": true
+          },
+          {
+            "name": "model.layers.14.linear_attn",
+            "exact": true
+          },
+          {
+            "name": "model.layers.16.linear_attn",
+            "exact": true
+          },
+          {
+            "name": "model.layers.17.linear_attn",
+            "exact": true
+          },
+          {
+            "name": "model.layers.18.linear_attn",
+            "exact": true
+          },
+          {
+            "name": "model.layers.20.linear_attn",
+            "exact": true
+          },
+          {
+            "name": "model.layers.21.linear_attn",
+            "exact": true
+          },
+          {
+            "name": "model.layers.22.linear_attn",
+            "exact": true
+          }
+        ]
+      ]
     }
   },
   "invalid_full_model_jobs": [
@@ -1175,5 +1838,75 @@
     "a1": "462b724d4543ae42710860e6418519db424523cc2c292f966b79f6240186fcfc",
     "a2": "89198ebdfbe3706ff801949ee3013db83d7ea899084a50cf0cba702fa9a4b373",
     "a3": "eb54220c3032d4b65e2a77cc72dce70f9c014e0266207f91775bb47ee865acf3"
+  },
+  "bf16_fast_retest_job": 23483167,
+  "bf16_fast_retest_node": "nid005032",
+  "performance": [
+    {
+      "concurrency": 1,
+      "nf4_native_tokens_per_second": 146.05372992701245,
+      "nf4_conservative_tokens_per_second": 147.56937542084603,
+      "nf4_conservative_over_native": 1.0103773145306936,
+      "nf4_fast_tokens_per_second": 188.98412320932817,
+      "nf4_fast_over_native": 1.2939356174181198,
+      "nf4_base_tokens_per_second": 221.71139397472166,
+      "bf16_native_tokens_per_second": 122.00066895481339,
+      "bf16_conservative_tokens_per_second": 124.40276014649437,
+      "bf16_conservative_over_native": 1.019689164102622,
+      "bf16_base_tokens_per_second": 185.25101093766753,
+      "bf16_retest_native_tokens_per_second": 122.16430060146891,
+      "bf16_retest_fast_tokens_per_second": 165.82602147502755,
+      "bf16_retest_fast_over_native": 1.3574016358182601,
+      "nf4_fast_over_bf16_fast": 1.139653002154358
+    },
+    {
+      "concurrency": 8,
+      "nf4_native_tokens_per_second": 473.57341817564316,
+      "nf4_conservative_tokens_per_second": 478.01041280996594,
+      "nf4_conservative_over_native": 1.0093691800764821,
+      "nf4_fast_tokens_per_second": 528.3912721507326,
+      "nf4_fast_over_native": 1.1157536548108324,
+      "nf4_base_tokens_per_second": 578.1208328610846,
+      "bf16_native_tokens_per_second": 831.5291644096723,
+      "bf16_conservative_tokens_per_second": 835.1861242234928,
+      "bf16_conservative_over_native": 1.0043978731839391,
+      "bf16_base_tokens_per_second": 1224.3433771246919,
+      "bf16_retest_native_tokens_per_second": 846.2205366215026,
+      "bf16_retest_fast_tokens_per_second": 1060.1710006038309,
+      "bf16_retest_fast_over_native": 1.2528306212426796,
+      "nf4_fast_over_bf16_fast": 0.4984019293583602
+    },
+    {
+      "concurrency": 32,
+      "nf4_native_tokens_per_second": 1562.8503209783694,
+      "nf4_conservative_tokens_per_second": 1563.2662623041085,
+      "nf4_conservative_over_native": 1.0002661427778181,
+      "nf4_fast_tokens_per_second": 1701.9754606501817,
+      "nf4_fast_over_native": 1.0890201305936436,
+      "nf4_base_tokens_per_second": 1887.0130383911671,
+      "bf16_native_tokens_per_second": 2484.4217014164537,
+      "bf16_conservative_tokens_per_second": 2469.140001861799,
+      "bf16_conservative_over_native": 0.9938489912779533,
+      "bf16_base_tokens_per_second": 3457.0073201104824,
+      "bf16_retest_native_tokens_per_second": 2533.4597344461927,
+      "bf16_retest_fast_tokens_per_second": 2924.7524572260627,
+      "bf16_retest_fast_over_native": 1.1544499474215664,
+      "nf4_fast_over_bf16_fast": 0.5819212003549848
+    }
+  ],
+  "allocation_note": "Each policy/native ratio uses its own same-allocation native control. Absolute NF4/BF16 values cross allocations/nodes. All jobs use small-g, one MI250 GCD, 7CPU,40GB,20min cap.",
+  "limitations": [
+    "Synthetic adapters; no trained quality or training performance claim.",
+    "Research policy numerical failures are retained; timing is a fixed-work diagnostic.",
+    "Three short repeats, no across-allocation confidence interval; NF4 fast C1 has a retained slow sample.",
+    "BF16-only packed GDN base projection is not enabled for NF4.",
+    "Previous original/unfused BF16 native execution is not numerically reproduced by the packed control; cause remains unresolved."
+  ],
+  "bf16_packed_vs_original_model": {
+    "cases": 96,
+    "same_token_cases": 91,
+    "same_tokens": false,
+    "max_common_prefix_logprob_difference": 0.09143048524856567,
+    "numerical_pass": false
   }
 }

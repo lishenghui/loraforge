@@ -85,9 +85,9 @@ this only for a packed/NF4 fixture with a generated receipt, and propagates it
 to spawned workers. Validation rejects missing/null and nonfinite logprobs
 before any throughput measurements.
 
-The matched study measures native BF16 LoRA, the preceding research fast policy,
-and no-adapter base under each base precision on one allocation. Native/Fleet
-comparisons stay within identical base weights; NF4/BF16 outputs are allowed to
+The matched study measures native BF16 LoRA, conservative Fleet, the preceding
+research fast policy and no-adapter base under each base precision. Each
+policy/native pair runs within one allocation and identical base weights; NF4/BF16 outputs are allowed to
 differ because the base itself was quantized. Any research-policy native token
 or logprob mismatch remains a failed numerical result, even when forced-length
 diagnostic throughput is measured. It is never an equal-quality speed claim.
@@ -148,8 +148,68 @@ maximum logprob difference, failing the strict 0.05 gate. Its fixed-work ratios
 are 1.2939x/1.1158x/1.0890x; strict numerical success is not inferred from timing.
 The three C1 fast repeats are 138.07, 188.98, 189.16 tokens/s; the reported result is their median. These short three-repeat samples are exploratory.
 
-The NF4 phase is saved before intentionally cancelling the unused remainder
-of its allocation at 12m42s. BF16 comparisons run in a separate single-card
-allocation, job 23482975. Each precision's policy/native comparison is paired
-within that allocation. The four BF16 controls and final cross-precision table
-are pending. See [the receipts and raw sample summary](qwen35-nf4-mi250.json).
+The NF4 phase was saved before intentionally cancelling the unused remainder
+of its allocation at 12m42s. BF16 native, conservative and base completed in job
+23482975 on nid005035. Its fast candidate was stopped before timing by a cache
+audit placed before lazy cache creation. Job 23483167 on nid005032 retests BF16
+native and fast together, checking all 18 GDN packed caches after the first
+forward, before timing. Every cache is exactly equal to current base weights.
+
+## BF16 controls and precision comparison
+
+All values below are median complete-service output tokens/s, with the same
+128/64 input/output lengths, adapters and graph configuration. The fast BF16
+column uses the new same-allocation native control; the other BF16 columns use
+job 23482975. Do not mix those two native controls when computing policy ratios.
+
+| Concurrency | BF16 base | BF16 native | BF16 conservative | BF16 fast control | BF16 fast | NF4 fast |
+| --- | ---: | ---: | ---: | ---: | ---: | ---: |
+| 1 | 185.25 | 122.00 | 124.40 | 122.16 | 165.83 | 188.98 |
+| 8 | 1224.34 | 831.53 | 835.19 | 846.22 | 1060.17 | 528.39 |
+| 32 | 3457.01 | 2484.42 | 2469.14 | 2533.46 | 2924.75 | 1701.98 |
+
+| Concurrency | BF16 fast/native | NF4 fast/native | NF4 fast/BF16 fast |
+| --- | ---: | ---: | ---: |
+| 1 | 1.3574x | 1.2939x | 1.1397x |
+| 8 | 1.2528x | 1.1158x | 0.4984x |
+| 32 | 1.1544x | 1.0890x | 0.5819x |
+
+Quantization does **not** increase the tested LoRAForge/native relative benefit.
+Single-request absolute throughput improves, but NF4 is substantially slower
+at C8/C32 on this installed ROCm backend. Absolute precision comparisons cross
+allocations/nodes and are exploratory; policy/native ratios are paired within
+one allocation. Short three-repeat medians are not confidence intervals.
+
+Numerical results against each precision's own native control:
+
+| Policy | Identical token sequences | Maximum saved logprob difference | Strict 0.05 gate |
+| --- | ---: | ---: | --- |
+| bf16-conservative | 96/96 | 0.081472695 | FAIL |
+| bf16-retest-fast | 96/96 | 0.120192289 | FAIL |
+| nf4-conservative | 96/96 | 0.000000000 | pass |
+| nf4-fast | 96/96 | 0.099945307 | FAIL |
+
+All these comparisons use the exact checked checkpoint within precision. The
+conservative NF4 path passes strictly and provides approximately native
+throughput. Research fast rates remain fixed-work diagnostics wherever their
+numerical gate fails; they do not establish equal-quality acceleration.
+
+An additional control against the earlier original/unfused BF16 native run
+(job 23481601) matches **91/96** token sequences, with maximum common-prefix
+logprob difference **0.0914304852**, failing the strict gate. The packed source
+rows and all 114 loaded projection tensors are exact, but this older execution
+has not been reproduced numerically; the cause is not localized. Do not use
+this study as proof of equivalence to that older checkpoint execution, or
+ascribe the difference to harmless rounding. Comparisons in this report use
+the newly checked, precision-local native controls.
+
+The direct operator screen points to a fused batched NF4 GEMM as the next
+quantized-backend target. Merely reducing LoRA rank or weight storage cannot
+remove the current batch>4 dequantization fallback. No speed for a replacement
+quantized kernel is claimed here. This is NF4-base/BF16-LoRA **inference**, not
+Unsloth training, a trained QLoRA evaluation, or general performance across
+quantization formats and devices.
+
+All samples, numerical flags, memory receipts and actual graph/weight audits
+are retained in [the evidence summary](qwen35-nf4-mi250.json). The experiment
+remains an explicit benchmark path with pinned compatibility scope.
