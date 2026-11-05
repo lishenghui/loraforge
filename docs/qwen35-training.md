@@ -115,6 +115,12 @@ PYTHONPATH=/absolute/path/to/deps:/absolute/path/to/benchmarks:$PYTHONPATH \
   python benchmarks/run_qwen35_training.py BF16_TEXT --output RESULTS
 ```
 
+When a shorter allocation is needed, `--skip-whole-compile --max-seconds 520`
+keeps all six required workers, token lengths and checkpoint settings, and
+omits the separate optional whole-model compilation worker. Its measurement
+still includes the compiled-MLP baseline; it does not establish a comparison
+against compiling the complete model. That comparison needs a separate run.
+
 CPU comparison after collection:
 
 ```bash

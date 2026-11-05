@@ -17,6 +17,7 @@ def main() -> None:
     parser.add_argument("--output", type=Path, required=True)
     parser.add_argument("--tokens", type=int, nargs="+", default=[128, 1024, 4096])
     parser.add_argument("--max-seconds", type=int, default=1100)
+    parser.add_argument("--skip-whole-compile", action="store_true")
     args = parser.parse_args()
     args.output.mkdir(exist_ok=False)
     deadline = time.monotonic() + args.max_seconds
@@ -30,6 +31,10 @@ def main() -> None:
         ("compiled-model", "compiled-model"),
         ("peft-after", "peft"),
     ]
+    if args.skip_whole_compile:
+        modes = [
+            (name, backend) for name, backend in modes if backend != "compiled-model"
+        ]
     for name, backend in modes:
         remaining = deadline - time.monotonic()
         if remaining < 30:
