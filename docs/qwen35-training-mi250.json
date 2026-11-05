@@ -5100,6 +5100,12 @@
   "native_equivalence": "FAILED predeclared gradient and updated-parameter gates; timings are experimental",
   "compiler_study": {
     "job_id": 23493295,
-    "state": "submitted_separately"
+    "state": "COMPLETED",
+    "receipt": "qwen35-training-compile-mi250.json"
+  },
+  "precision_study": {
+    "job_id": 23494172,
+    "state": "COMPLETED",
+    "receipt": "qwen35-training-precision-mi250.json"
   }
 }

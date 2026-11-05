@@ -34,7 +34,7 @@ Median synchronized wall-clock milliseconds, same GCD within the job:
 
 These are complete training steps, including GDN, attention, the LM head, loss,
 backward and AdamW. They are not the earlier MLP-only ratios. The two native
-controls differ by at most 1.31% in median step time and have **bitwise identical
+controls differ by at most 1.31% in median step time and have **exactly equal
 losses, all saved gradients and updated parameters** in every case.
 Relative to the packed reference, consumer fusion improves time by only
 0.2–3.1%; compared with compiling the MLP the differences are within about 0.7%
@@ -131,6 +131,50 @@ current process and do not silently change the default benchmark policy.
 errors, control measurements and the fallback warning. Earlier worker payloads
 are retained with their hashes; later compiler-setting options must not be
 attributed retroactively to the default runs.
+
+## Precision-preserving compiler configuration
+
+The single targeted follow-up, job `23494172`, completed all three workers in
+3m33s on `nid005067`. Worker receipts confirm
+`emulate_precision_casts=True`, `recompile_limit=64`, and float32 matmul
+precision `highest`. No recompile-limit fallback warning appears in this run.
+Graph breaks remain permitted by `fullgraph=False`; this is not a single static
+graph claim. Checkpointing is off, batch one, and rank remains four.
+
+| Tokens | PEFT before / after ms | Compiled ms | Speed range | PEFT / compiled peak GiB |
+| --- | ---: | ---: | ---: | ---: |
+| 128 | 208.84 / 213.72 | 176.22 | 1.185–1.213x | 2.191 / 1.958 |
+| 1024 | 212.03 / 219.70 | 172.07 | 1.232–1.277x | 6.455 / 4.614 |
+| 4096 | 462.28 / 462.64 | 405.98 | 1.139–1.140x | 20.862 / 13.652 |
+
+The native controls drift 2.34%/3.62%/0.08% in step time, while their saved
+loss/gradient/update tensors are exactly equal. The ranges above preserve that
+timing uncertainty. Both compiler options changed together, so this experiment
+does not isolate the performance contribution of either option.
+
+Loss drift improves substantially, but **all three native gradient/update gates
+still fail**:
+
+| Tokens | Max loss drift | All-gradient relative L2 | Worst parameter gradient relative L2 | Max updated parameter error |
+| --- | ---: | ---: | ---: | ---: |
+| 128 | 0.001741 | 0.02718 | 0.19430 | 5.900e-4 |
+| 1024 | 0.000733 | 0.02606 | 0.59052 | 5.932e-4 |
+| 4096 | 0.0000654 | 0.02574 | 0.51283 | 5.861e-4 |
+
+Preserving downcast/upcast boundaries is not a complete fix for a deep model's
+numerical execution differences. Other reduction/gradient accumulation and
+elementwise fusion changes still need isolation; this run does not establish
+their individual causes. No additional blind retry or relaxed acceptance
+threshold is used. [The precision receipt](qwen35-training-precision-mi250.json)
+records settings, samples, drift, failed-tensor counts and original payload
+hashes.
+
+The three completed GPU jobs execute 54 worker/shape/checkpoint cases and 540
+real optimizer steps. They establish experimental timing and memory savings,
+not a native-equivalent training backend or a trained-quality result. The
+consumer implementation's matched-reference success remains distinct from
+the original PEFT failures. GPU work for this study is finished; no new jobs or
+recurring follow-up are required for the recorded experiment.
 
 ## Model and parameter contract
 
