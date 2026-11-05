@@ -372,3 +372,17 @@ the original method. Versioned tensor/state changes invalidate eager scale
 reuse; captured graphs require immutable base weights. The experiment changes
 neither installed dependencies nor BF16 LoRA factors. See the NF4 guide for the
 explicit opt-in, exact-output checks, rejected kernels and same-card results.
+
+### NF4 rank-32 to rank-4 fixture comparison
+
+`benchmarks/compress_qwen35_fixture.py` applies the maintained
+`loraforge.compression.truncate_lora` API to deterministic rank-32 synthetic
+adapter files, then exports physical BF16 rank-4 factors with unchanged unit
+scaling. It uses the actual reported FlashTSQR/Jacobi backend; no QR or SVD
+implementation is substituted. For the 16-output GDN b/a branches, temporary
+zero output rows satisfy the rank-32 API dimension contract and are removed
+before export. Small-Gram norm identities check the BF16 export against the
+reported discarded spectrum without materializing dense weight updates.
+The source and destination files, dimensions, scaling and hashes are recorded.
+The comparison is an inference throughput experiment, not trained compression
+quality; random spectra and changed outputs remain explicit in its results.

@@ -273,3 +273,12 @@ reduction. The earlier original/unfused BF16 control limitation remains in the
 preceding section. CPU validation now passes 169 tests; Ruff, wheel and sdist
 builds pass. [All samples, rejected operator candidates, source hashes and graph,
 weight and scale audits](qwen35-nf4-optimization-mi250.json) are retained.
+
+
+## Actual compression comparison
+
+The same-card [rank32-to-physical-rank4 study](qwen35-nf4-rank-comparison.md)
+uses actual FlashTSQR compression of four synthetic rank32 source adapters.
+It separately records same-backend compression/execution ratios and ratios
+that additionally include NF4 backend optimization. The earlier tables above
+compare identical rank4 factors and must not be relabeled as compression gains.

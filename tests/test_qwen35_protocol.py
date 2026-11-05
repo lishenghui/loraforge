@@ -73,7 +73,7 @@ def test_model_gate_requires_matching_large_batch_validation():
     assert not protocol.numerical_check(native, candidate)["numerical_pass"]
 
 
-@pytest.mark.parametrize("rank", [4, 8, 64])
+@pytest.mark.parametrize("rank", [4, 8, 32, 64])
 def test_native_and_fleet_use_the_prepared_pool_capacity(rank):
     manifest = dict(
         model="local-model",
@@ -88,7 +88,7 @@ def test_native_and_fleet_use_the_prepared_pool_capacity(rank):
     assert "max_lora_rank" not in protocol.server_options(manifest, "base", 12345)
 
 
-@pytest.mark.parametrize("rank", [4, 8])
+@pytest.mark.parametrize("rank", [4, 8, 32])
 def test_fixed_rank_fixture_has_compact_weights_and_unit_scaling(
     tmp_path, monkeypatch, rank
 ):
@@ -144,7 +144,7 @@ def test_fixed_rank_fixture_has_compact_weights_and_unit_scaling(
 
 
 def test_prepare_rejects_invalid_fixed_rank_before_writing(tmp_path):
-    with pytest.raises(ValueError, match="rank must be 4 or 8"):
+    with pytest.raises(ValueError, match="rank must be 4, 8 or 32"):
         protocol.prepare(tmp_path / "fixture", tmp_path / "model", rank=0)
     assert not (tmp_path / "fixture").exists()
 

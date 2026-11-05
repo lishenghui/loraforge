@@ -33,8 +33,8 @@ def read(path):
 
 
 def prepare(root, model, rank=None):
-    if rank not in (None, 4, 8):
-        raise ValueError("fixed synthetic rank must be 4 or 8")
+    if rank not in (None, 4, 8, 32):
+        raise ValueError("fixed synthetic rank must be 4, 8 or 32")
     import torch
     from safetensors.torch import save_file
     from transformers import AutoTokenizer
@@ -85,7 +85,7 @@ def prepare(root, model, rank=None):
                     if rank is not None
                     else [8, 16, 32, 64][(layer + pos + index) % 4]
                 )
-                if name.endswith(("in_proj_a", "in_proj_b")):
+                if rank != 32 and name.endswith(("in_proj_a", "in_proj_b")):
                     k = min(k, 8)
                 prefix = f"base_model.model.model.language_model.layers.{layer}.{name}"
                 a = torch.zeros(physical_rank, nin, dtype=torch.bfloat16)
@@ -328,14 +328,14 @@ def server_options(m, mode, port):
             ],
         )
     if os.environ.get("LORAFORGE_BENCH_QWEN35_NF4") == "1":
-        assert m["max_lora_rank"] == 4, "NF4 pilot requires compact rank4"
+        assert m["max_lora_rank"] in (4, 32), "NF4 pilot requires compact rank4/32"
         options.update(
             quantization="bitsandbytes",
             load_format="bitsandbytes",
             enable_multimodal=False,
         )
     if os.environ.get("LORAFORGE_BENCH_QWEN35_COLD_PREFILL") == "1":
-        assert m["max_lora_rank"] == 4, "cold-prefill pilot is scoped to cap4"
+        assert m["max_lora_rank"] in (4, 32), "cold-prefill pilot requires cap4/32"
         options["disable_prefill_cuda_graph"] = False
         options["cuda_graph_config"]["prefill"] = dict(
             backend="full", bs=[1024], full_prefill_max_req=8, max_seq_len=2048
@@ -688,7 +688,7 @@ if __name__ == "__main__":
     parser.add_argument(
         "--rank",
         type=int,
-        choices=[4, 8],
+        choices=[4, 8, 32],
         help="Prepare compact fixed-rank synthetic adapters (default: mixed rank-64 fixture)",
     )
     parser.add_argument("--mode", choices=["native", "fleet", "base"])
@@ -707,7 +707,7 @@ if __name__ == "__main__":
     parser.add_argument(
         "--cold-prefill-graph",
         action="store_true",
-        help="Experimental SGLang0.5.22 cold8x128 graph; requires compact rank4 fixture",
+        help="Experimental SGLang0.5.22 cold8x128 graph; requires compact rank4/32 fixture",
     )
     parser.add_argument(
         "--extended-validation",

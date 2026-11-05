@@ -87,10 +87,13 @@ def test_nonquantized_adapter_loader_keeps_identity(kind):
     assert compat.adapter_load_config(original) is original
 
 
-def test_nf4_cli_configuration_preserves_bf16_lora_and_shared_options(monkeypatch):
+@pytest.mark.parametrize("rank", [4, 32])
+def test_nf4_cli_configuration_preserves_bf16_lora_and_shared_options(
+    monkeypatch, rank
+):
     manifest = dict(
         model="fused-nf4",
-        max_lora_rank=4,
+        max_lora_rank=rank,
         target_modules=["qkv_proj"],
         adapters=[dict(name="a0", path="local-bf16-adapter")],
     )
