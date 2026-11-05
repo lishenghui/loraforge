@@ -354,3 +354,21 @@ against their checkpoint values. This avoids upstream substring matching of
 those parameters in rejected attempts. Other weights retain upstream loading.
 Numerical validation rejects null/nonfinite logprobs before any timing.
 See `docs/qwen35-nf4.md` for scope, rejected evidence and measured results.
+
+### NF4 scale reuse and projection screening
+
+`benchmarks/qwen35_nf4_ops.py` and `check_qwen35_nf4_ops.py` are new LoRAForge
+benchmark implementations. They interpret bitsandbytes 0.50.2's canonical NF4
+nibble order, codebook and block-64 scale format; no upstream GPU kernel is
+copied. The block-scale reconstruction calls the installed bitsandbytes API.
+The Triton MFMA candidate follows the documented `tl.dot` operation contract;
+it is screened separately and is not the selected serving path.
+
+`qwen35_nf4_linear.py` is a process-local SGLang 0.5.22 benchmark adapter for the
+prepared 114-projection fixture. It retains NF4 parameter bytes, caches only
+FP32 block scales, and uses temporary BF16 dequantization followed by the native
+linear operation at larger batches. Small batches and unsupported layouts use
+the original method. Versioned tensor/state changes invalidate eager scale
+reuse; captured graphs require immutable base weights. The experiment changes
+neither installed dependencies nor BF16 LoRA factors. See the NF4 guide for the
+explicit opt-in, exact-output checks, rejected kernels and same-card results.

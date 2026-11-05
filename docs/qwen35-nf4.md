@@ -213,3 +213,63 @@ quantization formats and devices.
 All samples, numerical flags, memory receipts and actual graph/weight audits
 are retained in [the evidence summary](qwen35-nf4-mi250.json). The experiment
 remains an explicit benchmark path with pinned compatibility scope.
+
+
+## Large-batch NF4 optimization
+
+`--nf4-experiment --nf4-cached-scales` explicitly enables a benchmark-only
+large-batch path. The base keeps its original NF4 bytes and LoRA stays BF16.
+The new path reconstructs immutable FP32 block scales once per parameter/state
+version, dequantizes with one new Triton kernel, and calls the native BF16
+linear operation directly. It avoids repeated double-scale recovery and the
+SGLang shard-output copy. M<=4 and unsupported shapes/layouts keep the original
+bitsandbytes implementation. This is not a fused NF4 GEMM: full BF16 temporary
+weights are still written and read each invocation. There is no cache of their
+values, but captured graphs retain their temporary-buffer allocation lifetimes.
+The persistent FP32 scale cache across 114 projections is **31,100,928 bytes**.
+Captured execution assumes an immutable base; eager versioned weight/scale
+updates invalidate the scale cache. Shared installations and runtime defaults
+are unchanged.
+
+Jobs 23484723/23484738 each check six actual projection shapes at rows
+1/8/32/1024. All 48 shape/batch cases use exactly reconstructed BF16 weights
+and produce exact dequant-plus-linear outputs against the original NF4
+dequantized weights. At rows 8/32 the selected operator is about 1.5–2.4x the stock path; these are operator ratios. The first
+MFMA prototypes, including a register-codebook variant and forced native SIMT,
+were also screened. None provided a generally better selected serving path;
+slow and shared-memory-exhausted variants are retained as rejected candidates.
+The resident-BF16 column is only a diagnostic ceiling, not the quantized path.
+
+Job **23484772**, **nid005030**, runs old-native, old-fast, new-native and new-fast
+in that order on one MI250 GCD, 7 CPUs, 40GB, with a 20-minute cap. Same NF4
+checkpoint, four compact rank-4 adapters, 128 input/64 forced output tokens,
+8/32/96 requests at C1/8/32, three repeats and cold-prefill/decode graphs.
+Every arm verifies all 114 actual projection tensors and 336 BF16 LoRA buffers.
+Both new arms record 114 scale preparations and actual eager/captured execution.
+
+| Concurrency | Old native | New native | Old fast | New fast | New fast/old fast | New fast/new native |
+| --- | ---: | ---: | ---: | ---: | ---: | ---: |
+| 1 | 147.15 | 150.65 | 187.96 | 194.61 | 1.0354x | 1.2918x |
+| 8 | 473.07 | 662.99 | 523.87 | 775.53 | 1.4804x | 1.1697x |
+| 32 | 1561.36 | 2096.27 | 1684.37 | 2343.23 | 1.3912x | 1.1178x |
+
+Values are complete-service output tokens/s. Backend improvement also benefits
+native LoRA; only the final column measures the research Fleet benefit against
+native using the **same new quantized backend**. Comparing new-fast to old-native
+would conflate two optimizations.
+
+Both new-native/old-native and new-fast/old-fast retain **96/96 identical token
+sequences and zero saved logprob difference**. The fast policy's pre-existing
+native logprob failure remains; this change does not fix or relabel it:
+
+| Comparison | Identical token sequences | Maximum saved logprob difference | Strict 0.05 gate |
+| --- | ---: | ---: | --- |
+| old-fast/corresponding native | 96/96 | 0.099945307 | FAIL |
+| new-fast/corresponding native | 96/96 | 0.099945307 | FAIL |
+
+This is a three-repeat synthetic inference study on one allocation, not trained
+quality, training speed, a confidence interval or a claim of fourfold VRAM
+reduction. The earlier original/unfused BF16 control limitation remains in the
+preceding section. CPU validation now passes 169 tests; Ruff, wheel and sdist
+builds pass. [All samples, rejected operator candidates, source hashes and graph,
+weight and scale audits](qwen35-nf4-optimization-mi250.json) are retained.

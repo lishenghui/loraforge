@@ -247,6 +247,10 @@ def install_nf4_experiment():
         from qwen35_nf4_compat import install
 
         install()
+        if os.environ.get("LORAFORGE_BENCH_QWEN35_NF4_LINEAR") == "1":
+            from qwen35_nf4_linear import install as install_linear
+
+            install_linear()
 
 
 def install_cold_prefill_experiment():
@@ -715,7 +719,16 @@ if __name__ == "__main__":
         action="store_true",
         help="Experimental gfx90a NF4 fixture + BF16 LoRA; model must be prepacked",
     )
+    parser.add_argument(
+        "--nf4-cached-scales",
+        action="store_true",
+        help="Experimental NF4 large-batch path; cache FP32 scales, not BF16 weights",
+    )
     args = parser.parse_args()
+    if args.nf4_cached_scales:
+        if not args.nf4_experiment:
+            parser.error("--nf4-cached-scales requires --nf4-experiment")
+        os.environ["LORAFORGE_BENCH_QWEN35_NF4_LINEAR"] = "1"
     if args.nf4_experiment:
         os.environ["LORAFORGE_BENCH_QWEN35_NF4"] = "1"
         os.environ["LORAFORGE_BENCH_QWEN35_EXTENDED"] = "1"

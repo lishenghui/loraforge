@@ -193,3 +193,74 @@ def test_missing_logprob_is_rejected_before_any_speed_gate():
     record = dict(serial=[dict(adapter=0, length=17, tokens=[[None, 1]])], mixed=[])
     with pytest.raises(AssertionError, match="nonfinite logprob"):
         protocol.numerical_check(record, record)
+
+
+@pytest.mark.parametrize("batch", [8, 32, 1024])
+def test_nf4_linear_dispatch_keeps_small_batches_and_other_formats_native(batch):
+    hook = load("qwen35_nf4_linear")
+    state = N(
+        shape=(8192, 1024), dtype="torch.bfloat16", quant_type="nf4", blocksize=64
+    )
+    weight = N(dtype="torch.uint8", bnb_quant_state={0: state})
+
+    def activation(m, *, dtype="torch.bfloat16", k=1024, stride=1):
+        return N(
+            dtype=dtype,
+            ndim=2,
+            shape=(m, k),
+            stride=lambda axis: stride,
+            numel=lambda: m * k,
+        )
+
+    assert hook.select_state(weight, activation(batch)) is state
+    for x in [
+        activation(1),
+        activation(4),
+        activation(batch, dtype="torch.float16"),
+        activation(batch, k=512),
+        activation(batch, stride=2),
+    ]:
+        assert hook.select_state(weight, x) is None
+    for replacement in [
+        N(**dict(vars(state), quant_type="fp4")),
+        N(**dict(vars(state), blocksize=128)),
+        N(**dict(vars(state), shape=(4096, 1024))),
+    ]:
+        assert (
+            hook.select_state(N(bnb_quant_state={0: replacement}), activation(batch))
+            is None
+        )
+    assert (
+        hook.select_state(N(bnb_quant_state={0: state, 1: state}), activation(batch))
+        is None
+    )
+
+
+def test_nf4_scale_cache_detects_weight_scale_and_state_updates():
+    torch = pytest.importorskip("torch")
+    hook = load("qwen35_nf4_linear")
+    weight = torch.zeros(16, dtype=torch.uint8)
+    state = N(
+        nested=True,
+        absmax=torch.zeros(4, dtype=torch.uint8),
+        code=torch.zeros(16),
+        state2=N(absmax=torch.ones(1), code=torch.zeros(256)),
+        offset=torch.zeros(()),
+    )
+    stamp = hook.scale_key(weight, state)
+    for tensor in (
+        weight,
+        state.absmax,
+        state.code,
+        state.state2.absmax,
+        state.state2.code,
+        state.offset,
+    ):
+        tensor.add_(1)
+        current = hook.scale_key(weight, state)
+        assert current != stamp
+        stamp = current
+    assert hook.scale_key(weight, N(**vars(state))) != stamp
+    with torch.inference_mode():
+        immutable = torch.zeros(16, dtype=torch.uint8)
+    assert hook.scale_key(immutable, state) == hook.scale_key(immutable, state)
