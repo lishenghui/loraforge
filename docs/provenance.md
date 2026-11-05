@@ -400,3 +400,23 @@ rematerialization concepts are attributed prior work, not new algorithm claims.
 The probe is first-order only and does not alter inference autograd restrictions
 or install training hooks. See `docs/lora-training-transfer.md` for exact
 forward/gradient evidence, scope, failed checker attempts and limitations.
+
+### BF16 LoRA MLP training fusion experiment
+
+`benchmarks/lora_swiglu_training.py`, `lora_swiglu_kernels.py` and
+`check_lora_swiglu_training.py` are new LoRAForge benchmark implementations of
+standard LoRA and SwiGLU forward/first-order backward equations. No Unsloth
+source was copied. The saved-wide-activation/rematerialization approach is
+established prior work; the same pinned Unsloth `fast_lora.py` and `swiglu.py`
+references above informed the experiment. This is not a novelty claim.
+
+The new kernels combine tiny-rank expansion with activation consumption, and
+combine input-gradient LoRA corrections with residual addition. BF16 rounding
+boundaries remain explicit. The compact backward scales a freshly generated
+gradient buffer only after the frozen-base input-gradient GEMM has consumed it
+on the same stream. It never writes into saved input/activation/parameter
+storage. Trainable FP32 masters are recast on every invocation; no inference
+weight shadow is reused across optimizer updates. GPU kernels run only through
+the explicit standalone benchmark, with a CPU dense path solely for derivative
+and checkpoint tests. See `docs/lora-swiglu-training.md` for measured scope,
+compiled-baseline comparisons and rejected rank-32 scheduling.

@@ -159,7 +159,12 @@ PYTHONPATH=/absolute/path/to/benchmarks:$PYTHONPATH \
   python benchmarks/check_lora_training.py FIXTURE --output training.json
 ```
 
-The appropriate next experiment is a full BF16 LoRA MLP or GDN projection block:
+The BF16 LoRA MLP follow-up is now recorded in
+[the SwiGLU training experiment](lora-swiglu-training.md), including an actual
+`torch.compile` baseline. It is a separate BF16 experiment; its speed ratios
+must not be multiplied by these NF4 ratios to invent a combined result.
+
+A subsequent model-level experiment should validate a GDN projection block:
 validate gradients first, measure saved activations and forward/backward costs,
 then attach to a small Qwen3.5 SFT run. Compare against native PEFT and actual
 Unsloth with matched checkpointing, loss fusion, precision and batch tokens.
