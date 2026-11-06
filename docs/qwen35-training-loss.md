@@ -1,5 +1,9 @@
 # Unsloth loss ideas for Qwen3.5 LoRA training
 
+The later [native-CE/head-buffer study](qwen35-training-head.md) qualifies a
+different full-shape scratch-reuse path at batch four and runs batch eight.
+The isolated Unsloth CE results and failures below remain unchanged.
+
 The first CE-only ablation **fails the existing whole-model native numerical
 gates** and does not make batch eight fit. Its roughly 3% raw timing gain is
 not an accepted equivalent-training speedup. The separate first-step

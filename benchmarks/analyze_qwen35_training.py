@@ -128,6 +128,13 @@ def main() -> None:
         return summary
 
     pairs = [
+        ("head-chunked", "peft-before"),
+        ("head-chunked-graph", "peft-before"),
+        ("head-full-reuse", "peft-before"),
+        ("head-full-reuse-graph", "peft-before"),
+        ("head-chunked-graph", "head-chunked"),
+        ("head-full-reuse-graph", "head-full-reuse"),
+        ("head-chunked", "head-full-reuse"),
         ("unsloth-ce", "peft-before"),
         ("unsloth-ce-graph", "peft-before"),
         ("unsloth-ce-graph", "unsloth-ce"),

@@ -54,7 +54,12 @@ def main() -> None:
     )
     p.add_argument("--tokens", type=int, nargs="+", default=[128, 1024, 4096])
     p.add_argument("--batch-size", type=int, default=1)
-    p.add_argument("--loss-backend", choices=["native", "unsloth-ce"], default="native")
+    p.add_argument(
+        "--loss-backend",
+        choices=["native", "unsloth-ce", "head-chunked", "head-full-reuse"],
+        default="native",
+    )
+    p.add_argument("--head-chunk-rows", type=int, default=512)
     p.add_argument("--loss-source", type=Path)
     p.add_argument("--audit-initial-step", action="store_true")
     p.add_argument(
@@ -76,6 +81,14 @@ def main() -> None:
         p.error("positive batch and sequence lengths >=2 required")
     if (args.loss_backend == "unsloth-ce") != (args.loss_source is not None):
         p.error("unsloth-ce requires --loss-source; native takes no external source")
+    if args.loss_backend.startswith("head-") and (
+        args.backend not in {"peft", "native-graph"}
+        or any(args.checkpointing)
+        or args.head_chunk_rows < 1
+    ):
+        p.error(
+            "frozen head requires eager/native graph, no checkpointing, positive chunks"
+        )
     if args.audit_initial_step and args.backend != "peft":
         p.error("initial-step diagnostics are eager-only")
     if args.audit_initial_step and (
@@ -319,19 +332,51 @@ def main() -> None:
         if args.backend == "compiled-model"
         else model
     )
+    head_module = None
+    if args.loss_backend.startswith("head-"):
+        from qwen35_training_head import HeadLossAndSamples
+
+        head_module = HeadLossAndSamples(
+            model,
+            chunk_rows=args.head_chunk_rows,
+            strategy=args.loss_backend.removeprefix("head-"),
+            implicit_causal=args.implicit_causal,
+            full_audit=args.audit_initial_step,
+        )
+        assert {id(p) for p in head_module.parameters() if p.requires_grad} == {
+            id(p) for p in params.values()
+        }
+        train_model = head_module
+        report["loss_implementation"] = dict(
+            strategy=head_module.strategy,
+            chunk_rows=args.head_chunk_rows,
+            precomputed_native_head_gradient=True,
+            unit_upstream_loss_gradient=True,
+            frozen_head=True,
+            global_model_patches=False,
+        )
+        report["source_sha256"]["qwen35_training_head.py"] = hashlib.sha256(
+            Path(__file__).with_name("qwen35_training_head.py").read_bytes()
+        ).hexdigest()
     report["state"] = "running"
     save()
     input_ids = json.loads((args.checkpoint / "input-tokens.json").read_text())
+    initial_head_audited = False
 
     def run(inputs):
+        nonlocal initial_head_audited
         if args.backend == "native-graph":
             return train_model(inputs["input_ids"])
-        if args.implicit_causal:
+        if head_module is not None:
+            loss, audit = train_model(inputs["input_ids"])
+        elif args.implicit_causal:
             from qwen35_training_mask import fixed_positions
 
             inputs = dict(inputs, position_ids=fixed_positions(inputs["input_ids"]))
-        result = train_model(**inputs)
-        if args.audit_initial_step:
+        if head_module is None:
+            result = train_model(**inputs)
+            loss, audit = result.loss, sample_logits(result.logits.detach())
+        if args.audit_initial_step and not initial_head_audited:
             path = args.output / "initial-head-logits.safetensors"
             if not path.exists():
                 positions = (
@@ -341,8 +386,12 @@ def main() -> None:
                 )
                 save_file(
                     {
-                        "logits": torch.stack(
-                            [result.logits.detach()[:, p] for p in positions], dim=1
+                        "logits": (
+                            head_module.last_full_samples
+                            if head_module is not None
+                            else torch.stack(
+                                [result.logits.detach()[:, p] for p in positions], dim=1
+                            )
                         )
                         .cpu()
                         .contiguous(),
@@ -354,10 +403,10 @@ def main() -> None:
                     },
                     str(path),
                 )
-        return (
-            result.loss,
-            sample_logits(result.logits.detach()),
-        )
+                initial_head_audited = True
+                if head_module is not None:
+                    head_module.full_audit = False
+        return loss, audit
 
     def reset():
         with torch.no_grad():
@@ -411,7 +460,10 @@ def main() -> None:
             with graph_context as graph_counts:
                 if args.backend == "native-graph":
                     train_model = capture(
-                        model, ids, implicit_causal=args.implicit_causal
+                        model,
+                        ids,
+                        implicit_causal=args.implicit_causal,
+                        loss_module=head_module,
                     )
                     case["native_graph_setup"] = dict(graph_counts)
                 # Keep the common correctness/timing procedure below outside
@@ -591,7 +643,7 @@ def main() -> None:
             )
             del optim, step, loss, grads, logits, ids, batch
             if args.backend == "native-graph":
-                train_model = model
+                train_model = head_module if head_module is not None else model
             for parameter in params.values():
                 parameter.grad = None
             gc.collect()

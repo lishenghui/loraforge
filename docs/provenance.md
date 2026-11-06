@@ -540,3 +540,32 @@ adapter gradients and the first AdamW update before interpreting multi-step
 drift. Its actual-logit kernel comparison uses a stated BF16-rounded FP64
 oracle; parameter comparisons run separately on CPU. Diagnostic tensor copies
 are outside step timing and do not change parameter ownership or loss scaling.
+
+### Frozen LM-head and native CE chunking
+
+`benchmarks/qwen35_training_head.py`, `check_qwen35_training_head.py` and
+`run_qwen35_training_head.py` are new LoRAForge benchmark code using native
+Torch linear/CE/autograd operations. No Unsloth or Zoo implementation is copied
+or executed by these paths. Chunked loss and precomputed first-order gradients
+are established approaches; the pinned Unsloth/Zoo references above informed
+the experiment, not a novelty claim.
+
+The frozen-head function computes owned dHidden chunks in forward and returns
+them through the original model's backward. It updates no Parameter or caller
+storage. It rejects a trainable head and supports first derivatives only. The
+benchmark uses unit upstream loss gradients with BF16 compute and no GradScaler;
+scaled BF16 loss gradients can have different rounding. A fully chunked head
+avoids a full-vocabulary output/gradient matrix. The separate full-reuse control
+preserves the original large GEMM shapes and reuses one private BF16 logits
+buffer for dLogits after each native CE backward has consumed that chunk.
+No output consumer or saved graph retains the overwritten logits. These are
+distinct strategies and their memory claims must not be conflated.
+
+The wrapper calls the original already-adapted text backbone, retaining the
+identical original trainable Parameter objects and external AdamW optimizer.
+It is scoped to the existing single-adapter, dropout-zero, unpadded/unpacked
+Qwen3.5 experiment, not arbitrary PEFT hooks, trainable heads or a public Trainer
+integration. Graph mode passes this loss module to the existing native Torch
+graph API; no framework/GDN/attention kernel is replaced. Optional first-step
+full-vocabulary audit samples are detached and copied before private scratch is
+reused, then disabled before timing.

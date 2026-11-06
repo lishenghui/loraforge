@@ -66,10 +66,14 @@ def graph_counters():
         torch.cuda.CUDAGraph = original
 
 
-def capture(model, ids, *, implicit_causal=False):
+def capture(model, ids, *, implicit_causal=False, loss_module=None):
     if not ids.is_cuda or not model.training:
         raise ValueError("capture requires CUDA/ROCm tensors and training mode")
-    wrapper = LossAndSamples(model, implicit_causal=implicit_causal)
+    wrapper = (
+        loss_module
+        if loss_module is not None
+        else LossAndSamples(model, implicit_causal=implicit_causal)
+    )
     sample_ids = ids.detach().clone()
     # AMP's weight cache must be disabled: graph execution must recast the live
     # FP32 LoRA masters on every forward, including after AdamW updates/reset.
