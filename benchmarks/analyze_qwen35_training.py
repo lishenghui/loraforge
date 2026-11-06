@@ -128,6 +128,9 @@ def main() -> None:
         return summary
 
     pairs = [
+        ("unsloth-ce", "peft-before"),
+        ("unsloth-ce-graph", "peft-before"),
+        ("unsloth-ce-graph", "unsloth-ce"),
         ("dynamo-eager", "peft-before"),
         ("aot-eager", "peft-before"),
         ("graph-backend", "peft-before"),

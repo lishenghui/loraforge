@@ -78,7 +78,9 @@ Within this measured no-checkpointing grid, **batch four × 1024** fits and
 batch eight × 1024 does not; intermediate batches were not tested. A logical
 next capacity experiment is a chunked or fused LM-head/loss path that avoids
 materializing full-vocabulary FP32 logits. Its speed, numerical behavior and
-memory benefit are untested here. Gradient checkpointing is another separate
+memory benefit are untested here. A separate
+[Unsloth CE ablation](qwen35-training-loss.md) records the upstream review and
+current experiment status. Gradient checkpointing is another separate
 capacity experiment; the current graph helper explicitly rejects it. Gradient
 accumulation can increase effective batch without increasing microbatch, but
 is not counted as a microbatch throughput gain.

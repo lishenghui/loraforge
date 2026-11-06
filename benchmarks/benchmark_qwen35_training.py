@@ -54,6 +54,9 @@ def main() -> None:
     )
     p.add_argument("--tokens", type=int, nargs="+", default=[128, 1024, 4096])
     p.add_argument("--batch-size", type=int, default=1)
+    p.add_argument("--loss-backend", choices=["native", "unsloth-ce"], default="native")
+    p.add_argument("--loss-source", type=Path)
+    p.add_argument("--audit-initial-step", action="store_true")
     p.add_argument(
         "--checkpointing", type=int, nargs="+", choices=[0, 1], default=[0, 1]
     )
@@ -71,6 +74,14 @@ def main() -> None:
     args = p.parse_args()
     if args.batch_size < 1 or min(args.tokens) < 2:
         p.error("positive batch and sequence lengths >=2 required")
+    if (args.loss_backend == "unsloth-ce") != (args.loss_source is not None):
+        p.error("unsloth-ce requires --loss-source; native takes no external source")
+    if args.audit_initial_step and args.backend != "peft":
+        p.error("initial-step diagnostics are eager-only")
+    if args.audit_initial_step and (
+        len(args.tokens) != 1 or len(args.checkpointing) != 1
+    ):
+        p.error("initial-step diagnostics require one length/checkpointing setting")
     args.output.mkdir(exist_ok=False)
     import importlib.metadata
 
@@ -125,6 +136,8 @@ def main() -> None:
         ),
         gradient_accumulation=1,
         batch=args.batch_size,
+        loss_backend=args.loss_backend,
+        audit_initial_step=args.audit_initial_step,
         rank=4,
         alpha=4,
         lr=0.0001,
@@ -227,6 +240,14 @@ def main() -> None:
         conv_function=gdn[0].causal_conv1d_fn.__module__,
     )
     model.config.use_cache = False
+    if args.loss_backend == "unsloth-ce":
+        from qwen35_training_loss import load_unsloth_ce, make_causal_loss
+
+        fast_ce, report["loss_implementation"] = load_unsloth_ce(args.loss_source)
+        model.loss_function = make_causal_loss(fast_ce)
+        report["source_sha256"]["qwen35_training_loss.py"] = hashlib.sha256(
+            Path(__file__).with_name("qwen35_training_loss.py").read_bytes()
+        ).hexdigest()
     if args.implicit_causal:
         from qwen35_training_mask import install
 
@@ -310,6 +331,29 @@ def main() -> None:
 
             inputs = dict(inputs, position_ids=fixed_positions(inputs["input_ids"]))
         result = train_model(**inputs)
+        if args.audit_initial_step:
+            path = args.output / "initial-head-logits.safetensors"
+            if not path.exists():
+                positions = (
+                    0,
+                    inputs["input_ids"].shape[1] // 2,
+                    inputs["input_ids"].shape[1] - 2,
+                )
+                save_file(
+                    {
+                        "logits": torch.stack(
+                            [result.logits.detach()[:, p] for p in positions], dim=1
+                        )
+                        .cpu()
+                        .contiguous(),
+                        "targets": torch.stack(
+                            [inputs["labels"][:, p + 1] for p in positions], dim=1
+                        )
+                        .cpu()
+                        .contiguous(),
+                    },
+                    str(path),
+                )
         return (
             result.loss,
             sample_logits(result.logits.detach()),
@@ -390,6 +434,14 @@ def main() -> None:
                     for p in params.values()
                 )
                 case["losses"].append(loss.item())
+                if step == 0 and args.audit_initial_step:
+                    save_file(
+                        {
+                            k: p.grad.detach().cpu().contiguous()
+                            for k, p in params.items()
+                        },
+                        str(args.output / "initial-grad.safetensors"),
+                    )
                 if step == 2:
                     grads = {
                         k: p.grad.detach().cpu().contiguous() for k, p in params.items()
@@ -409,6 +461,11 @@ def main() -> None:
                         ),
                     )
                 optim.step()
+                if step == 0 and args.audit_initial_step:
+                    save_file(
+                        {k: p.detach().cpu().contiguous() for k, p in params.items()},
+                        str(args.output / "initial-updated.safetensors"),
+                    )
                 del loss
             save_file(
                 {k: p.detach().cpu().contiguous() for k, p in params.items()},

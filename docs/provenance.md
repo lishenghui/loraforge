@@ -507,3 +507,36 @@ native attention, model, graph, FLA or convolution implementations. Audit
 sampling now covers every sequence and adds a per-sequence numerical gate.
 The unchanged 4B checkpoint and prior-work attribution above still apply.
 See `docs/qwen35-training-batches.md` for the protocol, measurements and limits.
+
+### Isolated Unsloth cross-entropy experiment
+
+`benchmarks/qwen35_training_loss.py`, `check_unsloth_training_loss.py` and
+`run_qwen35_training_loss.py` and `diagnose_unsloth_training_loss.py` are new
+experiment glue around pinned external
+Unsloth source. They do not vendor a kernel, import the complete trainer, or
+apply upstream global model patches. The caller supplies the original
+Apache-2.0 files at Unsloth revision
+`a0197ca266e14d22f66c0dcffc452fe1ce42bb0f`:
+`unsloth/kernels/cross_entropy_loss.py`, `utils.py` and `rope_embedding.py`.
+Copyright Daniel Han-Chen and the Unsloth team. All three SHA256 values are
+checked before selecting unchanged definitions through Python AST. The original
+notices remain with the external files. On ROCm/Triton 3.6, the dependency
+bindings use native Torch device context, Triton casts/libdevice and the HIP
+predicate. The optional, explicitly reported HIP launch selects 16384 elements
+and eight warps for the original chunked forward kernel; it does not change
+the forward/backward equations. The original launch is checked separately.
+
+Unsloth Zoo revision `771dcfb9d9da713db32cc2abda73299ff3db33cd`,
+`unsloth_zoo/loss_utils.py` and
+`unsloth_zoo/fused_losses/cross_entropy_loss.py` (LGPLv3) were reviewed to
+understand fused CE registration and the separate chunked LM-head/loss path.
+No Zoo implementation is copied or executed by this ablation. The model
+instance's loss alone is replaced after unchanged weight loading; its LM-head
+GEMM, original adapters, FLA layers and optimizer remain in place. This is not a
+measurement of the complete Unsloth training stack.
+
+The opt-in eager first-step audit saves sampled real head logits, initial
+adapter gradients and the first AdamW update before interpreting multi-step
+drift. Its actual-logit kernel comparison uses a stated BF16-rounded FP64
+oracle; parameter comparisons run separately on CPU. Diagnostic tensor copies
+are outside step timing and do not change parameter ownership or loss scaling.

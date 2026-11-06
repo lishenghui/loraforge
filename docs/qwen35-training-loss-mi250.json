@@ -1,0 +1,3152 @@
+{
+  "run": {
+    "state": "complete_with_capacity_limits",
+    "checks": {
+      "upstream": {
+        "state": "failed",
+        "returncode": 1,
+        "seconds": 18.70350286900066
+      },
+      "hip": {
+        "state": "complete",
+        "returncode": 0,
+        "seconds": 5.7264797220123
+      }
+    },
+    "shapes": [
+      {
+        "name": "b4-t1024",
+        "batch": 4,
+        "tokens": 1024,
+        "workers": [
+          {
+            "name": "peft-before",
+            "backend": "peft",
+            "loss": "native",
+            "state": "complete",
+            "returncode": 0,
+            "seconds": 84.67775525100296
+          },
+          {
+            "name": "unsloth-ce",
+            "backend": "peft",
+            "loss": "unsloth-ce",
+            "state": "complete",
+            "returncode": 0,
+            "seconds": 39.734786909015384
+          },
+          {
+            "name": "unsloth-ce-graph",
+            "backend": "native-graph",
+            "loss": "unsloth-ce",
+            "state": "complete",
+            "returncode": 0,
+            "seconds": 43.202213264012244
+          },
+          {
+            "name": "peft-after",
+            "backend": "peft",
+            "loss": "native",
+            "state": "complete",
+            "returncode": 0,
+            "seconds": 39.550529772997834
+          }
+        ],
+        "state": "complete"
+      },
+      {
+        "name": "b8-t1024",
+        "batch": 8,
+        "tokens": 1024,
+        "workers": [
+          {
+            "name": "peft-before",
+            "backend": "peft",
+            "loss": "native",
+            "state": "oom",
+            "returncode": 1,
+            "seconds": 25.365785809000954
+          },
+          {
+            "name": "unsloth-ce",
+            "backend": "peft",
+            "loss": "unsloth-ce",
+            "state": "oom",
+            "returncode": 1,
+            "seconds": 24.71542518597562
+          },
+          {
+            "name": "unsloth-ce-graph",
+            "backend": "native-graph",
+            "loss": "unsloth-ce",
+            "state": "oom",
+            "returncode": 1,
+            "seconds": 24.2204994019703
+          },
+          {
+            "name": "peft-after",
+            "backend": "peft",
+            "loss": "native",
+            "state": "skipped_missing_reference"
+          }
+        ],
+        "state": "capacity_limit"
+      }
+    ]
+  },
+  "shapes": [
+    {
+      "analyzer_sha256": "f27fb10f1eeb19507c774d879a59450a09e0d17355beca6a8b52cd6d91ea88e9",
+      "scope": "Whole BF16 Qwen3.5 text training step; fixed text, no convergence claim",
+      "gates": {
+        "loss_max_abs": 0.01,
+        "sampled_logits_relative_l2": 0.02,
+        "sampled_logits_per_sequence_relative_l2": 0.02,
+        "per_parameter_gradient_relative_l2": 0.05,
+        "updated_parameter_max_abs": 0.0001
+      },
+      "workers": {
+        "peft-after": {
+          "state": "complete",
+          "argv": [
+            "/pfs/lustrep2/scratch/project_465003417/lishengh/loraforge-qwen35-loss-20261106/benchmark_qwen35_training.py",
+            "bf16-text",
+            "--output",
+            "results/b4-t1024/peft-after",
+            "--backend",
+            "peft",
+            "--loss-backend",
+            "native",
+            "--batch-size",
+            "4",
+            "--tokens",
+            "1024",
+            "--checkpointing",
+            "0",
+            "--check-input-change"
+          ],
+          "backend": "peft",
+          "cases": [
+            {
+              "batch": 4,
+              "tokens": 1024,
+              "input_tokens_per_step": 4096,
+              "supervised_tokens_per_step": 4092,
+              "input_sha256": "4e4a150064e7e806044f30abe3c63c57f35d777359b216ffc814e0d3fa30d496",
+              "checkpointing": false,
+              "losses": [
+                0.5049372911453247,
+                0.47164711356163025,
+                0.4000605046749115
+              ],
+              "sample_losses": [
+                0.4000605046749115,
+                0.3231232166290283,
+                0.28476858139038086,
+                0.28018614649772644,
+                0.2770741581916809
+              ],
+              "changed_input_sha256": "15ae9491d8c758b4dfa66e294c7b06b790e0383842f8042091570c2e481f8e9f",
+              "changed_input_loss": 0.33679670095443726,
+              "wall_ms": [
+                1474.4675619876944,
+                1280.2472729817964,
+                1281.8088390049525,
+                1282.58417599136,
+                1282.2017229627818
+              ],
+              "gpu_ms": [
+                1474.4046630859375,
+                1280.1982421875,
+                1281.752685546875,
+                1282.5302734375,
+                1282.14599609375
+              ],
+              "median_wall_ms": 1282.2017229627818,
+              "median_gpu_ms": 1282.14599609375,
+              "tokens_per_second": 3194.505144272758,
+              "supervised_tokens_per_second": 3191.385510342804,
+              "sequences_per_second": 3.1196339299538653,
+              "resident_allocated_bytes": 8668342784,
+              "peak_allocated_bytes": 46174150144,
+              "peak_reserved_bytes": 49503272960
+            }
+          ],
+          "scope": "Whole text-only BF16 Qwen3.5; all-linear rank4 LoRA FP32 masters; dropout0; zero_grad+forward+causal_loss+backward+AdamW; synthetic fixed text, not convergence",
+          "versions": {
+            "torch": "2.11.0+rocm7.2.lumi.aif.20260929120822",
+            "transformers": "5.10.1",
+            "peft": "0.21.1",
+            "fla-core": "0.6.0",
+            "flash-linear-attention": "0.6.0"
+          },
+          "device": "AMD Instinct MI250X",
+          "cuda_graph_replay": false,
+          "manual_cuda_graph_replay": false,
+          "native_autograd_graph_requested": false,
+          "implicit_causal_requested": false,
+          "cuda_graph_backend_requested": false,
+          "gradient_accumulation": 1,
+          "batch": 4,
+          "loss_backend": "native",
+          "rank": 4,
+          "alpha": 4,
+          "lr": 0.0001,
+          "warmup": 2,
+          "samples": 5,
+          "compiler_settings": {
+            "backend": null,
+            "emulate_precision_casts": false,
+            "recompile_limit": 8,
+            "float32_matmul_precision": "highest"
+          },
+          "source_sha256": {
+            "benchmark_qwen35_training.py": "76c829dacd2ea6a41dc4e40b20d783128dc2760ab55fab281667a55f97d5876a",
+            "run_qwen35_training.py": "d15410dcf77189faf267d531dd420b846413669158cee26a27446d538eeff1cf",
+            "qwen35_training_mlp.py": "9c7d4ab2cbbf6c9c3ac9858971a13d3f70d9381129ff418930672ef594e2f61a",
+            "lora_swiglu_training.py": "3d2e24f06dfa2df10eea2860ec4043cc9749854b2f4019451e5b46811722e576",
+            "lora_swiglu_kernels.py": "a7a4e909d7bab6ddd1fd8537c75b56ffb22285323b9182f85998aa5f3046e732",
+            "lora_native_training.py": "c2ac480ba429aa1b58b70383289b353aaccb0e9ffb70573df85794ce9901326b",
+            "qwen35_training_graph.py": "f2fd1d3d6efaff0808afa7b650e8423efaf3ceed7534e77b2a9c3672bae76758",
+            "qwen35_training_mask.py": "93a0b90611121992c73942cfca259e266ffd79a9a5a954199c6c3912739d32ef"
+          },
+          "loading": {
+            "missing_keys": "set()",
+            "unexpected_keys": "set()",
+            "mismatched_keys": "set()",
+            "error_msgs": []
+          },
+          "model": {
+            "layers": 32,
+            "hidden_size": 2560,
+            "intermediate_size": 9216,
+            "gdn_layers": 24,
+            "attention_layers": 8,
+            "base_parameters": 4205751296
+          },
+          "checked_loaded_tensors": 427,
+          "gdn": {
+            "layers": 24,
+            "chunk_function": "fla.ops.gated_delta_rule.chunk",
+            "norm": "FusedRMSNormGated",
+            "conv_function": "causal_conv1d.causal_conv1d_interface"
+          },
+          "adapter_tensors": 496,
+          "adapter_parameters": 8116224,
+          "initial_adapter_sha256": "7d97687b63b72ff94a25a4cba8c802a89f7717b90b72edbd4e9fafc172445332",
+          "compiler_counters": {},
+          "raw_report_sha256": "95d6ebd960891fd5e009ee29484c6cf814f57d940989c9886f7e9768af4c694a"
+        },
+        "unsloth-ce-graph": {
+          "state": "complete",
+          "argv": [
+            "/pfs/lustrep2/scratch/project_465003417/lishengh/loraforge-qwen35-loss-20261106/benchmark_qwen35_training.py",
+            "bf16-text",
+            "--output",
+            "results/b4-t1024/unsloth-ce-graph",
+            "--backend",
+            "native-graph",
+            "--loss-backend",
+            "unsloth-ce",
+            "--batch-size",
+            "4",
+            "--tokens",
+            "1024",
+            "--checkpointing",
+            "0",
+            "--check-input-change",
+            "--loss-source",
+            "reference",
+            "--implicit-causal"
+          ],
+          "backend": "native-graph",
+          "cases": [
+            {
+              "batch": 4,
+              "tokens": 1024,
+              "input_tokens_per_step": 4096,
+              "supervised_tokens_per_step": 4092,
+              "input_sha256": "4e4a150064e7e806044f30abe3c63c57f35d777359b216ffc814e0d3fa30d496",
+              "checkpointing": false,
+              "losses": [
+                0.5049374103546143,
+                0.4729825556278229,
+                0.39681917428970337
+              ],
+              "sample_losses": [
+                0.39681917428970337,
+                0.323332279920578,
+                0.28813692927360535,
+                0.2793743908405304,
+                0.2767467498779297
+              ],
+              "native_graph_setup": {
+                "captures": 2,
+                "replays": 0
+              },
+              "native_graph_api_counts": {
+                "captures": 2,
+                "replays": 22
+              },
+              "changed_input_sha256": "15ae9491d8c758b4dfa66e294c7b06b790e0383842f8042091570c2e481f8e9f",
+              "changed_input_loss": 0.33107879757881165,
+              "wall_ms": [
+                1247.1507309819572,
+                1248.22991900146,
+                1248.2198500074446,
+                1248.5879049636424,
+                1248.5509340185672
+              ],
+              "gpu_ms": [
+                1247.0870361328125,
+                1248.184814453125,
+                1248.177734375,
+                1248.5452880859375,
+                1248.50927734375
+              ],
+              "median_wall_ms": 1248.22991900146,
+              "median_gpu_ms": 1248.184814453125,
+              "tokens_per_second": 3281.4467412194826,
+              "supervised_tokens_per_second": 3278.2422033862604,
+              "sequences_per_second": 3.204537833222151,
+              "resident_allocated_bytes": 8860249088,
+              "peak_allocated_bytes": 8892713984,
+              "peak_reserved_bytes": 39485177856,
+              "native_graph_timed_replays": 10
+            }
+          ],
+          "scope": "Whole text-only BF16 Qwen3.5; all-linear rank4 LoRA FP32 masters; dropout0; zero_grad+forward+causal_loss+backward+AdamW; synthetic fixed text, not convergence",
+          "versions": {
+            "torch": "2.11.0+rocm7.2.lumi.aif.20260929120822",
+            "transformers": "5.10.1",
+            "peft": "0.21.1",
+            "fla-core": "0.6.0",
+            "flash-linear-attention": "0.6.0"
+          },
+          "device": "AMD Instinct MI250X",
+          "cuda_graph_replay": true,
+          "manual_cuda_graph_replay": false,
+          "native_autograd_graph_requested": true,
+          "implicit_causal_requested": true,
+          "cuda_graph_backend_requested": false,
+          "gradient_accumulation": 1,
+          "batch": 4,
+          "loss_backend": "unsloth-ce",
+          "rank": 4,
+          "alpha": 4,
+          "lr": 0.0001,
+          "warmup": 2,
+          "samples": 5,
+          "compiler_settings": {
+            "backend": null,
+            "emulate_precision_casts": false,
+            "recompile_limit": 8,
+            "float32_matmul_precision": "highest"
+          },
+          "source_sha256": {
+            "benchmark_qwen35_training.py": "76c829dacd2ea6a41dc4e40b20d783128dc2760ab55fab281667a55f97d5876a",
+            "run_qwen35_training.py": "d15410dcf77189faf267d531dd420b846413669158cee26a27446d538eeff1cf",
+            "qwen35_training_mlp.py": "9c7d4ab2cbbf6c9c3ac9858971a13d3f70d9381129ff418930672ef594e2f61a",
+            "lora_swiglu_training.py": "3d2e24f06dfa2df10eea2860ec4043cc9749854b2f4019451e5b46811722e576",
+            "lora_swiglu_kernels.py": "a7a4e909d7bab6ddd1fd8537c75b56ffb22285323b9182f85998aa5f3046e732",
+            "lora_native_training.py": "c2ac480ba429aa1b58b70383289b353aaccb0e9ffb70573df85794ce9901326b",
+            "qwen35_training_graph.py": "f2fd1d3d6efaff0808afa7b650e8423efaf3ceed7534e77b2a9c3672bae76758",
+            "qwen35_training_mask.py": "93a0b90611121992c73942cfca259e266ffd79a9a5a954199c6c3912739d32ef",
+            "qwen35_training_loss.py": "1b2bc08c84f468680df6e57b195601909981872b0a6a9173ccc2fdc0d6000d61"
+          },
+          "loading": {
+            "missing_keys": "set()",
+            "unexpected_keys": "set()",
+            "mismatched_keys": "set()",
+            "error_msgs": []
+          },
+          "model": {
+            "layers": 32,
+            "hidden_size": 2560,
+            "intermediate_size": 9216,
+            "gdn_layers": 24,
+            "attention_layers": 8,
+            "base_parameters": 4205751296
+          },
+          "checked_loaded_tensors": 427,
+          "gdn": {
+            "layers": 24,
+            "chunk_function": "fla.ops.gated_delta_rule.chunk",
+            "norm": "FusedRMSNormGated",
+            "conv_function": "causal_conv1d.causal_conv1d_interface"
+          },
+          "loss_implementation": {
+            "repository": "unslothai/unsloth",
+            "revision": "a0197ca266e14d22f66c0dcffc452fe1ce42bb0f",
+            "source_sha256": {
+              "cross_entropy_loss.py": "5f69f987fe160f83228b89da5119f5322225941e925dfcdf19f481f8d7b6f017",
+              "utils.py": "a9e0e6618db083ca677b248fdd526a78ec3884de3a2e5df43d7bfa86991e7830",
+              "rope_embedding.py": "6ac0a10f8c056319470e2c7702e1f25bbd128f96ec7363cca3d06f780c1b29ed"
+            },
+            "scope": "isolated original CE definitions, not the complete Unsloth trainer",
+            "upstream_forward_config": [
+              65536,
+              32
+            ],
+            "selected_forward_config": [
+              16384,
+              8
+            ],
+            "launch": "hip",
+            "dependency_bindings": "ROCm torch.cuda.device, tl.cast/libdevice, native is_hip",
+            "global_model_patches": false
+          },
+          "attention_policy": {
+            "name": "loraforge_fixed_causal_sdpa",
+            "transformers": "5.10.1",
+            "attention_layers": 8,
+            "scope": "positive rectangular unpadded/unpacked batch, no KV cache, q_length=kv_length, zero offsets, causal SDPA retained",
+            "native_source_sha256": {
+              "sdpa_attention_forward": "9123c5d5d025ecb29cd9c39cbf646627ab0eae85acd69d43ff275f0edbb914b6",
+              "use_gqa_in_sdpa": "b9448624b22ea05bea8dab3ed85531ebadb38dcb0fc30c041a613bf913badc96",
+              "is_tracing": "1392e7090c9863f55009f95b41dea2f1aad8271440780923086f175bd0b0dd10",
+              "_ignore_causal_mask_sdpa": "99bd967318b2212b0acf3b97423bce3e739268e210630cdc2779a575778bf711"
+            }
+          },
+          "adapter_tensors": 496,
+          "adapter_parameters": 8116224,
+          "initial_adapter_sha256": "7d97687b63b72ff94a25a4cba8c802a89f7717b90b72edbd4e9fafc172445332",
+          "compiler_counters": {},
+          "raw_report_sha256": "9b5a6cc8e299c8c1d6349eef91d0c84667b913fbf1f8eb56b413056bcdf0618e"
+        },
+        "peft-before": {
+          "state": "complete",
+          "argv": [
+            "/pfs/lustrep2/scratch/project_465003417/lishengh/loraforge-qwen35-loss-20261106/benchmark_qwen35_training.py",
+            "bf16-text",
+            "--output",
+            "results/b4-t1024/peft-before",
+            "--backend",
+            "peft",
+            "--loss-backend",
+            "native",
+            "--batch-size",
+            "4",
+            "--tokens",
+            "1024",
+            "--checkpointing",
+            "0",
+            "--check-input-change"
+          ],
+          "backend": "peft",
+          "cases": [
+            {
+              "batch": 4,
+              "tokens": 1024,
+              "input_tokens_per_step": 4096,
+              "supervised_tokens_per_step": 4092,
+              "input_sha256": "4e4a150064e7e806044f30abe3c63c57f35d777359b216ffc814e0d3fa30d496",
+              "checkpointing": false,
+              "losses": [
+                0.5049372911453247,
+                0.47164711356163025,
+                0.4000605046749115
+              ],
+              "sample_losses": [
+                0.4000605046749115,
+                0.3231232166290283,
+                0.28476858139038086,
+                0.28018614649772644,
+                0.2770741581916809
+              ],
+              "changed_input_sha256": "15ae9491d8c758b4dfa66e294c7b06b790e0383842f8042091570c2e481f8e9f",
+              "changed_input_loss": 0.33679670095443726,
+              "wall_ms": [
+                1475.306321051903,
+                1281.2582810292952,
+                1282.4644439970143,
+                1283.0038840183988,
+                1282.7250519767404
+              ],
+              "gpu_ms": [
+                1475.2301025390625,
+                1281.2078857421875,
+                1282.4127197265625,
+                1282.9556884765625,
+                1282.67724609375
+              ],
+              "median_wall_ms": 1282.7250519767404,
+              "median_gpu_ms": 1282.67724609375,
+              "tokens_per_second": 3193.2018429731834,
+              "supervised_tokens_per_second": 3190.083481798405,
+              "sequences_per_second": 3.1183611747784994,
+              "resident_allocated_bytes": 8668342784,
+              "peak_allocated_bytes": 46174150144,
+              "peak_reserved_bytes": 49503272960
+            }
+          ],
+          "scope": "Whole text-only BF16 Qwen3.5; all-linear rank4 LoRA FP32 masters; dropout0; zero_grad+forward+causal_loss+backward+AdamW; synthetic fixed text, not convergence",
+          "versions": {
+            "torch": "2.11.0+rocm7.2.lumi.aif.20260929120822",
+            "transformers": "5.10.1",
+            "peft": "0.21.1",
+            "fla-core": "0.6.0",
+            "flash-linear-attention": "0.6.0"
+          },
+          "device": "AMD Instinct MI250X",
+          "cuda_graph_replay": false,
+          "manual_cuda_graph_replay": false,
+          "native_autograd_graph_requested": false,
+          "implicit_causal_requested": false,
+          "cuda_graph_backend_requested": false,
+          "gradient_accumulation": 1,
+          "batch": 4,
+          "loss_backend": "native",
+          "rank": 4,
+          "alpha": 4,
+          "lr": 0.0001,
+          "warmup": 2,
+          "samples": 5,
+          "compiler_settings": {
+            "backend": null,
+            "emulate_precision_casts": false,
+            "recompile_limit": 8,
+            "float32_matmul_precision": "highest"
+          },
+          "source_sha256": {
+            "benchmark_qwen35_training.py": "76c829dacd2ea6a41dc4e40b20d783128dc2760ab55fab281667a55f97d5876a",
+            "run_qwen35_training.py": "d15410dcf77189faf267d531dd420b846413669158cee26a27446d538eeff1cf",
+            "qwen35_training_mlp.py": "9c7d4ab2cbbf6c9c3ac9858971a13d3f70d9381129ff418930672ef594e2f61a",
+            "lora_swiglu_training.py": "3d2e24f06dfa2df10eea2860ec4043cc9749854b2f4019451e5b46811722e576",
+            "lora_swiglu_kernels.py": "a7a4e909d7bab6ddd1fd8537c75b56ffb22285323b9182f85998aa5f3046e732",
+            "lora_native_training.py": "c2ac480ba429aa1b58b70383289b353aaccb0e9ffb70573df85794ce9901326b",
+            "qwen35_training_graph.py": "f2fd1d3d6efaff0808afa7b650e8423efaf3ceed7534e77b2a9c3672bae76758",
+            "qwen35_training_mask.py": "93a0b90611121992c73942cfca259e266ffd79a9a5a954199c6c3912739d32ef"
+          },
+          "loading": {
+            "missing_keys": "set()",
+            "unexpected_keys": "set()",
+            "mismatched_keys": "set()",
+            "error_msgs": []
+          },
+          "model": {
+            "layers": 32,
+            "hidden_size": 2560,
+            "intermediate_size": 9216,
+            "gdn_layers": 24,
+            "attention_layers": 8,
+            "base_parameters": 4205751296
+          },
+          "checked_loaded_tensors": 427,
+          "gdn": {
+            "layers": 24,
+            "chunk_function": "fla.ops.gated_delta_rule.chunk",
+            "norm": "FusedRMSNormGated",
+            "conv_function": "causal_conv1d.causal_conv1d_interface"
+          },
+          "adapter_tensors": 496,
+          "adapter_parameters": 8116224,
+          "initial_adapter_sha256": "7d97687b63b72ff94a25a4cba8c802a89f7717b90b72edbd4e9fafc172445332",
+          "compiler_counters": {},
+          "raw_report_sha256": "a5e75ca9c9cd7c0961ba54a63b25830b43cb97377aea39f20fbfa065908c4b98"
+        },
+        "unsloth-ce": {
+          "state": "complete",
+          "argv": [
+            "/pfs/lustrep2/scratch/project_465003417/lishengh/loraforge-qwen35-loss-20261106/benchmark_qwen35_training.py",
+            "bf16-text",
+            "--output",
+            "results/b4-t1024/unsloth-ce",
+            "--backend",
+            "peft",
+            "--loss-backend",
+            "unsloth-ce",
+            "--batch-size",
+            "4",
+            "--tokens",
+            "1024",
+            "--checkpointing",
+            "0",
+            "--check-input-change",
+            "--loss-source",
+            "reference"
+          ],
+          "backend": "peft",
+          "cases": [
+            {
+              "batch": 4,
+              "tokens": 1024,
+              "input_tokens_per_step": 4096,
+              "supervised_tokens_per_step": 4092,
+              "input_sha256": "4e4a150064e7e806044f30abe3c63c57f35d777359b216ffc814e0d3fa30d496",
+              "checkpointing": false,
+              "losses": [
+                0.5049374103546143,
+                0.4729825556278229,
+                0.39681917428970337
+              ],
+              "sample_losses": [
+                0.39681917428970337,
+                0.323332279920578,
+                0.28813692927360535,
+                0.2793743908405304,
+                0.2767467498779297
+              ],
+              "changed_input_sha256": "15ae9491d8c758b4dfa66e294c7b06b790e0383842f8042091570c2e481f8e9f",
+              "changed_input_loss": 0.33107879757881165,
+              "wall_ms": [
+                1245.1741709955968,
+                1243.9002559985965,
+                1243.8715699827299,
+                1244.465674040839,
+                1244.3370950059034
+              ],
+              "gpu_ms": [
+                1245.090087890625,
+                1243.8408203125,
+                1243.8138427734375,
+                1244.4088134765625,
+                1244.2821044921875
+              ],
+              "median_wall_ms": 1244.3370950059034,
+              "median_gpu_ms": 1244.2821044921875,
+              "tokens_per_second": 3291.7125242340926,
+              "supervised_tokens_per_second": 3288.497961222145,
+              "sequences_per_second": 3.214563011947356,
+              "resident_allocated_bytes": 8668342784,
+              "peak_allocated_bytes": 38037266432,
+              "peak_reserved_bytes": 41366323200
+            }
+          ],
+          "scope": "Whole text-only BF16 Qwen3.5; all-linear rank4 LoRA FP32 masters; dropout0; zero_grad+forward+causal_loss+backward+AdamW; synthetic fixed text, not convergence",
+          "versions": {
+            "torch": "2.11.0+rocm7.2.lumi.aif.20260929120822",
+            "transformers": "5.10.1",
+            "peft": "0.21.1",
+            "fla-core": "0.6.0",
+            "flash-linear-attention": "0.6.0"
+          },
+          "device": "AMD Instinct MI250X",
+          "cuda_graph_replay": false,
+          "manual_cuda_graph_replay": false,
+          "native_autograd_graph_requested": false,
+          "implicit_causal_requested": false,
+          "cuda_graph_backend_requested": false,
+          "gradient_accumulation": 1,
+          "batch": 4,
+          "loss_backend": "unsloth-ce",
+          "rank": 4,
+          "alpha": 4,
+          "lr": 0.0001,
+          "warmup": 2,
+          "samples": 5,
+          "compiler_settings": {
+            "backend": null,
+            "emulate_precision_casts": false,
+            "recompile_limit": 8,
+            "float32_matmul_precision": "highest"
+          },
+          "source_sha256": {
+            "benchmark_qwen35_training.py": "76c829dacd2ea6a41dc4e40b20d783128dc2760ab55fab281667a55f97d5876a",
+            "run_qwen35_training.py": "d15410dcf77189faf267d531dd420b846413669158cee26a27446d538eeff1cf",
+            "qwen35_training_mlp.py": "9c7d4ab2cbbf6c9c3ac9858971a13d3f70d9381129ff418930672ef594e2f61a",
+            "lora_swiglu_training.py": "3d2e24f06dfa2df10eea2860ec4043cc9749854b2f4019451e5b46811722e576",
+            "lora_swiglu_kernels.py": "a7a4e909d7bab6ddd1fd8537c75b56ffb22285323b9182f85998aa5f3046e732",
+            "lora_native_training.py": "c2ac480ba429aa1b58b70383289b353aaccb0e9ffb70573df85794ce9901326b",
+            "qwen35_training_graph.py": "f2fd1d3d6efaff0808afa7b650e8423efaf3ceed7534e77b2a9c3672bae76758",
+            "qwen35_training_mask.py": "93a0b90611121992c73942cfca259e266ffd79a9a5a954199c6c3912739d32ef",
+            "qwen35_training_loss.py": "1b2bc08c84f468680df6e57b195601909981872b0a6a9173ccc2fdc0d6000d61"
+          },
+          "loading": {
+            "missing_keys": "set()",
+            "unexpected_keys": "set()",
+            "mismatched_keys": "set()",
+            "error_msgs": []
+          },
+          "model": {
+            "layers": 32,
+            "hidden_size": 2560,
+            "intermediate_size": 9216,
+            "gdn_layers": 24,
+            "attention_layers": 8,
+            "base_parameters": 4205751296
+          },
+          "checked_loaded_tensors": 427,
+          "gdn": {
+            "layers": 24,
+            "chunk_function": "fla.ops.gated_delta_rule.chunk",
+            "norm": "FusedRMSNormGated",
+            "conv_function": "causal_conv1d.causal_conv1d_interface"
+          },
+          "loss_implementation": {
+            "repository": "unslothai/unsloth",
+            "revision": "a0197ca266e14d22f66c0dcffc452fe1ce42bb0f",
+            "source_sha256": {
+              "cross_entropy_loss.py": "5f69f987fe160f83228b89da5119f5322225941e925dfcdf19f481f8d7b6f017",
+              "utils.py": "a9e0e6618db083ca677b248fdd526a78ec3884de3a2e5df43d7bfa86991e7830",
+              "rope_embedding.py": "6ac0a10f8c056319470e2c7702e1f25bbd128f96ec7363cca3d06f780c1b29ed"
+            },
+            "scope": "isolated original CE definitions, not the complete Unsloth trainer",
+            "upstream_forward_config": [
+              65536,
+              32
+            ],
+            "selected_forward_config": [
+              16384,
+              8
+            ],
+            "launch": "hip",
+            "dependency_bindings": "ROCm torch.cuda.device, tl.cast/libdevice, native is_hip",
+            "global_model_patches": false
+          },
+          "adapter_tensors": 496,
+          "adapter_parameters": 8116224,
+          "initial_adapter_sha256": "7d97687b63b72ff94a25a4cba8c802a89f7717b90b72edbd4e9fafc172445332",
+          "compiler_counters": {},
+          "raw_report_sha256": "1c33c13431ae7719434c30cee778a3a88385bb4996c17f9de188869fc68312f2"
+        }
+      },
+      "comparisons": [
+        {
+          "candidate": "unsloth-ce",
+          "reference": "peft-before",
+          "checkpointing": false,
+          "tokens": 1024,
+          "batch": 4,
+          "speedup": 1.0308501266456698,
+          "loss_max_abs": 0.00324133038520813,
+          "grad": {
+            "tensors": 496,
+            "exact_tensors": 0,
+            "max_abs": 0.207275390625,
+            "max_relative_l2": 2.133647227391963,
+            "failed": [
+              {
+                "name": "base_model.model.model.layers.0.linear_attn.in_proj_a.lora_A.default.weight",
+                "max_abs": 3.3020973205566406e-05,
+                "relative_l2": 0.8485797931112755
+              },
+              {
+                "name": "base_model.model.model.layers.0.linear_attn.in_proj_a.lora_B.default.weight",
+                "max_abs": 0.0085296630859375,
+                "relative_l2": 1.078423141679926
+              },
+              {
+                "name": "base_model.model.model.layers.0.linear_attn.in_proj_b.lora_A.default.weight",
+                "max_abs": 0.00012123584747314453,
+                "relative_l2": 1.1344544848464457
+              },
+              {
+                "name": "base_model.model.model.layers.0.linear_attn.in_proj_b.lora_B.default.weight",
+                "max_abs": 0.118133544921875,
+                "relative_l2": 1.053969370184106
+              },
+              {
+                "name": "base_model.model.model.layers.0.linear_attn.in_proj_qkv.lora_A.default.weight",
+                "max_abs": 0.00077056884765625,
+                "relative_l2": 0.8208925134050838
+              }
+            ],
+            "passed": false,
+            "aggregate_relative_l2": 1.1144908582499176,
+            "failed_count": 426
+          },
+          "updated": {
+            "tensors": 496,
+            "exact_tensors": 0,
+            "max_abs": 0.0005649867234751582,
+            "max_relative_l2": 0.40470486621524154,
+            "failed": [
+              {
+                "name": "base_model.model.model.layers.0.linear_attn.in_proj_a.lora_A.default.weight",
+                "max_abs": 0.0003080954775214195,
+                "relative_l2": 0.005168656161032296
+              },
+              {
+                "name": "base_model.model.model.layers.0.linear_attn.in_proj_a.lora_B.default.weight",
+                "max_abs": 0.0002524549199733883,
+                "relative_l2": 0.31469842060133374
+              },
+              {
+                "name": "base_model.model.model.layers.0.linear_attn.in_proj_b.lora_A.default.weight",
+                "max_abs": 0.0003195619210600853,
+                "relative_l2": 0.010658693618504399
+              },
+              {
+                "name": "base_model.model.model.layers.0.linear_attn.in_proj_b.lora_B.default.weight",
+                "max_abs": 0.0002954852825496346,
+                "relative_l2": 0.3711869843424786
+              },
+              {
+                "name": "base_model.model.model.layers.0.linear_attn.in_proj_qkv.lora_A.default.weight",
+                "max_abs": 0.0003206217661499977,
+                "relative_l2": 0.007085833741653517
+              }
+            ],
+            "passed": false,
+            "aggregate_relative_l2": 0.008069787048650356,
+            "failed_count": 495
+          },
+          "logits": {
+            "tensors": 1,
+            "exact_tensors": 0,
+            "max_abs": 4.69140625,
+            "max_relative_l2": 0.09303779410408876,
+            "failed": [
+              {
+                "name": "logits",
+                "max_abs": 4.69140625,
+                "relative_l2": 0.09303779410408876
+              }
+            ],
+            "passed": false,
+            "max_sequence_relative_l2": 0.17763747943090555,
+            "aggregate_relative_l2": 0.09303779410408876,
+            "failed_count": 1
+          },
+          "numerics_passed": false,
+          "timed_loss_max_abs": 0.0033683478832244873,
+          "changed_input_loss_max_abs": 0.00571790337562561,
+          "changed-grad": {
+            "tensors": 496,
+            "exact_tensors": 0,
+            "max_abs": 0.054718017578125,
+            "max_relative_l2": 2.037556577274957,
+            "failed": [
+              {
+                "name": "base_model.model.model.layers.0.linear_attn.in_proj_a.lora_A.default.weight",
+                "max_abs": 1.7508864402770996e-05,
+                "relative_l2": 0.8557787266676185
+              },
+              {
+                "name": "base_model.model.model.layers.0.linear_attn.in_proj_a.lora_B.default.weight",
+                "max_abs": 0.004329681396484375,
+                "relative_l2": 0.8125200983685569
+              },
+              {
+                "name": "base_model.model.model.layers.0.linear_attn.in_proj_b.lora_A.default.weight",
+                "max_abs": 6.127357482910156e-05,
+                "relative_l2": 0.9391758174056253
+              },
+              {
+                "name": "base_model.model.model.layers.0.linear_attn.in_proj_b.lora_B.default.weight",
+                "max_abs": 0.020904541015625,
+                "relative_l2": 0.6216428660116815
+              },
+              {
+                "name": "base_model.model.model.layers.0.linear_attn.in_proj_qkv.lora_A.default.weight",
+                "max_abs": 0.0004736185073852539,
+                "relative_l2": 0.39208609946704825
+              }
+            ],
+            "passed": false,
+            "aggregate_relative_l2": 0.6303873448512887,
+            "failed_count": 485
+          },
+          "changed-logits": {
+            "tensors": 1,
+            "exact_tensors": 0,
+            "max_abs": 6.84375,
+            "max_relative_l2": 0.12796116254033715,
+            "failed": [
+              {
+                "name": "logits",
+                "max_abs": 6.84375,
+                "relative_l2": 0.12796116254033715
+              }
+            ],
+            "passed": false,
+            "max_sequence_relative_l2": 0.24562714399468483,
+            "aggregate_relative_l2": 0.12796116254033715,
+            "failed_count": 1
+          }
+        },
+        {
+          "candidate": "unsloth-ce-graph",
+          "reference": "peft-before",
+          "checkpointing": false,
+          "tokens": 1024,
+          "batch": 4,
+          "speedup": 1.0276352396703288,
+          "loss_max_abs": 0.00324133038520813,
+          "grad": {
+            "tensors": 496,
+            "exact_tensors": 0,
+            "max_abs": 0.207275390625,
+            "max_relative_l2": 2.133647227391963,
+            "failed": [
+              {
+                "name": "base_model.model.model.layers.0.linear_attn.in_proj_a.lora_A.default.weight",
+                "max_abs": 3.3020973205566406e-05,
+                "relative_l2": 0.8485797931112755
+              },
+              {
+                "name": "base_model.model.model.layers.0.linear_attn.in_proj_a.lora_B.default.weight",
+                "max_abs": 0.0085296630859375,
+                "relative_l2": 1.078423141679926
+              },
+              {
+                "name": "base_model.model.model.layers.0.linear_attn.in_proj_b.lora_A.default.weight",
+                "max_abs": 0.00012123584747314453,
+                "relative_l2": 1.1344544848464457
+              },
+              {
+                "name": "base_model.model.model.layers.0.linear_attn.in_proj_b.lora_B.default.weight",
+                "max_abs": 0.118133544921875,
+                "relative_l2": 1.053969370184106
+              },
+              {
+                "name": "base_model.model.model.layers.0.linear_attn.in_proj_qkv.lora_A.default.weight",
+                "max_abs": 0.00077056884765625,
+                "relative_l2": 0.8208925134050838
+              }
+            ],
+            "passed": false,
+            "aggregate_relative_l2": 1.1144908582499176,
+            "failed_count": 426
+          },
+          "updated": {
+            "tensors": 496,
+            "exact_tensors": 0,
+            "max_abs": 0.0005649867234751582,
+            "max_relative_l2": 0.40470486621524154,
+            "failed": [
+              {
+                "name": "base_model.model.model.layers.0.linear_attn.in_proj_a.lora_A.default.weight",
+                "max_abs": 0.0003080954775214195,
+                "relative_l2": 0.005168656161032296
+              },
+              {
+                "name": "base_model.model.model.layers.0.linear_attn.in_proj_a.lora_B.default.weight",
+                "max_abs": 0.0002524549199733883,
+                "relative_l2": 0.31469842060133374
+              },
+              {
+                "name": "base_model.model.model.layers.0.linear_attn.in_proj_b.lora_A.default.weight",
+                "max_abs": 0.0003195619210600853,
+                "relative_l2": 0.010658693618504399
+              },
+              {
+                "name": "base_model.model.model.layers.0.linear_attn.in_proj_b.lora_B.default.weight",
+                "max_abs": 0.0002954852825496346,
+                "relative_l2": 0.3711869843424786
+              },
+              {
+                "name": "base_model.model.model.layers.0.linear_attn.in_proj_qkv.lora_A.default.weight",
+                "max_abs": 0.0003206217661499977,
+                "relative_l2": 0.007085833741653517
+              }
+            ],
+            "passed": false,
+            "aggregate_relative_l2": 0.008069787048650356,
+            "failed_count": 495
+          },
+          "logits": {
+            "tensors": 1,
+            "exact_tensors": 0,
+            "max_abs": 4.69140625,
+            "max_relative_l2": 0.09303779410408876,
+            "failed": [
+              {
+                "name": "logits",
+                "max_abs": 4.69140625,
+                "relative_l2": 0.09303779410408876
+              }
+            ],
+            "passed": false,
+            "max_sequence_relative_l2": 0.17763747943090555,
+            "aggregate_relative_l2": 0.09303779410408876,
+            "failed_count": 1
+          },
+          "numerics_passed": false,
+          "timed_loss_max_abs": 0.0033683478832244873,
+          "changed_input_loss_max_abs": 0.00571790337562561,
+          "changed-grad": {
+            "tensors": 496,
+            "exact_tensors": 0,
+            "max_abs": 0.054718017578125,
+            "max_relative_l2": 2.037556577274957,
+            "failed": [
+              {
+                "name": "base_model.model.model.layers.0.linear_attn.in_proj_a.lora_A.default.weight",
+                "max_abs": 1.7508864402770996e-05,
+                "relative_l2": 0.8557787266676185
+              },
+              {
+                "name": "base_model.model.model.layers.0.linear_attn.in_proj_a.lora_B.default.weight",
+                "max_abs": 0.004329681396484375,
+                "relative_l2": 0.8125200983685569
+              },
+              {
+                "name": "base_model.model.model.layers.0.linear_attn.in_proj_b.lora_A.default.weight",
+                "max_abs": 6.127357482910156e-05,
+                "relative_l2": 0.9391758174056253
+              },
+              {
+                "name": "base_model.model.model.layers.0.linear_attn.in_proj_b.lora_B.default.weight",
+                "max_abs": 0.020904541015625,
+                "relative_l2": 0.6216428660116815
+              },
+              {
+                "name": "base_model.model.model.layers.0.linear_attn.in_proj_qkv.lora_A.default.weight",
+                "max_abs": 0.0004736185073852539,
+                "relative_l2": 0.39208609946704825
+              }
+            ],
+            "passed": false,
+            "aggregate_relative_l2": 0.6303873448512887,
+            "failed_count": 485
+          },
+          "changed-logits": {
+            "tensors": 1,
+            "exact_tensors": 0,
+            "max_abs": 6.84375,
+            "max_relative_l2": 0.12796116254033715,
+            "failed": [
+              {
+                "name": "logits",
+                "max_abs": 6.84375,
+                "relative_l2": 0.12796116254033715
+              }
+            ],
+            "passed": false,
+            "max_sequence_relative_l2": 0.24562714399468483,
+            "aggregate_relative_l2": 0.12796116254033715,
+            "failed_count": 1
+          }
+        },
+        {
+          "candidate": "unsloth-ce-graph",
+          "reference": "unsloth-ce",
+          "checkpointing": false,
+          "tokens": 1024,
+          "batch": 4,
+          "speedup": 0.9968813245570409,
+          "loss_max_abs": 0.0,
+          "grad": {
+            "tensors": 496,
+            "exact_tensors": 496,
+            "max_abs": 0.0,
+            "max_relative_l2": 0.0,
+            "failed": [],
+            "passed": true,
+            "aggregate_relative_l2": 0.0,
+            "failed_count": 0
+          },
+          "updated": {
+            "tensors": 496,
+            "exact_tensors": 496,
+            "max_abs": 0.0,
+            "max_relative_l2": 0.0,
+            "failed": [],
+            "passed": true,
+            "aggregate_relative_l2": 0.0,
+            "failed_count": 0
+          },
+          "logits": {
+            "tensors": 1,
+            "exact_tensors": 1,
+            "max_abs": 0.0,
+            "max_relative_l2": 0.0,
+            "failed": [],
+            "passed": true,
+            "max_sequence_relative_l2": 0,
+            "aggregate_relative_l2": 0.0,
+            "failed_count": 0
+          },
+          "numerics_passed": true,
+          "timed_loss_max_abs": 0.0,
+          "changed_input_loss_max_abs": 0.0,
+          "changed-grad": {
+            "tensors": 496,
+            "exact_tensors": 496,
+            "max_abs": 0.0,
+            "max_relative_l2": 0.0,
+            "failed": [],
+            "passed": true,
+            "aggregate_relative_l2": 0.0,
+            "failed_count": 0
+          },
+          "changed-logits": {
+            "tensors": 1,
+            "exact_tensors": 1,
+            "max_abs": 0.0,
+            "max_relative_l2": 0.0,
+            "failed": [],
+            "passed": true,
+            "max_sequence_relative_l2": 0,
+            "aggregate_relative_l2": 0.0,
+            "failed_count": 0
+          }
+        },
+        {
+          "candidate": "peft-after",
+          "reference": "peft-before",
+          "checkpointing": false,
+          "tokens": 1024,
+          "batch": 4,
+          "speedup": 1.0004081487371186,
+          "loss_max_abs": 0.0,
+          "grad": {
+            "tensors": 496,
+            "exact_tensors": 496,
+            "max_abs": 0.0,
+            "max_relative_l2": 0.0,
+            "failed": [],
+            "passed": true,
+            "aggregate_relative_l2": 0.0,
+            "failed_count": 0
+          },
+          "updated": {
+            "tensors": 496,
+            "exact_tensors": 496,
+            "max_abs": 0.0,
+            "max_relative_l2": 0.0,
+            "failed": [],
+            "passed": true,
+            "aggregate_relative_l2": 0.0,
+            "failed_count": 0
+          },
+          "logits": {
+            "tensors": 1,
+            "exact_tensors": 1,
+            "max_abs": 0.0,
+            "max_relative_l2": 0.0,
+            "failed": [],
+            "passed": true,
+            "max_sequence_relative_l2": 0,
+            "aggregate_relative_l2": 0.0,
+            "failed_count": 0
+          },
+          "numerics_passed": true,
+          "timed_loss_max_abs": 0.0,
+          "changed_input_loss_max_abs": 0.0,
+          "changed-grad": {
+            "tensors": 496,
+            "exact_tensors": 496,
+            "max_abs": 0.0,
+            "max_relative_l2": 0.0,
+            "failed": [],
+            "passed": true,
+            "aggregate_relative_l2": 0.0,
+            "failed_count": 0
+          },
+          "changed-logits": {
+            "tensors": 1,
+            "exact_tensors": 1,
+            "max_abs": 0.0,
+            "max_relative_l2": 0.0,
+            "failed": [],
+            "passed": true,
+            "max_sequence_relative_l2": 0,
+            "aggregate_relative_l2": 0.0,
+            "failed_count": 0
+          }
+        }
+      ],
+      "run": {
+        "name": "b4-t1024",
+        "batch": 4,
+        "tokens": 1024,
+        "workers": [
+          {
+            "name": "peft-before",
+            "backend": "peft",
+            "loss": "native",
+            "state": "complete",
+            "returncode": 0,
+            "seconds": 84.67775525100296
+          },
+          {
+            "name": "unsloth-ce",
+            "backend": "peft",
+            "loss": "unsloth-ce",
+            "state": "complete",
+            "returncode": 0,
+            "seconds": 39.734786909015384
+          },
+          {
+            "name": "unsloth-ce-graph",
+            "backend": "native-graph",
+            "loss": "unsloth-ce",
+            "state": "complete",
+            "returncode": 0,
+            "seconds": 43.202213264012244
+          },
+          {
+            "name": "peft-after",
+            "backend": "peft",
+            "loss": "native",
+            "state": "complete",
+            "returncode": 0,
+            "seconds": 39.550529772997834
+          }
+        ],
+        "state": "complete"
+      },
+      "state": "complete",
+      "batch": 4,
+      "tokens": 1024,
+      "native_reference_available": true,
+      "native_candidate_numerics_passed": false
+    },
+    {
+      "analyzer_sha256": "f27fb10f1eeb19507c774d879a59450a09e0d17355beca6a8b52cd6d91ea88e9",
+      "scope": "Whole BF16 Qwen3.5 text training step; fixed text, no convergence claim",
+      "gates": {
+        "loss_max_abs": 0.01,
+        "sampled_logits_relative_l2": 0.02,
+        "sampled_logits_per_sequence_relative_l2": 0.02,
+        "per_parameter_gradient_relative_l2": 0.05,
+        "updated_parameter_max_abs": 0.0001
+      },
+      "workers": {
+        "unsloth-ce-graph": {
+          "state": "running",
+          "argv": [
+            "/pfs/lustrep2/scratch/project_465003417/lishengh/loraforge-qwen35-loss-20261106/benchmark_qwen35_training.py",
+            "bf16-text",
+            "--output",
+            "results/b8-t1024/unsloth-ce-graph",
+            "--backend",
+            "native-graph",
+            "--loss-backend",
+            "unsloth-ce",
+            "--batch-size",
+            "8",
+            "--tokens",
+            "1024",
+            "--checkpointing",
+            "0",
+            "--check-input-change",
+            "--loss-source",
+            "reference",
+            "--implicit-causal"
+          ],
+          "backend": "native-graph",
+          "cases": [],
+          "scope": "Whole text-only BF16 Qwen3.5; all-linear rank4 LoRA FP32 masters; dropout0; zero_grad+forward+causal_loss+backward+AdamW; synthetic fixed text, not convergence",
+          "versions": {
+            "torch": "2.11.0+rocm7.2.lumi.aif.20260929120822",
+            "transformers": "5.10.1",
+            "peft": "0.21.1",
+            "fla-core": "0.6.0",
+            "flash-linear-attention": "0.6.0"
+          },
+          "device": "AMD Instinct MI250X",
+          "cuda_graph_replay": null,
+          "manual_cuda_graph_replay": false,
+          "native_autograd_graph_requested": true,
+          "implicit_causal_requested": true,
+          "cuda_graph_backend_requested": false,
+          "gradient_accumulation": 1,
+          "batch": 8,
+          "loss_backend": "unsloth-ce",
+          "rank": 4,
+          "alpha": 4,
+          "lr": 0.0001,
+          "warmup": 2,
+          "samples": 5,
+          "compiler_settings": {
+            "backend": null,
+            "emulate_precision_casts": false,
+            "recompile_limit": 8,
+            "float32_matmul_precision": "highest"
+          },
+          "source_sha256": {
+            "benchmark_qwen35_training.py": "76c829dacd2ea6a41dc4e40b20d783128dc2760ab55fab281667a55f97d5876a",
+            "run_qwen35_training.py": "d15410dcf77189faf267d531dd420b846413669158cee26a27446d538eeff1cf",
+            "qwen35_training_mlp.py": "9c7d4ab2cbbf6c9c3ac9858971a13d3f70d9381129ff418930672ef594e2f61a",
+            "lora_swiglu_training.py": "3d2e24f06dfa2df10eea2860ec4043cc9749854b2f4019451e5b46811722e576",
+            "lora_swiglu_kernels.py": "a7a4e909d7bab6ddd1fd8537c75b56ffb22285323b9182f85998aa5f3046e732",
+            "lora_native_training.py": "c2ac480ba429aa1b58b70383289b353aaccb0e9ffb70573df85794ce9901326b",
+            "qwen35_training_graph.py": "f2fd1d3d6efaff0808afa7b650e8423efaf3ceed7534e77b2a9c3672bae76758",
+            "qwen35_training_mask.py": "93a0b90611121992c73942cfca259e266ffd79a9a5a954199c6c3912739d32ef",
+            "qwen35_training_loss.py": "1b2bc08c84f468680df6e57b195601909981872b0a6a9173ccc2fdc0d6000d61"
+          },
+          "loading": {
+            "missing_keys": "set()",
+            "unexpected_keys": "set()",
+            "mismatched_keys": "set()",
+            "error_msgs": []
+          },
+          "model": {
+            "layers": 32,
+            "hidden_size": 2560,
+            "intermediate_size": 9216,
+            "gdn_layers": 24,
+            "attention_layers": 8,
+            "base_parameters": 4205751296
+          },
+          "checked_loaded_tensors": 427,
+          "gdn": {
+            "layers": 24,
+            "chunk_function": "fla.ops.gated_delta_rule.chunk",
+            "norm": "FusedRMSNormGated",
+            "conv_function": "causal_conv1d.causal_conv1d_interface"
+          },
+          "loss_implementation": {
+            "repository": "unslothai/unsloth",
+            "revision": "a0197ca266e14d22f66c0dcffc452fe1ce42bb0f",
+            "source_sha256": {
+              "cross_entropy_loss.py": "5f69f987fe160f83228b89da5119f5322225941e925dfcdf19f481f8d7b6f017",
+              "utils.py": "a9e0e6618db083ca677b248fdd526a78ec3884de3a2e5df43d7bfa86991e7830",
+              "rope_embedding.py": "6ac0a10f8c056319470e2c7702e1f25bbd128f96ec7363cca3d06f780c1b29ed"
+            },
+            "scope": "isolated original CE definitions, not the complete Unsloth trainer",
+            "upstream_forward_config": [
+              65536,
+              32
+            ],
+            "selected_forward_config": [
+              16384,
+              8
+            ],
+            "launch": "hip",
+            "dependency_bindings": "ROCm torch.cuda.device, tl.cast/libdevice, native is_hip",
+            "global_model_patches": false
+          },
+          "attention_policy": {
+            "name": "loraforge_fixed_causal_sdpa",
+            "transformers": "5.10.1",
+            "attention_layers": 8,
+            "scope": "positive rectangular unpadded/unpacked batch, no KV cache, q_length=kv_length, zero offsets, causal SDPA retained",
+            "native_source_sha256": {
+              "sdpa_attention_forward": "9123c5d5d025ecb29cd9c39cbf646627ab0eae85acd69d43ff275f0edbb914b6",
+              "use_gqa_in_sdpa": "b9448624b22ea05bea8dab3ed85531ebadb38dcb0fc30c041a613bf913badc96",
+              "is_tracing": "1392e7090c9863f55009f95b41dea2f1aad8271440780923086f175bd0b0dd10",
+              "_ignore_causal_mask_sdpa": "99bd967318b2212b0acf3b97423bce3e739268e210630cdc2779a575778bf711"
+            }
+          },
+          "adapter_tensors": 496,
+          "adapter_parameters": 8116224,
+          "initial_adapter_sha256": "7d97687b63b72ff94a25a4cba8c802a89f7717b90b72edbd4e9fafc172445332",
+          "raw_report_sha256": "5447b082b09ad3ca581857aecfd5a18ff6c654eea044d64ea03bf4070e542116"
+        },
+        "peft-before": {
+          "state": "running",
+          "argv": [
+            "/pfs/lustrep2/scratch/project_465003417/lishengh/loraforge-qwen35-loss-20261106/benchmark_qwen35_training.py",
+            "bf16-text",
+            "--output",
+            "results/b8-t1024/peft-before",
+            "--backend",
+            "peft",
+            "--loss-backend",
+            "native",
+            "--batch-size",
+            "8",
+            "--tokens",
+            "1024",
+            "--checkpointing",
+            "0",
+            "--check-input-change"
+          ],
+          "backend": "peft",
+          "cases": [],
+          "scope": "Whole text-only BF16 Qwen3.5; all-linear rank4 LoRA FP32 masters; dropout0; zero_grad+forward+causal_loss+backward+AdamW; synthetic fixed text, not convergence",
+          "versions": {
+            "torch": "2.11.0+rocm7.2.lumi.aif.20260929120822",
+            "transformers": "5.10.1",
+            "peft": "0.21.1",
+            "fla-core": "0.6.0",
+            "flash-linear-attention": "0.6.0"
+          },
+          "device": "AMD Instinct MI250X",
+          "cuda_graph_replay": false,
+          "manual_cuda_graph_replay": false,
+          "native_autograd_graph_requested": false,
+          "implicit_causal_requested": false,
+          "cuda_graph_backend_requested": false,
+          "gradient_accumulation": 1,
+          "batch": 8,
+          "loss_backend": "native",
+          "rank": 4,
+          "alpha": 4,
+          "lr": 0.0001,
+          "warmup": 2,
+          "samples": 5,
+          "compiler_settings": {
+            "backend": null,
+            "emulate_precision_casts": false,
+            "recompile_limit": 8,
+            "float32_matmul_precision": "highest"
+          },
+          "source_sha256": {
+            "benchmark_qwen35_training.py": "76c829dacd2ea6a41dc4e40b20d783128dc2760ab55fab281667a55f97d5876a",
+            "run_qwen35_training.py": "d15410dcf77189faf267d531dd420b846413669158cee26a27446d538eeff1cf",
+            "qwen35_training_mlp.py": "9c7d4ab2cbbf6c9c3ac9858971a13d3f70d9381129ff418930672ef594e2f61a",
+            "lora_swiglu_training.py": "3d2e24f06dfa2df10eea2860ec4043cc9749854b2f4019451e5b46811722e576",
+            "lora_swiglu_kernels.py": "a7a4e909d7bab6ddd1fd8537c75b56ffb22285323b9182f85998aa5f3046e732",
+            "lora_native_training.py": "c2ac480ba429aa1b58b70383289b353aaccb0e9ffb70573df85794ce9901326b",
+            "qwen35_training_graph.py": "f2fd1d3d6efaff0808afa7b650e8423efaf3ceed7534e77b2a9c3672bae76758",
+            "qwen35_training_mask.py": "93a0b90611121992c73942cfca259e266ffd79a9a5a954199c6c3912739d32ef"
+          },
+          "loading": {
+            "missing_keys": "set()",
+            "unexpected_keys": "set()",
+            "mismatched_keys": "set()",
+            "error_msgs": []
+          },
+          "model": {
+            "layers": 32,
+            "hidden_size": 2560,
+            "intermediate_size": 9216,
+            "gdn_layers": 24,
+            "attention_layers": 8,
+            "base_parameters": 4205751296
+          },
+          "checked_loaded_tensors": 427,
+          "gdn": {
+            "layers": 24,
+            "chunk_function": "fla.ops.gated_delta_rule.chunk",
+            "norm": "FusedRMSNormGated",
+            "conv_function": "causal_conv1d.causal_conv1d_interface"
+          },
+          "adapter_tensors": 496,
+          "adapter_parameters": 8116224,
+          "initial_adapter_sha256": "7d97687b63b72ff94a25a4cba8c802a89f7717b90b72edbd4e9fafc172445332",
+          "raw_report_sha256": "c1e3010e172b8f8a7432529aa9cbf7c3eb56aeb64dae249717975dcd01b1b41b"
+        },
+        "unsloth-ce": {
+          "state": "running",
+          "argv": [
+            "/pfs/lustrep2/scratch/project_465003417/lishengh/loraforge-qwen35-loss-20261106/benchmark_qwen35_training.py",
+            "bf16-text",
+            "--output",
+            "results/b8-t1024/unsloth-ce",
+            "--backend",
+            "peft",
+            "--loss-backend",
+            "unsloth-ce",
+            "--batch-size",
+            "8",
+            "--tokens",
+            "1024",
+            "--checkpointing",
+            "0",
+            "--check-input-change",
+            "--loss-source",
+            "reference"
+          ],
+          "backend": "peft",
+          "cases": [],
+          "scope": "Whole text-only BF16 Qwen3.5; all-linear rank4 LoRA FP32 masters; dropout0; zero_grad+forward+causal_loss+backward+AdamW; synthetic fixed text, not convergence",
+          "versions": {
+            "torch": "2.11.0+rocm7.2.lumi.aif.20260929120822",
+            "transformers": "5.10.1",
+            "peft": "0.21.1",
+            "fla-core": "0.6.0",
+            "flash-linear-attention": "0.6.0"
+          },
+          "device": "AMD Instinct MI250X",
+          "cuda_graph_replay": false,
+          "manual_cuda_graph_replay": false,
+          "native_autograd_graph_requested": false,
+          "implicit_causal_requested": false,
+          "cuda_graph_backend_requested": false,
+          "gradient_accumulation": 1,
+          "batch": 8,
+          "loss_backend": "unsloth-ce",
+          "rank": 4,
+          "alpha": 4,
+          "lr": 0.0001,
+          "warmup": 2,
+          "samples": 5,
+          "compiler_settings": {
+            "backend": null,
+            "emulate_precision_casts": false,
+            "recompile_limit": 8,
+            "float32_matmul_precision": "highest"
+          },
+          "source_sha256": {
+            "benchmark_qwen35_training.py": "76c829dacd2ea6a41dc4e40b20d783128dc2760ab55fab281667a55f97d5876a",
+            "run_qwen35_training.py": "d15410dcf77189faf267d531dd420b846413669158cee26a27446d538eeff1cf",
+            "qwen35_training_mlp.py": "9c7d4ab2cbbf6c9c3ac9858971a13d3f70d9381129ff418930672ef594e2f61a",
+            "lora_swiglu_training.py": "3d2e24f06dfa2df10eea2860ec4043cc9749854b2f4019451e5b46811722e576",
+            "lora_swiglu_kernels.py": "a7a4e909d7bab6ddd1fd8537c75b56ffb22285323b9182f85998aa5f3046e732",
+            "lora_native_training.py": "c2ac480ba429aa1b58b70383289b353aaccb0e9ffb70573df85794ce9901326b",
+            "qwen35_training_graph.py": "f2fd1d3d6efaff0808afa7b650e8423efaf3ceed7534e77b2a9c3672bae76758",
+            "qwen35_training_mask.py": "93a0b90611121992c73942cfca259e266ffd79a9a5a954199c6c3912739d32ef",
+            "qwen35_training_loss.py": "1b2bc08c84f468680df6e57b195601909981872b0a6a9173ccc2fdc0d6000d61"
+          },
+          "loading": {
+            "missing_keys": "set()",
+            "unexpected_keys": "set()",
+            "mismatched_keys": "set()",
+            "error_msgs": []
+          },
+          "model": {
+            "layers": 32,
+            "hidden_size": 2560,
+            "intermediate_size": 9216,
+            "gdn_layers": 24,
+            "attention_layers": 8,
+            "base_parameters": 4205751296
+          },
+          "checked_loaded_tensors": 427,
+          "gdn": {
+            "layers": 24,
+            "chunk_function": "fla.ops.gated_delta_rule.chunk",
+            "norm": "FusedRMSNormGated",
+            "conv_function": "causal_conv1d.causal_conv1d_interface"
+          },
+          "loss_implementation": {
+            "repository": "unslothai/unsloth",
+            "revision": "a0197ca266e14d22f66c0dcffc452fe1ce42bb0f",
+            "source_sha256": {
+              "cross_entropy_loss.py": "5f69f987fe160f83228b89da5119f5322225941e925dfcdf19f481f8d7b6f017",
+              "utils.py": "a9e0e6618db083ca677b248fdd526a78ec3884de3a2e5df43d7bfa86991e7830",
+              "rope_embedding.py": "6ac0a10f8c056319470e2c7702e1f25bbd128f96ec7363cca3d06f780c1b29ed"
+            },
+            "scope": "isolated original CE definitions, not the complete Unsloth trainer",
+            "upstream_forward_config": [
+              65536,
+              32
+            ],
+            "selected_forward_config": [
+              16384,
+              8
+            ],
+            "launch": "hip",
+            "dependency_bindings": "ROCm torch.cuda.device, tl.cast/libdevice, native is_hip",
+            "global_model_patches": false
+          },
+          "adapter_tensors": 496,
+          "adapter_parameters": 8116224,
+          "initial_adapter_sha256": "7d97687b63b72ff94a25a4cba8c802a89f7717b90b72edbd4e9fafc172445332",
+          "raw_report_sha256": "d42df0e99ef2c0c90a27e508a5da082f78faa4c0e57e0d61026361f0d6b49fbf"
+        }
+      },
+      "comparisons": [],
+      "run": {
+        "name": "b8-t1024",
+        "batch": 8,
+        "tokens": 1024,
+        "workers": [
+          {
+            "name": "peft-before",
+            "backend": "peft",
+            "loss": "native",
+            "state": "oom",
+            "returncode": 1,
+            "seconds": 25.365785809000954
+          },
+          {
+            "name": "unsloth-ce",
+            "backend": "peft",
+            "loss": "unsloth-ce",
+            "state": "oom",
+            "returncode": 1,
+            "seconds": 24.71542518597562
+          },
+          {
+            "name": "unsloth-ce-graph",
+            "backend": "native-graph",
+            "loss": "unsloth-ce",
+            "state": "oom",
+            "returncode": 1,
+            "seconds": 24.2204994019703
+          },
+          {
+            "name": "peft-after",
+            "backend": "peft",
+            "loss": "native",
+            "state": "skipped_missing_reference"
+          }
+        ],
+        "state": "capacity_limit"
+      },
+      "state": "partial",
+      "batch": 8,
+      "tokens": 1024,
+      "native_reference_available": false,
+      "native_candidate_numerics_passed": null
+    }
+  ],
+  "operator_checks": {
+    "check-hip": {
+      "state": "passed",
+      "source": {
+        "repository": "unslothai/unsloth",
+        "revision": "a0197ca266e14d22f66c0dcffc452fe1ce42bb0f",
+        "source_sha256": {
+          "cross_entropy_loss.py": "5f69f987fe160f83228b89da5119f5322225941e925dfcdf19f481f8d7b6f017",
+          "utils.py": "a9e0e6618db083ca677b248fdd526a78ec3884de3a2e5df43d7bfa86991e7830",
+          "rope_embedding.py": "6ac0a10f8c056319470e2c7702e1f25bbd128f96ec7363cca3d06f780c1b29ed"
+        },
+        "scope": "isolated original CE definitions, not the complete Unsloth trainer",
+        "upstream_forward_config": [
+          65536,
+          32
+        ],
+        "selected_forward_config": [
+          16384,
+          8
+        ],
+        "launch": "hip",
+        "dependency_bindings": "ROCm torch.cuda.device, tl.cast/libdevice, native is_hip",
+        "global_model_patches": false
+      },
+      "cases": [
+        {
+          "batch": 2,
+          "tokens": 17,
+          "vocab": 1003,
+          "loss_max_abs": 0.0,
+          "gradient_relative_l2": 5.890303711453271e-08,
+          "caller_storage_unchanged": true,
+          "repeated_backward_scaled": true,
+          "timings": {
+            "native": {
+              "samples_ms": [
+                0.3126179799437523,
+                0.29617600375786424,
+                0.22985704708844423,
+                0.3023979952558875,
+                0.22671103943139315
+              ],
+              "median_ms": 0.29617600375786424
+            },
+            "unsloth-ce": {
+              "samples_ms": [
+                0.5554900271818042,
+                0.5545879830606282,
+                0.552103971131146,
+                0.5466029979288578,
+                0.5519429687410593
+              ],
+              "median_ms": 0.552103971131146
+            }
+          }
+        },
+        {
+          "batch": 4,
+          "tokens": 32,
+          "vocab": 248320,
+          "loss_max_abs": 1.9073486328125e-06,
+          "gradient_relative_l2": 1.4694402352688485e-06,
+          "caller_storage_unchanged": true,
+          "repeated_backward_scaled": true,
+          "timings": {
+            "native": {
+              "samples_ms": [
+                1.4361219946295023,
+                1.4337070169858634,
+                1.4353810111060739,
+                1.4292779960669577,
+                1.4285080251283944
+              ],
+              "median_ms": 1.4337070169858634
+            },
+            "unsloth-ce": {
+              "samples_ms": [
+                0.741782016120851,
+                0.70658401818946,
+                0.7062620134092867,
+                0.6954619893804193,
+                0.6917149876244366
+              ],
+              "median_ms": 0.7062620134092867
+            }
+          }
+        },
+        {
+          "batch": 8,
+          "tokens": 64,
+          "vocab": 248320,
+          "loss_max_abs": 0.0,
+          "gradient_relative_l2": 7.795647434249986e-07,
+          "caller_storage_unchanged": true,
+          "repeated_backward_scaled": true,
+          "timings": {
+            "native": {
+              "samples_ms": [
+                5.4727980168536305,
+                5.4848630097694695,
+                5.45736902859062,
+                5.483319982886314,
+                5.46156702330336
+              ],
+              "median_ms": 5.4727980168536305
+            },
+            "unsloth-ce": {
+              "samples_ms": [
+                1.025001984089613,
+                1.0288400226272643,
+                1.010252977721393,
+                1.016636029817164,
+                1.0091019794344902
+              ],
+              "median_ms": 1.016636029817164
+            }
+          }
+        }
+      ]
+    },
+    "check-upstream": {
+      "state": "running",
+      "source": {
+        "repository": "unslothai/unsloth",
+        "revision": "a0197ca266e14d22f66c0dcffc452fe1ce42bb0f",
+        "source_sha256": {
+          "cross_entropy_loss.py": "5f69f987fe160f83228b89da5119f5322225941e925dfcdf19f481f8d7b6f017",
+          "utils.py": "a9e0e6618db083ca677b248fdd526a78ec3884de3a2e5df43d7bfa86991e7830",
+          "rope_embedding.py": "6ac0a10f8c056319470e2c7702e1f25bbd128f96ec7363cca3d06f780c1b29ed"
+        },
+        "scope": "isolated original CE definitions, not the complete Unsloth trainer",
+        "upstream_forward_config": [
+          65536,
+          32
+        ],
+        "selected_forward_config": [
+          65536,
+          32
+        ],
+        "launch": "upstream",
+        "dependency_bindings": "ROCm torch.cuda.device, tl.cast/libdevice, native is_hip",
+        "global_model_patches": false
+      },
+      "cases": [
+        {
+          "batch": 2,
+          "tokens": 17,
+          "vocab": 1003,
+          "loss_max_abs": 0.0,
+          "gradient_relative_l2": 5.890303711453271e-08,
+          "caller_storage_unchanged": true,
+          "repeated_backward_scaled": true,
+          "timings": {
+            "native": {
+              "samples_ms": [
+                0.22971699945628643,
+                0.22401497699320316,
+                0.21752301836386323,
+                0.20549900364130735,
+                0.22314401576295495
+              ],
+              "median_ms": 0.22314401576295495
+            },
+            "unsloth-ce": {
+              "samples_ms": [
+                0.5752480356022716,
+                0.5717210005968809,
+                0.5537659744732082,
+                0.5483560380525887,
+                0.5466930451802909
+              ],
+              "median_ms": 0.5537659744732082
+            }
+          }
+        }
+      ]
+    }
+  },
+  "state": "failed",
+  "controller_sha256": "7a9f4fb152183b91998d393547af8ac1bcb260e2a9823119a511cc34d42464a0",
+  "validation": {
+    "status": "not_accepted_native_equivalent_training",
+    "job_id": 23515154,
+    "node": "nid005036",
+    "slurm_state": "COMPLETED",
+    "elapsed": "00:05:08",
+    "gcds": 1,
+    "requested_cpus": 7,
+    "host_memory_gb": 40,
+    "limit_minutes": 20,
+    "source_manifest": {
+      "qwen35_training_loss.py": "1b2bc08c84f468680df6e57b195601909981872b0a6a9173ccc2fdc0d6000d61",
+      "benchmark_qwen35_training.py": "76c829dacd2ea6a41dc4e40b20d783128dc2760ab55fab281667a55f97d5876a",
+      "lora_swiglu_training.py": "3d2e24f06dfa2df10eea2860ec4043cc9749854b2f4019451e5b46811722e576",
+      "lora_native_training.py": "c2ac480ba429aa1b58b70383289b353aaccb0e9ffb70573df85794ce9901326b",
+      "qwen35_training_mlp.py": "9c7d4ab2cbbf6c9c3ac9858971a13d3f70d9381129ff418930672ef594e2f61a",
+      "lora_swiglu_kernels.py": "a7a4e909d7bab6ddd1fd8537c75b56ffb22285323b9182f85998aa5f3046e732",
+      "analyze_qwen35_training.py": "f27fb10f1eeb19507c774d879a59450a09e0d17355beca6a8b52cd6d91ea88e9",
+      "qwen35_training_mask.py": "93a0b90611121992c73942cfca259e266ffd79a9a5a954199c6c3912739d32ef",
+      "check_unsloth_training_loss.py": "f93ff2405832752c8f0238b944f11ed01a42f389bd39c18667b75e3a16693d1e",
+      "run_qwen35_training_batches.py": "7eaeaa650e7c977d6030815407519ebe48a6f476effe749cd0dbe55a5b594488",
+      "run_qwen35_training_loss.py": "7a9f4fb152183b91998d393547af8ac1bcb260e2a9823119a511cc34d42464a0",
+      "qwen35_training_graph.py": "f2fd1d3d6efaff0808afa7b650e8423efaf3ceed7534e77b2a9c3672bae76758",
+      "run_qwen35_training.py": "d15410dcf77189faf267d531dd420b846413669158cee26a27446d538eeff1cf",
+      "reference/rope_embedding.py": "6ac0a10f8c056319470e2c7702e1f25bbd128f96ec7363cca3d06f780c1b29ed",
+      "reference/utils.py": "a9e0e6618db083ca677b248fdd526a78ec3884de3a2e5df43d7bfa86991e7830",
+      "reference/cross_entropy_loss.py": "5f69f987fe160f83228b89da5119f5322225941e925dfcdf19f481f8d7b6f017"
+    },
+    "raw_comparison_sha256": "1aacba83ccbd9b2e46111b2b571f40dc4545185f8c7cc7a5a1343591606d7646",
+    "cpu_tests_passed": 245,
+    "cpu_skipped": 3,
+    "gpu_unit_tests_deselected": 49,
+    "failure_logs": {
+      "results/check-hip.log": {
+        "sha256": "7dbcb50c78a0d3ce0ce8dbfca92aa83c9318d4141afab615539fa05681545280",
+        "tail": [
+          "CE_CHECK hip 2 17 0.0 5.890303711453271e-08",
+          "CE_CHECK hip 4 32 1.9073486328125e-06 1.4694402352688485e-06",
+          "CE_CHECK hip 8 64 0.0 7.795647434249986e-07"
+        ]
+      },
+      "results/check-upstream.log": {
+        "sha256": "d0d201600236fd9f2143a779ca654f08f0682cd8f3d4b9ea3060668a56ab8836",
+        "tail": [
+          "    launch_metadata = kernel.launch_metadata(grid, stream, *bound_args.values())",
+          "                      ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^",
+          "  File \"/opt/venv/lib/python3.12/site-packages/triton/compiler/compiler.py\", line 482, in launch_metadata",
+          "    self._init_handles()",
+          "  File \"/opt/venv/lib/python3.12/site-packages/triton/compiler/compiler.py\", line 469, in _init_handles",
+          "    raise_(OutOfResources(self.metadata.num_warps * warp_size, self.n_max_threads, \"threads\"))",
+          "  File \"/opt/venv/lib/python3.12/site-packages/triton/compiler/compiler.py\", line 448, in raise_",
+          "    raise err",
+          "triton.runtime.errors.OutOfResources: out of resource: threads, Required: 2048, Hardware limit: 1024. Reducing block sizes or `num_stages` may help."
+        ]
+      },
+      "results/b8-t1024/peft-before.log": {
+        "sha256": "c0d8b03560bf091759879d0173d2ee96fb7ab500645843d17229de1554709eba",
+        "tail": [
+          "    output = func(self, *args, **kwargs)",
+          "             ^^^^^^^^^^^^^^^^^^^^^^^^^^^",
+          "  File \"/opt/venv/lib/python3.12/site-packages/transformers/models/qwen3_5/modeling_qwen3_5.py\", line 1684, in forward",
+          "    loss = self.loss_function(logits=logits, labels=labels, vocab_size=self.config.vocab_size, **kwargs)",
+          "           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^",
+          "  File \"/opt/venv/lib/python3.12/site-packages/transformers/loss/loss_utils.py\", line 58, in ForCausalLMLoss",
+          "    logits = logits.float()",
+          "             ^^^^^^^^^^^^^^",
+          "torch.OutOfMemoryError: CUDA out of memory. Tried to allocate 7.58 GiB. GPU 0 has a total capacity of 63.98 GiB of which 2.95 GiB is free. Of the allocated memory 58.88 GiB is allocated by PyTorch, and 1.76 GiB is reserved by PyTorch but unallocated. If reserved but unallocated memory is large try setting PYTORCH_CUDA_ALLOC_CONF=expandable_segments:True to avoid fragmentation.  See documentation for Memory Management  (https://docs.pytorch.org/docs/stable/notes/cuda.html#optimizing-memory-usage-with-pytorch-cuda-alloc-conf)"
+        ]
+      },
+      "results/b8-t1024/unsloth-ce-graph.log": {
+        "sha256": "812a6319b051c937a25977bcbef0cad59b7a03bf1b03269f441a4f1ffc98d6e9",
+        "tail": [
+          "    return Variable._execution_engine.run_backward(  # Calls into the C++ engine to run the backward pass",
+          "           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^",
+          "  File \"/opt/venv/lib/python3.12/site-packages/torch/autograd/function.py\", line 317, in apply",
+          "    return user_fn(self, *args)",
+          "           ^^^^^^^^^^^^^^^^^^^^",
+          "  File \"reference/cross_entropy_loss.py\", line 498, in backward",
+          "    dlogits = torch.empty_like(logits)",
+          "              ^^^^^^^^^^^^^^^^^^^^^^^^",
+          "torch.OutOfMemoryError: CUDA out of memory. Tried to allocate 3.79 GiB. GPU 0 has a total capacity of 63.98 GiB of which 3.06 GiB is free. Of the allocated memory 58.84 GiB is allocated by PyTorch, and 1.67 GiB is reserved by PyTorch but unallocated. If reserved but unallocated memory is large try setting PYTORCH_CUDA_ALLOC_CONF=expandable_segments:True to avoid fragmentation.  See documentation for Memory Management  (https://docs.pytorch.org/docs/stable/notes/cuda.html#optimizing-memory-usage-with-pytorch-cuda-alloc-conf)"
+        ]
+      },
+      "results/b8-t1024/unsloth-ce.log": {
+        "sha256": "6c39c630af277e984f160a1c6d289b09b30c1b0bafb190dd9d82709832d70866",
+        "tail": [
+          "    return Variable._execution_engine.run_backward(  # Calls into the C++ engine to run the backward pass",
+          "           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^",
+          "  File \"/opt/venv/lib/python3.12/site-packages/torch/autograd/function.py\", line 317, in apply",
+          "    return user_fn(self, *args)",
+          "           ^^^^^^^^^^^^^^^^^^^^",
+          "  File \"reference/cross_entropy_loss.py\", line 498, in backward",
+          "    dlogits = torch.empty_like(logits)",
+          "              ^^^^^^^^^^^^^^^^^^^^^^^^",
+          "torch.OutOfMemoryError: CUDA out of memory. Tried to allocate 3.79 GiB. GPU 0 has a total capacity of 63.98 GiB of which 3.00 GiB is free. Of the allocated memory 58.84 GiB is allocated by PyTorch, and 1.72 GiB is reserved by PyTorch but unallocated. If reserved but unallocated memory is large try setting PYTORCH_CUDA_ALLOC_CONF=expandable_segments:True to avoid fragmentation.  See documentation for Memory Management  (https://docs.pytorch.org/docs/stable/notes/cuda.html#optimizing-memory-usage-with-pytorch-cuda-alloc-conf)"
+        ]
+      }
+    }
+  },
+  "initial_diagnostic": {
+    "job_id": 23515537,
+    "node": "nid005071",
+    "elapsed": "00:02:31",
+    "slurm_state": "COMPLETED",
+    "limit_minutes": 7,
+    "gcds": 1,
+    "host_memory_gb": 40,
+    "source_manifest": {
+      "qwen35_training_loss.py": "1b2bc08c84f468680df6e57b195601909981872b0a6a9173ccc2fdc0d6000d61",
+      "benchmark_qwen35_training.py": "93928fe21ed9e4e6fd14b4dff8f27dc9cce7f95e1ee25967321fa5d0cd64cb46",
+      "lora_swiglu_training.py": "3d2e24f06dfa2df10eea2860ec4043cc9749854b2f4019451e5b46811722e576",
+      "lora_native_training.py": "c2ac480ba429aa1b58b70383289b353aaccb0e9ffb70573df85794ce9901326b",
+      "qwen35_training_mlp.py": "9c7d4ab2cbbf6c9c3ac9858971a13d3f70d9381129ff418930672ef594e2f61a",
+      "lora_swiglu_kernels.py": "a7a4e909d7bab6ddd1fd8537c75b56ffb22285323b9182f85998aa5f3046e732",
+      "analyze_qwen35_training.py": "f27fb10f1eeb19507c774d879a59450a09e0d17355beca6a8b52cd6d91ea88e9",
+      "qwen35_training_mask.py": "93a0b90611121992c73942cfca259e266ffd79a9a5a954199c6c3912739d32ef",
+      "check_unsloth_training_loss.py": "f93ff2405832752c8f0238b944f11ed01a42f389bd39c18667b75e3a16693d1e",
+      "run_qwen35_training_batches.py": "7eaeaa650e7c977d6030815407519ebe48a6f476effe749cd0dbe55a5b594488",
+      "run_qwen35_training_loss.py": "7a9f4fb152183b91998d393547af8ac1bcb260e2a9823119a511cc34d42464a0",
+      "qwen35_training_graph.py": "f2fd1d3d6efaff0808afa7b650e8423efaf3ceed7534e77b2a9c3672bae76758",
+      "diagnose_unsloth_training_loss.py": "77a6f5dca088525dbe05a9456c96979341815febfa13c26e9b66727f3d2a827e",
+      "run_qwen35_training.py": "d15410dcf77189faf267d531dd420b846413669158cee26a27446d538eeff1cf"
+    },
+    "kernel_scope": "12 sampled real head rows, BF16 gradients, 4092 supervised-token normalization; not all 4096 rows",
+    "kernel": {
+      "source": {
+        "repository": "unslothai/unsloth",
+        "revision": "a0197ca266e14d22f66c0dcffc452fe1ce42bb0f",
+        "source_sha256": {
+          "cross_entropy_loss.py": "5f69f987fe160f83228b89da5119f5322225941e925dfcdf19f481f8d7b6f017",
+          "utils.py": "a9e0e6618db083ca677b248fdd526a78ec3884de3a2e5df43d7bfa86991e7830",
+          "rope_embedding.py": "6ac0a10f8c056319470e2c7702e1f25bbd128f96ec7363cca3d06f780c1b29ed"
+        },
+        "scope": "isolated original CE definitions, not the complete Unsloth trainer",
+        "upstream_forward_config": [
+          65536,
+          32
+        ],
+        "selected_forward_config": [
+          16384,
+          8
+        ],
+        "launch": "hip",
+        "dependency_bindings": "ROCm torch.cuda.device, tl.cast/libdevice, native is_hip",
+        "global_model_patches": false
+      },
+      "initial_logits_exact": true,
+      "losses": {
+        "native": 0.0074989646673202515,
+        "unsloth-ce": 0.007498965132981539,
+        "fp64": 0.007498965194449709
+      },
+      "native_vs_unsloth_relative_l2": 0.0,
+      "native_vs_fp64_relative_l2": 4.483163174029414e-09,
+      "unsloth_vs_fp64_relative_l2": 4.483163174029414e-09,
+      "native_target_gradients": [
+        -0.000244140625,
+        -7.450580596923828e-08,
+        -1.51805579662323e-07,
+        -0.000244140625,
+        -5.5789947509765625e-05,
+        -1.5832483768463135e-07,
+        -0.000244140625,
+        -1.1082738637924194e-07,
+        -1.087784767150879e-06,
+        -0.00024318695068359375,
+        -4.991888999938965e-07,
+        -3.4086406230926514e-07
+      ],
+      "unsloth_target_gradients": [
+        -0.000244140625,
+        -7.450580596923828e-08,
+        -1.51805579662323e-07,
+        -0.000244140625,
+        -5.5789947509765625e-05,
+        -1.5832483768463135e-07,
+        -0.000244140625,
+        -1.1082738637924194e-07,
+        -1.087784767150879e-06,
+        -0.00024318695068359375,
+        -4.991888999938965e-07,
+        -3.4086406230926514e-07
+      ],
+      "fp64_target_gradients": [
+        -0.000244140625,
+        -7.450580596923828e-08,
+        -1.51805579662323e-07,
+        -0.000244140625,
+        -5.5789947509765625e-05,
+        -1.5832483768463135e-07,
+        -0.000244140625,
+        -1.1082738637924194e-07,
+        -1.087784767150879e-06,
+        -0.00024318695068359375,
+        -4.991888999938965e-07,
+        -3.4086406230926514e-07
+      ]
+    },
+    "parameters": {
+      "grad": {
+        "aggregate_relative_l2": 0.02258583471803704,
+        "exact_tensors": 248,
+        "tensors": 496,
+        "worst": [
+          {
+            "name": "base_model.model.model.layers.1.linear_attn.in_proj_a.lora_B.default.weight",
+            "relative_l2": 0.06523418264077468,
+            "max_abs": 0.00341796875,
+            "exact": false
+          },
+          {
+            "name": "base_model.model.model.layers.0.linear_attn.in_proj_a.lora_B.default.weight",
+            "relative_l2": 0.05880611192017725,
+            "max_abs": 0.00045680999755859375,
+            "exact": false
+          },
+          {
+            "name": "base_model.model.model.layers.0.linear_attn.in_proj_b.lora_B.default.weight",
+            "relative_l2": 0.04905454001189874,
+            "max_abs": 0.0025634765625,
+            "exact": false
+          },
+          {
+            "name": "base_model.model.model.layers.1.linear_attn.in_proj_b.lora_B.default.weight",
+            "relative_l2": 0.04237794242952221,
+            "max_abs": 0.00200653076171875,
+            "exact": false
+          },
+          {
+            "name": "base_model.model.model.layers.0.mlp.up_proj.lora_B.default.weight",
+            "relative_l2": 0.03800982843491291,
+            "max_abs": 0.0018310546875,
+            "exact": false
+          },
+          {
+            "name": "base_model.model.model.layers.0.mlp.gate_proj.lora_B.default.weight",
+            "relative_l2": 0.03749792926742549,
+            "max_abs": 0.00164794921875,
+            "exact": false
+          },
+          {
+            "name": "base_model.model.model.layers.4.linear_attn.in_proj_qkv.lora_B.default.weight",
+            "relative_l2": 0.03675047968370466,
+            "max_abs": 0.004150390625,
+            "exact": false
+          },
+          {
+            "name": "base_model.model.model.layers.0.linear_attn.in_proj_qkv.lora_B.default.weight",
+            "relative_l2": 0.03667626201951029,
+            "max_abs": 0.0015869140625,
+            "exact": false
+          }
+        ]
+      },
+      "updated": {
+        "aggregate_relative_l2": 0.0012250177034855223,
+        "exact_tensors": 248,
+        "tensors": 496,
+        "worst": [
+          {
+            "name": "base_model.model.model.layers.1.linear_attn.in_proj_a.lora_B.default.weight",
+            "relative_l2": 0.35357860642143485,
+            "max_abs": 0.0001999862870434299,
+            "exact": false
+          },
+          {
+            "name": "base_model.model.model.layers.0.linear_attn.in_proj_b.lora_B.default.weight",
+            "relative_l2": 0.24881000303028694,
+            "max_abs": 0.0001998460356844589,
+            "exact": false
+          },
+          {
+            "name": "base_model.model.model.layers.25.linear_attn.in_proj_b.lora_B.default.weight",
+            "relative_l2": 0.24744230133541834,
+            "max_abs": 0.0001983870315598324,
+            "exact": false
+          },
+          {
+            "name": "base_model.model.model.layers.9.linear_attn.in_proj_a.lora_B.default.weight",
+            "relative_l2": 0.244541120963714,
+            "max_abs": 0.0001997384024434723,
+            "exact": false
+          },
+          {
+            "name": "base_model.model.model.layers.0.linear_attn.in_proj_qkv.lora_B.default.weight",
+            "relative_l2": 0.2281809507376844,
+            "max_abs": 0.00019999543292215094,
+            "exact": false
+          },
+          {
+            "name": "base_model.model.model.layers.0.linear_attn.in_proj_z.lora_B.default.weight",
+            "relative_l2": 0.22231116081608293,
+            "max_abs": 0.00019999491632916033,
+            "exact": false
+          },
+          {
+            "name": "base_model.model.model.layers.0.mlp.up_proj.lora_B.default.weight",
+            "relative_l2": 0.21449966265744944,
+            "max_abs": 0.0001999943342525512,
+            "exact": false
+          },
+          {
+            "name": "base_model.model.model.layers.1.linear_attn.out_proj.lora_B.default.weight",
+            "relative_l2": 0.21367793800593043,
+            "max_abs": 0.00019998349307570606,
+            "exact": false
+          }
+        ]
+      }
+    },
+    "workers": [
+      {
+        "state": "complete",
+        "argv": [
+          "benchmark_qwen35_training.py",
+          "bf16-text",
+          "--output",
+          "results/peft-before",
+          "--backend",
+          "peft",
+          "--batch-size",
+          "4",
+          "--tokens",
+          "1024",
+          "--checkpointing",
+          "0",
+          "--check-input-change",
+          "--audit-initial-step"
+        ],
+        "backend": "peft",
+        "cases": [
+          {
+            "batch": 4,
+            "tokens": 1024,
+            "input_tokens_per_step": 4096,
+            "supervised_tokens_per_step": 4092,
+            "input_sha256": "4e4a150064e7e806044f30abe3c63c57f35d777359b216ffc814e0d3fa30d496",
+            "checkpointing": false,
+            "losses": [
+              0.5049372911453247,
+              0.47164711356163025,
+              0.4000605046749115
+            ],
+            "sample_losses": [
+              0.4000605046749115,
+              0.3231232166290283,
+              0.28476858139038086,
+              0.28018614649772644,
+              0.2770741581916809
+            ],
+            "changed_input_sha256": "15ae9491d8c758b4dfa66e294c7b06b790e0383842f8042091570c2e481f8e9f",
+            "changed_input_loss": 0.33679670095443726,
+            "wall_ms": [
+              1492.3427929752506,
+              1302.615519030951,
+              1303.4009169787169,
+              1303.4176799701527,
+              1303.2352940062992
+            ],
+            "gpu_ms": [
+              1492.2913818359375,
+              1302.5849609375,
+              1303.3720703125,
+              1303.3812255859375,
+              1303.205810546875
+            ],
+            "median_wall_ms": 1303.4009169787169,
+            "median_gpu_ms": 1303.3720703125,
+            "tokens_per_second": 3142.5480423126655,
+            "supervised_tokens_per_second": 3139.479147740095,
+            "sequences_per_second": 3.0688945725709624,
+            "resident_allocated_bytes": 8668342784,
+            "peak_allocated_bytes": 46174150144,
+            "peak_reserved_bytes": 49503272960
+          }
+        ],
+        "scope": "Whole text-only BF16 Qwen3.5; all-linear rank4 LoRA FP32 masters; dropout0; zero_grad+forward+causal_loss+backward+AdamW; synthetic fixed text, not convergence",
+        "versions": {
+          "torch": "2.11.0+rocm7.2.lumi.aif.20260929120822",
+          "transformers": "5.10.1",
+          "peft": "0.21.1",
+          "fla-core": "0.6.0",
+          "flash-linear-attention": "0.6.0"
+        },
+        "device": "AMD Instinct MI250X",
+        "cuda_graph_replay": false,
+        "manual_cuda_graph_replay": false,
+        "native_autograd_graph_requested": false,
+        "implicit_causal_requested": false,
+        "cuda_graph_backend_requested": false,
+        "gradient_accumulation": 1,
+        "batch": 4,
+        "loss_backend": "native",
+        "audit_initial_step": true,
+        "rank": 4,
+        "alpha": 4,
+        "lr": 0.0001,
+        "warmup": 2,
+        "samples": 5,
+        "compiler_settings": {
+          "backend": null,
+          "emulate_precision_casts": false,
+          "recompile_limit": 8,
+          "float32_matmul_precision": "highest"
+        },
+        "source_sha256": {
+          "benchmark_qwen35_training.py": "93928fe21ed9e4e6fd14b4dff8f27dc9cce7f95e1ee25967321fa5d0cd64cb46",
+          "run_qwen35_training.py": "d15410dcf77189faf267d531dd420b846413669158cee26a27446d538eeff1cf",
+          "qwen35_training_mlp.py": "9c7d4ab2cbbf6c9c3ac9858971a13d3f70d9381129ff418930672ef594e2f61a",
+          "lora_swiglu_training.py": "3d2e24f06dfa2df10eea2860ec4043cc9749854b2f4019451e5b46811722e576",
+          "lora_swiglu_kernels.py": "a7a4e909d7bab6ddd1fd8537c75b56ffb22285323b9182f85998aa5f3046e732",
+          "lora_native_training.py": "c2ac480ba429aa1b58b70383289b353aaccb0e9ffb70573df85794ce9901326b",
+          "qwen35_training_graph.py": "f2fd1d3d6efaff0808afa7b650e8423efaf3ceed7534e77b2a9c3672bae76758",
+          "qwen35_training_mask.py": "93a0b90611121992c73942cfca259e266ffd79a9a5a954199c6c3912739d32ef"
+        },
+        "loading": {
+          "missing_keys": "set()",
+          "unexpected_keys": "set()",
+          "mismatched_keys": "set()",
+          "error_msgs": []
+        },
+        "model": {
+          "layers": 32,
+          "hidden_size": 2560,
+          "intermediate_size": 9216,
+          "gdn_layers": 24,
+          "attention_layers": 8,
+          "base_parameters": 4205751296
+        },
+        "checked_loaded_tensors": 427,
+        "gdn": {
+          "layers": 24,
+          "chunk_function": "fla.ops.gated_delta_rule.chunk",
+          "norm": "FusedRMSNormGated",
+          "conv_function": "causal_conv1d.causal_conv1d_interface"
+        },
+        "adapter_tensors": 496,
+        "adapter_parameters": 8116224,
+        "initial_adapter_sha256": "7d97687b63b72ff94a25a4cba8c802a89f7717b90b72edbd4e9fafc172445332",
+        "compiler_counters": {}
+      },
+      {
+        "state": "complete",
+        "argv": [
+          "benchmark_qwen35_training.py",
+          "bf16-text",
+          "--output",
+          "results/unsloth-ce",
+          "--backend",
+          "peft",
+          "--loss-backend",
+          "unsloth-ce",
+          "--loss-source",
+          "reference",
+          "--batch-size",
+          "4",
+          "--tokens",
+          "1024",
+          "--checkpointing",
+          "0",
+          "--check-input-change",
+          "--audit-initial-step"
+        ],
+        "backend": "peft",
+        "cases": [
+          {
+            "batch": 4,
+            "tokens": 1024,
+            "input_tokens_per_step": 4096,
+            "supervised_tokens_per_step": 4092,
+            "input_sha256": "4e4a150064e7e806044f30abe3c63c57f35d777359b216ffc814e0d3fa30d496",
+            "checkpointing": false,
+            "losses": [
+              0.5049374103546143,
+              0.4729825556278229,
+              0.39681917428970337
+            ],
+            "sample_losses": [
+              0.39681917428970337,
+              0.323332279920578,
+              0.28813692927360535,
+              0.2793743908405304,
+              0.2767467498779297
+            ],
+            "changed_input_sha256": "15ae9491d8c758b4dfa66e294c7b06b790e0383842f8042091570c2e481f8e9f",
+            "changed_input_loss": 0.33107879757881165,
+            "wall_ms": [
+              1260.3143680025823,
+              1256.0957620153204,
+              1256.8303209845908,
+              1257.0570720126852,
+              1257.1338519919664
+            ],
+            "gpu_ms": [
+              1260.2518310546875,
+              1256.0665283203125,
+              1256.7950439453125,
+              1257.024169921875,
+              1257.104248046875
+            ],
+            "median_wall_ms": 1257.0570720126852,
+            "median_gpu_ms": 1257.024169921875,
+            "tokens_per_second": 3258.404165724837,
+            "supervised_tokens_per_second": 3255.222130406746,
+            "sequences_per_second": 3.1820353180906613,
+            "resident_allocated_bytes": 8668342784,
+            "peak_allocated_bytes": 38037266432,
+            "peak_reserved_bytes": 41366323200
+          }
+        ],
+        "scope": "Whole text-only BF16 Qwen3.5; all-linear rank4 LoRA FP32 masters; dropout0; zero_grad+forward+causal_loss+backward+AdamW; synthetic fixed text, not convergence",
+        "versions": {
+          "torch": "2.11.0+rocm7.2.lumi.aif.20260929120822",
+          "transformers": "5.10.1",
+          "peft": "0.21.1",
+          "fla-core": "0.6.0",
+          "flash-linear-attention": "0.6.0"
+        },
+        "device": "AMD Instinct MI250X",
+        "cuda_graph_replay": false,
+        "manual_cuda_graph_replay": false,
+        "native_autograd_graph_requested": false,
+        "implicit_causal_requested": false,
+        "cuda_graph_backend_requested": false,
+        "gradient_accumulation": 1,
+        "batch": 4,
+        "loss_backend": "unsloth-ce",
+        "audit_initial_step": true,
+        "rank": 4,
+        "alpha": 4,
+        "lr": 0.0001,
+        "warmup": 2,
+        "samples": 5,
+        "compiler_settings": {
+          "backend": null,
+          "emulate_precision_casts": false,
+          "recompile_limit": 8,
+          "float32_matmul_precision": "highest"
+        },
+        "source_sha256": {
+          "benchmark_qwen35_training.py": "93928fe21ed9e4e6fd14b4dff8f27dc9cce7f95e1ee25967321fa5d0cd64cb46",
+          "run_qwen35_training.py": "d15410dcf77189faf267d531dd420b846413669158cee26a27446d538eeff1cf",
+          "qwen35_training_mlp.py": "9c7d4ab2cbbf6c9c3ac9858971a13d3f70d9381129ff418930672ef594e2f61a",
+          "lora_swiglu_training.py": "3d2e24f06dfa2df10eea2860ec4043cc9749854b2f4019451e5b46811722e576",
+          "lora_swiglu_kernels.py": "a7a4e909d7bab6ddd1fd8537c75b56ffb22285323b9182f85998aa5f3046e732",
+          "lora_native_training.py": "c2ac480ba429aa1b58b70383289b353aaccb0e9ffb70573df85794ce9901326b",
+          "qwen35_training_graph.py": "f2fd1d3d6efaff0808afa7b650e8423efaf3ceed7534e77b2a9c3672bae76758",
+          "qwen35_training_mask.py": "93a0b90611121992c73942cfca259e266ffd79a9a5a954199c6c3912739d32ef",
+          "qwen35_training_loss.py": "1b2bc08c84f468680df6e57b195601909981872b0a6a9173ccc2fdc0d6000d61"
+        },
+        "loading": {
+          "missing_keys": "set()",
+          "unexpected_keys": "set()",
+          "mismatched_keys": "set()",
+          "error_msgs": []
+        },
+        "model": {
+          "layers": 32,
+          "hidden_size": 2560,
+          "intermediate_size": 9216,
+          "gdn_layers": 24,
+          "attention_layers": 8,
+          "base_parameters": 4205751296
+        },
+        "checked_loaded_tensors": 427,
+        "gdn": {
+          "layers": 24,
+          "chunk_function": "fla.ops.gated_delta_rule.chunk",
+          "norm": "FusedRMSNormGated",
+          "conv_function": "causal_conv1d.causal_conv1d_interface"
+        },
+        "loss_implementation": {
+          "repository": "unslothai/unsloth",
+          "revision": "a0197ca266e14d22f66c0dcffc452fe1ce42bb0f",
+          "source_sha256": {
+            "cross_entropy_loss.py": "5f69f987fe160f83228b89da5119f5322225941e925dfcdf19f481f8d7b6f017",
+            "utils.py": "a9e0e6618db083ca677b248fdd526a78ec3884de3a2e5df43d7bfa86991e7830",
+            "rope_embedding.py": "6ac0a10f8c056319470e2c7702e1f25bbd128f96ec7363cca3d06f780c1b29ed"
+          },
+          "scope": "isolated original CE definitions, not the complete Unsloth trainer",
+          "upstream_forward_config": [
+            65536,
+            32
+          ],
+          "selected_forward_config": [
+            16384,
+            8
+          ],
+          "launch": "hip",
+          "dependency_bindings": "ROCm torch.cuda.device, tl.cast/libdevice, native is_hip",
+          "global_model_patches": false
+        },
+        "adapter_tensors": 496,
+        "adapter_parameters": 8116224,
+        "initial_adapter_sha256": "7d97687b63b72ff94a25a4cba8c802a89f7717b90b72edbd4e9fafc172445332",
+        "compiler_counters": {}
+      }
+    ]
+  },
+  "checkpoint": {
+    "state": "complete",
+    "scope": "unchanged BF16 text weights; no vision inputs",
+    "source_files": {
+      "model.safetensors-00001-of-00002.safetensors": "26a93f066e1916adb13453dae5a0c707c0fbc71299ed98779571a907b8e74c61",
+      "model.safetensors-00002-of-00002.safetensors": "cb544bd9bfae93dc59b0f22b292f5933573854a7f9b97835c67060d7d910e188"
+    },
+    "model_config": {
+      "hidden_size": 2560,
+      "intermediate_size": 9216,
+      "num_hidden_layers": 32,
+      "vocab_size": 248320
+    },
+    "text_sha256": "745f02a4b43388a901cd71f67a473bbcb8ee3c5a68d21b943923034f9c95bbf5",
+    "source_to_text": {
+      "model.language_model.embed_tokens.weight": "model.embed_tokens.weight",
+      "model.language_model.layers.1.mlp.down_proj.weight": "model.layers.1.mlp.down_proj.weight",
+      "model.language_model.layers.1.mlp.gate_proj.weight": "model.layers.1.mlp.gate_proj.weight",
+      "model.language_model.layers.1.mlp.up_proj.weight": "model.layers.1.mlp.up_proj.weight",
+      "model.language_model.layers.10.mlp.down_proj.weight": "model.layers.10.mlp.down_proj.weight",
+      "model.language_model.layers.10.mlp.gate_proj.weight": "model.layers.10.mlp.gate_proj.weight",
+      "model.language_model.layers.10.mlp.up_proj.weight": "model.layers.10.mlp.up_proj.weight",
+      "model.language_model.layers.11.mlp.down_proj.weight": "model.layers.11.mlp.down_proj.weight",
+      "model.language_model.layers.11.mlp.gate_proj.weight": "model.layers.11.mlp.gate_proj.weight",
+      "model.language_model.layers.11.mlp.up_proj.weight": "model.layers.11.mlp.up_proj.weight",
+      "model.language_model.layers.12.mlp.down_proj.weight": "model.layers.12.mlp.down_proj.weight",
+      "model.language_model.layers.12.mlp.gate_proj.weight": "model.layers.12.mlp.gate_proj.weight",
+      "model.language_model.layers.12.mlp.up_proj.weight": "model.layers.12.mlp.up_proj.weight",
+      "model.language_model.layers.13.mlp.down_proj.weight": "model.layers.13.mlp.down_proj.weight",
+      "model.language_model.layers.13.mlp.gate_proj.weight": "model.layers.13.mlp.gate_proj.weight",
+      "model.language_model.layers.13.mlp.up_proj.weight": "model.layers.13.mlp.up_proj.weight",
+      "model.language_model.layers.14.mlp.down_proj.weight": "model.layers.14.mlp.down_proj.weight",
+      "model.language_model.layers.14.mlp.gate_proj.weight": "model.layers.14.mlp.gate_proj.weight",
+      "model.language_model.layers.14.mlp.up_proj.weight": "model.layers.14.mlp.up_proj.weight",
+      "model.language_model.layers.15.mlp.down_proj.weight": "model.layers.15.mlp.down_proj.weight",
+      "model.language_model.layers.15.mlp.gate_proj.weight": "model.layers.15.mlp.gate_proj.weight",
+      "model.language_model.layers.15.mlp.up_proj.weight": "model.layers.15.mlp.up_proj.weight",
+      "model.language_model.layers.16.mlp.down_proj.weight": "model.layers.16.mlp.down_proj.weight",
+      "model.language_model.layers.16.mlp.gate_proj.weight": "model.layers.16.mlp.gate_proj.weight",
+      "model.language_model.layers.16.mlp.up_proj.weight": "model.layers.16.mlp.up_proj.weight",
+      "model.language_model.layers.17.mlp.down_proj.weight": "model.layers.17.mlp.down_proj.weight",
+      "model.language_model.layers.17.mlp.gate_proj.weight": "model.layers.17.mlp.gate_proj.weight",
+      "model.language_model.layers.17.mlp.up_proj.weight": "model.layers.17.mlp.up_proj.weight",
+      "model.language_model.layers.18.mlp.down_proj.weight": "model.layers.18.mlp.down_proj.weight",
+      "model.language_model.layers.18.mlp.gate_proj.weight": "model.layers.18.mlp.gate_proj.weight",
+      "model.language_model.layers.18.mlp.up_proj.weight": "model.layers.18.mlp.up_proj.weight",
+      "model.language_model.layers.19.mlp.down_proj.weight": "model.layers.19.mlp.down_proj.weight",
+      "model.language_model.layers.19.mlp.gate_proj.weight": "model.layers.19.mlp.gate_proj.weight",
+      "model.language_model.layers.19.mlp.up_proj.weight": "model.layers.19.mlp.up_proj.weight",
+      "model.language_model.layers.2.mlp.down_proj.weight": "model.layers.2.mlp.down_proj.weight",
+      "model.language_model.layers.2.mlp.gate_proj.weight": "model.layers.2.mlp.gate_proj.weight",
+      "model.language_model.layers.2.mlp.up_proj.weight": "model.layers.2.mlp.up_proj.weight",
+      "model.language_model.layers.20.mlp.down_proj.weight": "model.layers.20.mlp.down_proj.weight",
+      "model.language_model.layers.20.mlp.gate_proj.weight": "model.layers.20.mlp.gate_proj.weight",
+      "model.language_model.layers.20.mlp.up_proj.weight": "model.layers.20.mlp.up_proj.weight",
+      "model.language_model.layers.21.mlp.down_proj.weight": "model.layers.21.mlp.down_proj.weight",
+      "model.language_model.layers.21.mlp.gate_proj.weight": "model.layers.21.mlp.gate_proj.weight",
+      "model.language_model.layers.21.mlp.up_proj.weight": "model.layers.21.mlp.up_proj.weight",
+      "model.language_model.layers.22.mlp.down_proj.weight": "model.layers.22.mlp.down_proj.weight",
+      "model.language_model.layers.22.mlp.gate_proj.weight": "model.layers.22.mlp.gate_proj.weight",
+      "model.language_model.layers.22.mlp.up_proj.weight": "model.layers.22.mlp.up_proj.weight",
+      "model.language_model.layers.23.mlp.down_proj.weight": "model.layers.23.mlp.down_proj.weight",
+      "model.language_model.layers.23.mlp.gate_proj.weight": "model.layers.23.mlp.gate_proj.weight",
+      "model.language_model.layers.23.mlp.up_proj.weight": "model.layers.23.mlp.up_proj.weight",
+      "model.language_model.layers.24.mlp.down_proj.weight": "model.layers.24.mlp.down_proj.weight",
+      "model.language_model.layers.24.mlp.gate_proj.weight": "model.layers.24.mlp.gate_proj.weight",
+      "model.language_model.layers.24.mlp.up_proj.weight": "model.layers.24.mlp.up_proj.weight",
+      "model.language_model.layers.25.mlp.down_proj.weight": "model.layers.25.mlp.down_proj.weight",
+      "model.language_model.layers.25.mlp.gate_proj.weight": "model.layers.25.mlp.gate_proj.weight",
+      "model.language_model.layers.25.mlp.up_proj.weight": "model.layers.25.mlp.up_proj.weight",
+      "model.language_model.layers.26.mlp.down_proj.weight": "model.layers.26.mlp.down_proj.weight",
+      "model.language_model.layers.29.mlp.down_proj.weight": "model.layers.29.mlp.down_proj.weight",
+      "model.language_model.layers.3.mlp.down_proj.weight": "model.layers.3.mlp.down_proj.weight",
+      "model.language_model.layers.3.mlp.gate_proj.weight": "model.layers.3.mlp.gate_proj.weight",
+      "model.language_model.layers.3.mlp.up_proj.weight": "model.layers.3.mlp.up_proj.weight",
+      "model.language_model.layers.30.mlp.down_proj.weight": "model.layers.30.mlp.down_proj.weight",
+      "model.language_model.layers.30.mlp.gate_proj.weight": "model.layers.30.mlp.gate_proj.weight",
+      "model.language_model.layers.30.mlp.up_proj.weight": "model.layers.30.mlp.up_proj.weight",
+      "model.language_model.layers.31.mlp.down_proj.weight": "model.layers.31.mlp.down_proj.weight",
+      "model.language_model.layers.31.mlp.gate_proj.weight": "model.layers.31.mlp.gate_proj.weight",
+      "model.language_model.layers.31.mlp.up_proj.weight": "model.layers.31.mlp.up_proj.weight",
+      "model.language_model.layers.4.mlp.down_proj.weight": "model.layers.4.mlp.down_proj.weight",
+      "model.language_model.layers.4.mlp.gate_proj.weight": "model.layers.4.mlp.gate_proj.weight",
+      "model.language_model.layers.4.mlp.up_proj.weight": "model.layers.4.mlp.up_proj.weight",
+      "model.language_model.layers.5.mlp.down_proj.weight": "model.layers.5.mlp.down_proj.weight",
+      "model.language_model.layers.5.mlp.gate_proj.weight": "model.layers.5.mlp.gate_proj.weight",
+      "model.language_model.layers.5.mlp.up_proj.weight": "model.layers.5.mlp.up_proj.weight",
+      "model.language_model.layers.6.mlp.down_proj.weight": "model.layers.6.mlp.down_proj.weight",
+      "model.language_model.layers.6.mlp.gate_proj.weight": "model.layers.6.mlp.gate_proj.weight",
+      "model.language_model.layers.6.mlp.up_proj.weight": "model.layers.6.mlp.up_proj.weight",
+      "model.language_model.layers.7.mlp.down_proj.weight": "model.layers.7.mlp.down_proj.weight",
+      "model.language_model.layers.7.mlp.gate_proj.weight": "model.layers.7.mlp.gate_proj.weight",
+      "model.language_model.layers.7.mlp.up_proj.weight": "model.layers.7.mlp.up_proj.weight",
+      "model.language_model.layers.8.mlp.down_proj.weight": "model.layers.8.mlp.down_proj.weight",
+      "model.language_model.layers.8.mlp.gate_proj.weight": "model.layers.8.mlp.gate_proj.weight",
+      "model.language_model.layers.8.mlp.up_proj.weight": "model.layers.8.mlp.up_proj.weight",
+      "model.language_model.layers.9.mlp.down_proj.weight": "model.layers.9.mlp.down_proj.weight",
+      "model.language_model.layers.9.mlp.gate_proj.weight": "model.layers.9.mlp.gate_proj.weight",
+      "model.language_model.layers.9.mlp.up_proj.weight": "model.layers.9.mlp.up_proj.weight",
+      "model.language_model.layers.0.input_layernorm.weight": "model.layers.0.input_layernorm.weight",
+      "model.language_model.layers.0.linear_attn.A_log": "model.layers.0.linear_attn.A_log",
+      "model.language_model.layers.0.linear_attn.conv1d.weight": "model.layers.0.linear_attn.conv1d.weight",
+      "model.language_model.layers.0.linear_attn.dt_bias": "model.layers.0.linear_attn.dt_bias",
+      "model.language_model.layers.0.linear_attn.in_proj_a.weight": "model.layers.0.linear_attn.in_proj_a.weight",
+      "model.language_model.layers.0.linear_attn.in_proj_b.weight": "model.layers.0.linear_attn.in_proj_b.weight",
+      "model.language_model.layers.0.linear_attn.in_proj_qkv.weight": "model.layers.0.linear_attn.in_proj_qkv.weight",
+      "model.language_model.layers.0.linear_attn.in_proj_z.weight": "model.layers.0.linear_attn.in_proj_z.weight",
+      "model.language_model.layers.0.linear_attn.norm.weight": "model.layers.0.linear_attn.norm.weight",
+      "model.language_model.layers.0.linear_attn.out_proj.weight": "model.layers.0.linear_attn.out_proj.weight",
+      "model.language_model.layers.0.mlp.down_proj.weight": "model.layers.0.mlp.down_proj.weight",
+      "model.language_model.layers.0.mlp.gate_proj.weight": "model.layers.0.mlp.gate_proj.weight",
+      "model.language_model.layers.0.mlp.up_proj.weight": "model.layers.0.mlp.up_proj.weight",
+      "model.language_model.layers.0.post_attention_layernorm.weight": "model.layers.0.post_attention_layernorm.weight",
+      "model.language_model.layers.1.input_layernorm.weight": "model.layers.1.input_layernorm.weight",
+      "model.language_model.layers.1.linear_attn.A_log": "model.layers.1.linear_attn.A_log",
+      "model.language_model.layers.1.linear_attn.conv1d.weight": "model.layers.1.linear_attn.conv1d.weight",
+      "model.language_model.layers.1.linear_attn.dt_bias": "model.layers.1.linear_attn.dt_bias",
+      "model.language_model.layers.1.linear_attn.in_proj_a.weight": "model.layers.1.linear_attn.in_proj_a.weight",
+      "model.language_model.layers.1.linear_attn.in_proj_b.weight": "model.layers.1.linear_attn.in_proj_b.weight",
+      "model.language_model.layers.1.linear_attn.in_proj_qkv.weight": "model.layers.1.linear_attn.in_proj_qkv.weight",
+      "model.language_model.layers.1.linear_attn.in_proj_z.weight": "model.layers.1.linear_attn.in_proj_z.weight",
+      "model.language_model.layers.1.linear_attn.norm.weight": "model.layers.1.linear_attn.norm.weight",
+      "model.language_model.layers.1.linear_attn.out_proj.weight": "model.layers.1.linear_attn.out_proj.weight",
+      "model.language_model.layers.1.post_attention_layernorm.weight": "model.layers.1.post_attention_layernorm.weight",
+      "model.language_model.layers.10.input_layernorm.weight": "model.layers.10.input_layernorm.weight",
+      "model.language_model.layers.10.linear_attn.A_log": "model.layers.10.linear_attn.A_log",
+      "model.language_model.layers.10.linear_attn.conv1d.weight": "model.layers.10.linear_attn.conv1d.weight",
+      "model.language_model.layers.10.linear_attn.dt_bias": "model.layers.10.linear_attn.dt_bias",
+      "model.language_model.layers.10.linear_attn.in_proj_a.weight": "model.layers.10.linear_attn.in_proj_a.weight",
+      "model.language_model.layers.10.linear_attn.in_proj_b.weight": "model.layers.10.linear_attn.in_proj_b.weight",
+      "model.language_model.layers.10.linear_attn.in_proj_qkv.weight": "model.layers.10.linear_attn.in_proj_qkv.weight",
+      "model.language_model.layers.10.linear_attn.in_proj_z.weight": "model.layers.10.linear_attn.in_proj_z.weight",
+      "model.language_model.layers.10.linear_attn.norm.weight": "model.layers.10.linear_attn.norm.weight",
+      "model.language_model.layers.10.linear_attn.out_proj.weight": "model.layers.10.linear_attn.out_proj.weight",
+      "model.language_model.layers.10.post_attention_layernorm.weight": "model.layers.10.post_attention_layernorm.weight",
+      "model.language_model.layers.11.input_layernorm.weight": "model.layers.11.input_layernorm.weight",
+      "model.language_model.layers.11.post_attention_layernorm.weight": "model.layers.11.post_attention_layernorm.weight",
+      "model.language_model.layers.11.self_attn.k_norm.weight": "model.layers.11.self_attn.k_norm.weight",
+      "model.language_model.layers.11.self_attn.k_proj.weight": "model.layers.11.self_attn.k_proj.weight",
+      "model.language_model.layers.11.self_attn.o_proj.weight": "model.layers.11.self_attn.o_proj.weight",
+      "model.language_model.layers.11.self_attn.q_norm.weight": "model.layers.11.self_attn.q_norm.weight",
+      "model.language_model.layers.11.self_attn.q_proj.weight": "model.layers.11.self_attn.q_proj.weight",
+      "model.language_model.layers.11.self_attn.v_proj.weight": "model.layers.11.self_attn.v_proj.weight",
+      "model.language_model.layers.12.input_layernorm.weight": "model.layers.12.input_layernorm.weight",
+      "model.language_model.layers.12.linear_attn.A_log": "model.layers.12.linear_attn.A_log",
+      "model.language_model.layers.12.linear_attn.conv1d.weight": "model.layers.12.linear_attn.conv1d.weight",
+      "model.language_model.layers.12.linear_attn.dt_bias": "model.layers.12.linear_attn.dt_bias",
+      "model.language_model.layers.12.linear_attn.in_proj_a.weight": "model.layers.12.linear_attn.in_proj_a.weight",
+      "model.language_model.layers.12.linear_attn.in_proj_b.weight": "model.layers.12.linear_attn.in_proj_b.weight",
+      "model.language_model.layers.12.linear_attn.in_proj_qkv.weight": "model.layers.12.linear_attn.in_proj_qkv.weight",
+      "model.language_model.layers.12.linear_attn.in_proj_z.weight": "model.layers.12.linear_attn.in_proj_z.weight",
+      "model.language_model.layers.12.linear_attn.norm.weight": "model.layers.12.linear_attn.norm.weight",
+      "model.language_model.layers.12.linear_attn.out_proj.weight": "model.layers.12.linear_attn.out_proj.weight",
+      "model.language_model.layers.12.post_attention_layernorm.weight": "model.layers.12.post_attention_layernorm.weight",
+      "model.language_model.layers.13.input_layernorm.weight": "model.layers.13.input_layernorm.weight",
+      "model.language_model.layers.13.linear_attn.A_log": "model.layers.13.linear_attn.A_log",
+      "model.language_model.layers.13.linear_attn.conv1d.weight": "model.layers.13.linear_attn.conv1d.weight",
+      "model.language_model.layers.13.linear_attn.dt_bias": "model.layers.13.linear_attn.dt_bias",
+      "model.language_model.layers.13.linear_attn.in_proj_a.weight": "model.layers.13.linear_attn.in_proj_a.weight",
+      "model.language_model.layers.13.linear_attn.in_proj_b.weight": "model.layers.13.linear_attn.in_proj_b.weight",
+      "model.language_model.layers.13.linear_attn.in_proj_qkv.weight": "model.layers.13.linear_attn.in_proj_qkv.weight",
+      "model.language_model.layers.13.linear_attn.in_proj_z.weight": "model.layers.13.linear_attn.in_proj_z.weight",
+      "model.language_model.layers.13.linear_attn.norm.weight": "model.layers.13.linear_attn.norm.weight",
+      "model.language_model.layers.13.linear_attn.out_proj.weight": "model.layers.13.linear_attn.out_proj.weight",
+      "model.language_model.layers.13.post_attention_layernorm.weight": "model.layers.13.post_attention_layernorm.weight",
+      "model.language_model.layers.14.input_layernorm.weight": "model.layers.14.input_layernorm.weight",
+      "model.language_model.layers.14.linear_attn.A_log": "model.layers.14.linear_attn.A_log",
+      "model.language_model.layers.14.linear_attn.conv1d.weight": "model.layers.14.linear_attn.conv1d.weight",
+      "model.language_model.layers.14.linear_attn.dt_bias": "model.layers.14.linear_attn.dt_bias",
+      "model.language_model.layers.14.linear_attn.in_proj_a.weight": "model.layers.14.linear_attn.in_proj_a.weight",
+      "model.language_model.layers.14.linear_attn.in_proj_b.weight": "model.layers.14.linear_attn.in_proj_b.weight",
+      "model.language_model.layers.14.linear_attn.in_proj_qkv.weight": "model.layers.14.linear_attn.in_proj_qkv.weight",
+      "model.language_model.layers.14.linear_attn.in_proj_z.weight": "model.layers.14.linear_attn.in_proj_z.weight",
+      "model.language_model.layers.14.linear_attn.norm.weight": "model.layers.14.linear_attn.norm.weight",
+      "model.language_model.layers.14.linear_attn.out_proj.weight": "model.layers.14.linear_attn.out_proj.weight",
+      "model.language_model.layers.14.post_attention_layernorm.weight": "model.layers.14.post_attention_layernorm.weight",
+      "model.language_model.layers.15.input_layernorm.weight": "model.layers.15.input_layernorm.weight",
+      "model.language_model.layers.15.post_attention_layernorm.weight": "model.layers.15.post_attention_layernorm.weight",
+      "model.language_model.layers.15.self_attn.k_norm.weight": "model.layers.15.self_attn.k_norm.weight",
+      "model.language_model.layers.15.self_attn.k_proj.weight": "model.layers.15.self_attn.k_proj.weight",
+      "model.language_model.layers.15.self_attn.o_proj.weight": "model.layers.15.self_attn.o_proj.weight",
+      "model.language_model.layers.15.self_attn.q_norm.weight": "model.layers.15.self_attn.q_norm.weight",
+      "model.language_model.layers.15.self_attn.q_proj.weight": "model.layers.15.self_attn.q_proj.weight",
+      "model.language_model.layers.15.self_attn.v_proj.weight": "model.layers.15.self_attn.v_proj.weight",
+      "model.language_model.layers.16.input_layernorm.weight": "model.layers.16.input_layernorm.weight",
+      "model.language_model.layers.16.linear_attn.A_log": "model.layers.16.linear_attn.A_log",
+      "model.language_model.layers.16.linear_attn.conv1d.weight": "model.layers.16.linear_attn.conv1d.weight",
+      "model.language_model.layers.16.linear_attn.dt_bias": "model.layers.16.linear_attn.dt_bias",
+      "model.language_model.layers.16.linear_attn.in_proj_a.weight": "model.layers.16.linear_attn.in_proj_a.weight",
+      "model.language_model.layers.16.linear_attn.in_proj_b.weight": "model.layers.16.linear_attn.in_proj_b.weight",
+      "model.language_model.layers.16.linear_attn.in_proj_qkv.weight": "model.layers.16.linear_attn.in_proj_qkv.weight",
+      "model.language_model.layers.16.linear_attn.in_proj_z.weight": "model.layers.16.linear_attn.in_proj_z.weight",
+      "model.language_model.layers.16.linear_attn.norm.weight": "model.layers.16.linear_attn.norm.weight",
+      "model.language_model.layers.16.linear_attn.out_proj.weight": "model.layers.16.linear_attn.out_proj.weight",
+      "model.language_model.layers.16.post_attention_layernorm.weight": "model.layers.16.post_attention_layernorm.weight",
+      "model.language_model.layers.17.input_layernorm.weight": "model.layers.17.input_layernorm.weight",
+      "model.language_model.layers.17.linear_attn.A_log": "model.layers.17.linear_attn.A_log",
+      "model.language_model.layers.17.linear_attn.conv1d.weight": "model.layers.17.linear_attn.conv1d.weight",
+      "model.language_model.layers.17.linear_attn.dt_bias": "model.layers.17.linear_attn.dt_bias",
+      "model.language_model.layers.17.linear_attn.in_proj_a.weight": "model.layers.17.linear_attn.in_proj_a.weight",
+      "model.language_model.layers.17.linear_attn.in_proj_b.weight": "model.layers.17.linear_attn.in_proj_b.weight",
+      "model.language_model.layers.17.linear_attn.in_proj_qkv.weight": "model.layers.17.linear_attn.in_proj_qkv.weight",
+      "model.language_model.layers.17.linear_attn.in_proj_z.weight": "model.layers.17.linear_attn.in_proj_z.weight",
+      "model.language_model.layers.17.linear_attn.norm.weight": "model.layers.17.linear_attn.norm.weight",
+      "model.language_model.layers.17.linear_attn.out_proj.weight": "model.layers.17.linear_attn.out_proj.weight",
+      "model.language_model.layers.17.post_attention_layernorm.weight": "model.layers.17.post_attention_layernorm.weight",
+      "model.language_model.layers.18.input_layernorm.weight": "model.layers.18.input_layernorm.weight",
+      "model.language_model.layers.18.linear_attn.A_log": "model.layers.18.linear_attn.A_log",
+      "model.language_model.layers.18.linear_attn.conv1d.weight": "model.layers.18.linear_attn.conv1d.weight",
+      "model.language_model.layers.18.linear_attn.dt_bias": "model.layers.18.linear_attn.dt_bias",
+      "model.language_model.layers.18.linear_attn.in_proj_a.weight": "model.layers.18.linear_attn.in_proj_a.weight",
+      "model.language_model.layers.18.linear_attn.in_proj_b.weight": "model.layers.18.linear_attn.in_proj_b.weight",
+      "model.language_model.layers.18.linear_attn.in_proj_qkv.weight": "model.layers.18.linear_attn.in_proj_qkv.weight",
+      "model.language_model.layers.18.linear_attn.in_proj_z.weight": "model.layers.18.linear_attn.in_proj_z.weight",
+      "model.language_model.layers.18.linear_attn.norm.weight": "model.layers.18.linear_attn.norm.weight",
+      "model.language_model.layers.18.linear_attn.out_proj.weight": "model.layers.18.linear_attn.out_proj.weight",
+      "model.language_model.layers.18.post_attention_layernorm.weight": "model.layers.18.post_attention_layernorm.weight",
+      "model.language_model.layers.19.input_layernorm.weight": "model.layers.19.input_layernorm.weight",
+      "model.language_model.layers.19.post_attention_layernorm.weight": "model.layers.19.post_attention_layernorm.weight",
+      "model.language_model.layers.19.self_attn.k_norm.weight": "model.layers.19.self_attn.k_norm.weight",
+      "model.language_model.layers.19.self_attn.k_proj.weight": "model.layers.19.self_attn.k_proj.weight",
+      "model.language_model.layers.19.self_attn.o_proj.weight": "model.layers.19.self_attn.o_proj.weight",
+      "model.language_model.layers.19.self_attn.q_norm.weight": "model.layers.19.self_attn.q_norm.weight",
+      "model.language_model.layers.19.self_attn.q_proj.weight": "model.layers.19.self_attn.q_proj.weight",
+      "model.language_model.layers.19.self_attn.v_proj.weight": "model.layers.19.self_attn.v_proj.weight",
+      "model.language_model.layers.2.input_layernorm.weight": "model.layers.2.input_layernorm.weight",
+      "model.language_model.layers.2.linear_attn.A_log": "model.layers.2.linear_attn.A_log",
+      "model.language_model.layers.2.linear_attn.conv1d.weight": "model.layers.2.linear_attn.conv1d.weight",
+      "model.language_model.layers.2.linear_attn.dt_bias": "model.layers.2.linear_attn.dt_bias",
+      "model.language_model.layers.2.linear_attn.in_proj_a.weight": "model.layers.2.linear_attn.in_proj_a.weight",
+      "model.language_model.layers.2.linear_attn.in_proj_b.weight": "model.layers.2.linear_attn.in_proj_b.weight",
+      "model.language_model.layers.2.linear_attn.in_proj_qkv.weight": "model.layers.2.linear_attn.in_proj_qkv.weight",
+      "model.language_model.layers.2.linear_attn.in_proj_z.weight": "model.layers.2.linear_attn.in_proj_z.weight",
+      "model.language_model.layers.2.linear_attn.norm.weight": "model.layers.2.linear_attn.norm.weight",
+      "model.language_model.layers.2.linear_attn.out_proj.weight": "model.layers.2.linear_attn.out_proj.weight",
+      "model.language_model.layers.2.post_attention_layernorm.weight": "model.layers.2.post_attention_layernorm.weight",
+      "model.language_model.layers.20.input_layernorm.weight": "model.layers.20.input_layernorm.weight",
+      "model.language_model.layers.20.linear_attn.A_log": "model.layers.20.linear_attn.A_log",
+      "model.language_model.layers.20.linear_attn.conv1d.weight": "model.layers.20.linear_attn.conv1d.weight",
+      "model.language_model.layers.20.linear_attn.dt_bias": "model.layers.20.linear_attn.dt_bias",
+      "model.language_model.layers.20.linear_attn.in_proj_a.weight": "model.layers.20.linear_attn.in_proj_a.weight",
+      "model.language_model.layers.20.linear_attn.in_proj_b.weight": "model.layers.20.linear_attn.in_proj_b.weight",
+      "model.language_model.layers.20.linear_attn.in_proj_qkv.weight": "model.layers.20.linear_attn.in_proj_qkv.weight",
+      "model.language_model.layers.20.linear_attn.in_proj_z.weight": "model.layers.20.linear_attn.in_proj_z.weight",
+      "model.language_model.layers.20.linear_attn.norm.weight": "model.layers.20.linear_attn.norm.weight",
+      "model.language_model.layers.20.linear_attn.out_proj.weight": "model.layers.20.linear_attn.out_proj.weight",
+      "model.language_model.layers.20.post_attention_layernorm.weight": "model.layers.20.post_attention_layernorm.weight",
+      "model.language_model.layers.21.input_layernorm.weight": "model.layers.21.input_layernorm.weight",
+      "model.language_model.layers.21.linear_attn.A_log": "model.layers.21.linear_attn.A_log",
+      "model.language_model.layers.21.linear_attn.conv1d.weight": "model.layers.21.linear_attn.conv1d.weight",
+      "model.language_model.layers.21.linear_attn.dt_bias": "model.layers.21.linear_attn.dt_bias",
+      "model.language_model.layers.21.linear_attn.in_proj_a.weight": "model.layers.21.linear_attn.in_proj_a.weight",
+      "model.language_model.layers.21.linear_attn.in_proj_b.weight": "model.layers.21.linear_attn.in_proj_b.weight",
+      "model.language_model.layers.21.linear_attn.in_proj_qkv.weight": "model.layers.21.linear_attn.in_proj_qkv.weight",
+      "model.language_model.layers.21.linear_attn.in_proj_z.weight": "model.layers.21.linear_attn.in_proj_z.weight",
+      "model.language_model.layers.21.linear_attn.norm.weight": "model.layers.21.linear_attn.norm.weight",
+      "model.language_model.layers.21.linear_attn.out_proj.weight": "model.layers.21.linear_attn.out_proj.weight",
+      "model.language_model.layers.21.post_attention_layernorm.weight": "model.layers.21.post_attention_layernorm.weight",
+      "model.language_model.layers.22.input_layernorm.weight": "model.layers.22.input_layernorm.weight",
+      "model.language_model.layers.22.linear_attn.A_log": "model.layers.22.linear_attn.A_log",
+      "model.language_model.layers.22.linear_attn.conv1d.weight": "model.layers.22.linear_attn.conv1d.weight",
+      "model.language_model.layers.22.linear_attn.dt_bias": "model.layers.22.linear_attn.dt_bias",
+      "model.language_model.layers.22.linear_attn.in_proj_a.weight": "model.layers.22.linear_attn.in_proj_a.weight",
+      "model.language_model.layers.22.linear_attn.in_proj_b.weight": "model.layers.22.linear_attn.in_proj_b.weight",
+      "model.language_model.layers.22.linear_attn.in_proj_qkv.weight": "model.layers.22.linear_attn.in_proj_qkv.weight",
+      "model.language_model.layers.22.linear_attn.in_proj_z.weight": "model.layers.22.linear_attn.in_proj_z.weight",
+      "model.language_model.layers.22.linear_attn.norm.weight": "model.layers.22.linear_attn.norm.weight",
+      "model.language_model.layers.22.linear_attn.out_proj.weight": "model.layers.22.linear_attn.out_proj.weight",
+      "model.language_model.layers.22.post_attention_layernorm.weight": "model.layers.22.post_attention_layernorm.weight",
+      "model.language_model.layers.23.input_layernorm.weight": "model.layers.23.input_layernorm.weight",
+      "model.language_model.layers.23.post_attention_layernorm.weight": "model.layers.23.post_attention_layernorm.weight",
+      "model.language_model.layers.23.self_attn.k_norm.weight": "model.layers.23.self_attn.k_norm.weight",
+      "model.language_model.layers.23.self_attn.k_proj.weight": "model.layers.23.self_attn.k_proj.weight",
+      "model.language_model.layers.23.self_attn.o_proj.weight": "model.layers.23.self_attn.o_proj.weight",
+      "model.language_model.layers.23.self_attn.q_norm.weight": "model.layers.23.self_attn.q_norm.weight",
+      "model.language_model.layers.23.self_attn.q_proj.weight": "model.layers.23.self_attn.q_proj.weight",
+      "model.language_model.layers.23.self_attn.v_proj.weight": "model.layers.23.self_attn.v_proj.weight",
+      "model.language_model.layers.24.input_layernorm.weight": "model.layers.24.input_layernorm.weight",
+      "model.language_model.layers.24.linear_attn.A_log": "model.layers.24.linear_attn.A_log",
+      "model.language_model.layers.24.linear_attn.conv1d.weight": "model.layers.24.linear_attn.conv1d.weight",
+      "model.language_model.layers.24.linear_attn.dt_bias": "model.layers.24.linear_attn.dt_bias",
+      "model.language_model.layers.24.linear_attn.in_proj_a.weight": "model.layers.24.linear_attn.in_proj_a.weight",
+      "model.language_model.layers.24.linear_attn.in_proj_b.weight": "model.layers.24.linear_attn.in_proj_b.weight",
+      "model.language_model.layers.24.linear_attn.in_proj_qkv.weight": "model.layers.24.linear_attn.in_proj_qkv.weight",
+      "model.language_model.layers.24.linear_attn.in_proj_z.weight": "model.layers.24.linear_attn.in_proj_z.weight",
+      "model.language_model.layers.24.linear_attn.norm.weight": "model.layers.24.linear_attn.norm.weight",
+      "model.language_model.layers.24.linear_attn.out_proj.weight": "model.layers.24.linear_attn.out_proj.weight",
+      "model.language_model.layers.24.post_attention_layernorm.weight": "model.layers.24.post_attention_layernorm.weight",
+      "model.language_model.layers.25.input_layernorm.weight": "model.layers.25.input_layernorm.weight",
+      "model.language_model.layers.25.linear_attn.A_log": "model.layers.25.linear_attn.A_log",
+      "model.language_model.layers.25.linear_attn.conv1d.weight": "model.layers.25.linear_attn.conv1d.weight",
+      "model.language_model.layers.25.linear_attn.dt_bias": "model.layers.25.linear_attn.dt_bias",
+      "model.language_model.layers.25.linear_attn.in_proj_a.weight": "model.layers.25.linear_attn.in_proj_a.weight",
+      "model.language_model.layers.25.linear_attn.in_proj_b.weight": "model.layers.25.linear_attn.in_proj_b.weight",
+      "model.language_model.layers.25.linear_attn.in_proj_qkv.weight": "model.layers.25.linear_attn.in_proj_qkv.weight",
+      "model.language_model.layers.25.linear_attn.in_proj_z.weight": "model.layers.25.linear_attn.in_proj_z.weight",
+      "model.language_model.layers.25.linear_attn.norm.weight": "model.layers.25.linear_attn.norm.weight",
+      "model.language_model.layers.25.linear_attn.out_proj.weight": "model.layers.25.linear_attn.out_proj.weight",
+      "model.language_model.layers.25.post_attention_layernorm.weight": "model.layers.25.post_attention_layernorm.weight",
+      "model.language_model.layers.26.input_layernorm.weight": "model.layers.26.input_layernorm.weight",
+      "model.language_model.layers.26.linear_attn.A_log": "model.layers.26.linear_attn.A_log",
+      "model.language_model.layers.26.linear_attn.conv1d.weight": "model.layers.26.linear_attn.conv1d.weight",
+      "model.language_model.layers.26.linear_attn.dt_bias": "model.layers.26.linear_attn.dt_bias",
+      "model.language_model.layers.26.linear_attn.in_proj_a.weight": "model.layers.26.linear_attn.in_proj_a.weight",
+      "model.language_model.layers.26.linear_attn.in_proj_b.weight": "model.layers.26.linear_attn.in_proj_b.weight",
+      "model.language_model.layers.26.linear_attn.in_proj_qkv.weight": "model.layers.26.linear_attn.in_proj_qkv.weight",
+      "model.language_model.layers.26.linear_attn.in_proj_z.weight": "model.layers.26.linear_attn.in_proj_z.weight",
+      "model.language_model.layers.26.linear_attn.norm.weight": "model.layers.26.linear_attn.norm.weight",
+      "model.language_model.layers.26.linear_attn.out_proj.weight": "model.layers.26.linear_attn.out_proj.weight",
+      "model.language_model.layers.26.mlp.gate_proj.weight": "model.layers.26.mlp.gate_proj.weight",
+      "model.language_model.layers.26.mlp.up_proj.weight": "model.layers.26.mlp.up_proj.weight",
+      "model.language_model.layers.26.post_attention_layernorm.weight": "model.layers.26.post_attention_layernorm.weight",
+      "model.language_model.layers.27.input_layernorm.weight": "model.layers.27.input_layernorm.weight",
+      "model.language_model.layers.27.mlp.down_proj.weight": "model.layers.27.mlp.down_proj.weight",
+      "model.language_model.layers.27.mlp.gate_proj.weight": "model.layers.27.mlp.gate_proj.weight",
+      "model.language_model.layers.27.mlp.up_proj.weight": "model.layers.27.mlp.up_proj.weight",
+      "model.language_model.layers.27.post_attention_layernorm.weight": "model.layers.27.post_attention_layernorm.weight",
+      "model.language_model.layers.27.self_attn.k_norm.weight": "model.layers.27.self_attn.k_norm.weight",
+      "model.language_model.layers.27.self_attn.k_proj.weight": "model.layers.27.self_attn.k_proj.weight",
+      "model.language_model.layers.27.self_attn.o_proj.weight": "model.layers.27.self_attn.o_proj.weight",
+      "model.language_model.layers.27.self_attn.q_norm.weight": "model.layers.27.self_attn.q_norm.weight",
+      "model.language_model.layers.27.self_attn.q_proj.weight": "model.layers.27.self_attn.q_proj.weight",
+      "model.language_model.layers.27.self_attn.v_proj.weight": "model.layers.27.self_attn.v_proj.weight",
+      "model.language_model.layers.28.input_layernorm.weight": "model.layers.28.input_layernorm.weight",
+      "model.language_model.layers.28.linear_attn.A_log": "model.layers.28.linear_attn.A_log",
+      "model.language_model.layers.28.linear_attn.conv1d.weight": "model.layers.28.linear_attn.conv1d.weight",
+      "model.language_model.layers.28.linear_attn.dt_bias": "model.layers.28.linear_attn.dt_bias",
+      "model.language_model.layers.28.linear_attn.in_proj_a.weight": "model.layers.28.linear_attn.in_proj_a.weight",
+      "model.language_model.layers.28.linear_attn.in_proj_b.weight": "model.layers.28.linear_attn.in_proj_b.weight",
+      "model.language_model.layers.28.linear_attn.in_proj_qkv.weight": "model.layers.28.linear_attn.in_proj_qkv.weight",
+      "model.language_model.layers.28.linear_attn.in_proj_z.weight": "model.layers.28.linear_attn.in_proj_z.weight",
+      "model.language_model.layers.28.linear_attn.norm.weight": "model.layers.28.linear_attn.norm.weight",
+      "model.language_model.layers.28.linear_attn.out_proj.weight": "model.layers.28.linear_attn.out_proj.weight",
+      "model.language_model.layers.28.mlp.down_proj.weight": "model.layers.28.mlp.down_proj.weight",
+      "model.language_model.layers.28.mlp.gate_proj.weight": "model.layers.28.mlp.gate_proj.weight",
+      "model.language_model.layers.28.mlp.up_proj.weight": "model.layers.28.mlp.up_proj.weight",
+      "model.language_model.layers.28.post_attention_layernorm.weight": "model.layers.28.post_attention_layernorm.weight",
+      "model.language_model.layers.29.input_layernorm.weight": "model.layers.29.input_layernorm.weight",
+      "model.language_model.layers.29.linear_attn.A_log": "model.layers.29.linear_attn.A_log",
+      "model.language_model.layers.29.linear_attn.conv1d.weight": "model.layers.29.linear_attn.conv1d.weight",
+      "model.language_model.layers.29.linear_attn.dt_bias": "model.layers.29.linear_attn.dt_bias",
+      "model.language_model.layers.29.linear_attn.in_proj_a.weight": "model.layers.29.linear_attn.in_proj_a.weight",
+      "model.language_model.layers.29.linear_attn.in_proj_b.weight": "model.layers.29.linear_attn.in_proj_b.weight",
+      "model.language_model.layers.29.linear_attn.in_proj_qkv.weight": "model.layers.29.linear_attn.in_proj_qkv.weight",
+      "model.language_model.layers.29.linear_attn.in_proj_z.weight": "model.layers.29.linear_attn.in_proj_z.weight",
+      "model.language_model.layers.29.linear_attn.norm.weight": "model.layers.29.linear_attn.norm.weight",
+      "model.language_model.layers.29.linear_attn.out_proj.weight": "model.layers.29.linear_attn.out_proj.weight",
+      "model.language_model.layers.29.mlp.gate_proj.weight": "model.layers.29.mlp.gate_proj.weight",
+      "model.language_model.layers.29.mlp.up_proj.weight": "model.layers.29.mlp.up_proj.weight",
+      "model.language_model.layers.29.post_attention_layernorm.weight": "model.layers.29.post_attention_layernorm.weight",
+      "model.language_model.layers.3.input_layernorm.weight": "model.layers.3.input_layernorm.weight",
+      "model.language_model.layers.3.post_attention_layernorm.weight": "model.layers.3.post_attention_layernorm.weight",
+      "model.language_model.layers.3.self_attn.k_norm.weight": "model.layers.3.self_attn.k_norm.weight",
+      "model.language_model.layers.3.self_attn.k_proj.weight": "model.layers.3.self_attn.k_proj.weight",
+      "model.language_model.layers.3.self_attn.o_proj.weight": "model.layers.3.self_attn.o_proj.weight",
+      "model.language_model.layers.3.self_attn.q_norm.weight": "model.layers.3.self_attn.q_norm.weight",
+      "model.language_model.layers.3.self_attn.q_proj.weight": "model.layers.3.self_attn.q_proj.weight",
+      "model.language_model.layers.3.self_attn.v_proj.weight": "model.layers.3.self_attn.v_proj.weight",
+      "model.language_model.layers.30.input_layernorm.weight": "model.layers.30.input_layernorm.weight",
+      "model.language_model.layers.30.linear_attn.A_log": "model.layers.30.linear_attn.A_log",
+      "model.language_model.layers.30.linear_attn.conv1d.weight": "model.layers.30.linear_attn.conv1d.weight",
+      "model.language_model.layers.30.linear_attn.dt_bias": "model.layers.30.linear_attn.dt_bias",
+      "model.language_model.layers.30.linear_attn.in_proj_a.weight": "model.layers.30.linear_attn.in_proj_a.weight",
+      "model.language_model.layers.30.linear_attn.in_proj_b.weight": "model.layers.30.linear_attn.in_proj_b.weight",
+      "model.language_model.layers.30.linear_attn.in_proj_qkv.weight": "model.layers.30.linear_attn.in_proj_qkv.weight",
+      "model.language_model.layers.30.linear_attn.in_proj_z.weight": "model.layers.30.linear_attn.in_proj_z.weight",
+      "model.language_model.layers.30.linear_attn.norm.weight": "model.layers.30.linear_attn.norm.weight",
+      "model.language_model.layers.30.linear_attn.out_proj.weight": "model.layers.30.linear_attn.out_proj.weight",
+      "model.language_model.layers.30.post_attention_layernorm.weight": "model.layers.30.post_attention_layernorm.weight",
+      "model.language_model.layers.31.input_layernorm.weight": "model.layers.31.input_layernorm.weight",
+      "model.language_model.layers.31.post_attention_layernorm.weight": "model.layers.31.post_attention_layernorm.weight",
+      "model.language_model.layers.31.self_attn.k_norm.weight": "model.layers.31.self_attn.k_norm.weight",
+      "model.language_model.layers.31.self_attn.k_proj.weight": "model.layers.31.self_attn.k_proj.weight",
+      "model.language_model.layers.31.self_attn.o_proj.weight": "model.layers.31.self_attn.o_proj.weight",
+      "model.language_model.layers.31.self_attn.q_norm.weight": "model.layers.31.self_attn.q_norm.weight",
+      "model.language_model.layers.31.self_attn.q_proj.weight": "model.layers.31.self_attn.q_proj.weight",
+      "model.language_model.layers.31.self_attn.v_proj.weight": "model.layers.31.self_attn.v_proj.weight",
+      "model.language_model.layers.4.input_layernorm.weight": "model.layers.4.input_layernorm.weight",
+      "model.language_model.layers.4.linear_attn.A_log": "model.layers.4.linear_attn.A_log",
+      "model.language_model.layers.4.linear_attn.conv1d.weight": "model.layers.4.linear_attn.conv1d.weight",
+      "model.language_model.layers.4.linear_attn.dt_bias": "model.layers.4.linear_attn.dt_bias",
+      "model.language_model.layers.4.linear_attn.in_proj_a.weight": "model.layers.4.linear_attn.in_proj_a.weight",
+      "model.language_model.layers.4.linear_attn.in_proj_b.weight": "model.layers.4.linear_attn.in_proj_b.weight",
+      "model.language_model.layers.4.linear_attn.in_proj_qkv.weight": "model.layers.4.linear_attn.in_proj_qkv.weight",
+      "model.language_model.layers.4.linear_attn.in_proj_z.weight": "model.layers.4.linear_attn.in_proj_z.weight",
+      "model.language_model.layers.4.linear_attn.norm.weight": "model.layers.4.linear_attn.norm.weight",
+      "model.language_model.layers.4.linear_attn.out_proj.weight": "model.layers.4.linear_attn.out_proj.weight",
+      "model.language_model.layers.4.post_attention_layernorm.weight": "model.layers.4.post_attention_layernorm.weight",
+      "model.language_model.layers.5.input_layernorm.weight": "model.layers.5.input_layernorm.weight",
+      "model.language_model.layers.5.linear_attn.A_log": "model.layers.5.linear_attn.A_log",
+      "model.language_model.layers.5.linear_attn.conv1d.weight": "model.layers.5.linear_attn.conv1d.weight",
+      "model.language_model.layers.5.linear_attn.dt_bias": "model.layers.5.linear_attn.dt_bias",
+      "model.language_model.layers.5.linear_attn.in_proj_a.weight": "model.layers.5.linear_attn.in_proj_a.weight",
+      "model.language_model.layers.5.linear_attn.in_proj_b.weight": "model.layers.5.linear_attn.in_proj_b.weight",
+      "model.language_model.layers.5.linear_attn.in_proj_qkv.weight": "model.layers.5.linear_attn.in_proj_qkv.weight",
+      "model.language_model.layers.5.linear_attn.in_proj_z.weight": "model.layers.5.linear_attn.in_proj_z.weight",
+      "model.language_model.layers.5.linear_attn.norm.weight": "model.layers.5.linear_attn.norm.weight",
+      "model.language_model.layers.5.linear_attn.out_proj.weight": "model.layers.5.linear_attn.out_proj.weight",
+      "model.language_model.layers.5.post_attention_layernorm.weight": "model.layers.5.post_attention_layernorm.weight",
+      "model.language_model.layers.6.input_layernorm.weight": "model.layers.6.input_layernorm.weight",
+      "model.language_model.layers.6.linear_attn.A_log": "model.layers.6.linear_attn.A_log",
+      "model.language_model.layers.6.linear_attn.conv1d.weight": "model.layers.6.linear_attn.conv1d.weight",
+      "model.language_model.layers.6.linear_attn.dt_bias": "model.layers.6.linear_attn.dt_bias",
+      "model.language_model.layers.6.linear_attn.in_proj_a.weight": "model.layers.6.linear_attn.in_proj_a.weight",
+      "model.language_model.layers.6.linear_attn.in_proj_b.weight": "model.layers.6.linear_attn.in_proj_b.weight",
+      "model.language_model.layers.6.linear_attn.in_proj_qkv.weight": "model.layers.6.linear_attn.in_proj_qkv.weight",
+      "model.language_model.layers.6.linear_attn.in_proj_z.weight": "model.layers.6.linear_attn.in_proj_z.weight",
+      "model.language_model.layers.6.linear_attn.norm.weight": "model.layers.6.linear_attn.norm.weight",
+      "model.language_model.layers.6.linear_attn.out_proj.weight": "model.layers.6.linear_attn.out_proj.weight",
+      "model.language_model.layers.6.post_attention_layernorm.weight": "model.layers.6.post_attention_layernorm.weight",
+      "model.language_model.layers.7.input_layernorm.weight": "model.layers.7.input_layernorm.weight",
+      "model.language_model.layers.7.post_attention_layernorm.weight": "model.layers.7.post_attention_layernorm.weight",
+      "model.language_model.layers.7.self_attn.k_norm.weight": "model.layers.7.self_attn.k_norm.weight",
+      "model.language_model.layers.7.self_attn.k_proj.weight": "model.layers.7.self_attn.k_proj.weight",
+      "model.language_model.layers.7.self_attn.o_proj.weight": "model.layers.7.self_attn.o_proj.weight",
+      "model.language_model.layers.7.self_attn.q_norm.weight": "model.layers.7.self_attn.q_norm.weight",
+      "model.language_model.layers.7.self_attn.q_proj.weight": "model.layers.7.self_attn.q_proj.weight",
+      "model.language_model.layers.7.self_attn.v_proj.weight": "model.layers.7.self_attn.v_proj.weight",
+      "model.language_model.layers.8.input_layernorm.weight": "model.layers.8.input_layernorm.weight",
+      "model.language_model.layers.8.linear_attn.A_log": "model.layers.8.linear_attn.A_log",
+      "model.language_model.layers.8.linear_attn.conv1d.weight": "model.layers.8.linear_attn.conv1d.weight",
+      "model.language_model.layers.8.linear_attn.dt_bias": "model.layers.8.linear_attn.dt_bias",
+      "model.language_model.layers.8.linear_attn.in_proj_a.weight": "model.layers.8.linear_attn.in_proj_a.weight",
+      "model.language_model.layers.8.linear_attn.in_proj_b.weight": "model.layers.8.linear_attn.in_proj_b.weight",
+      "model.language_model.layers.8.linear_attn.in_proj_qkv.weight": "model.layers.8.linear_attn.in_proj_qkv.weight",
+      "model.language_model.layers.8.linear_attn.in_proj_z.weight": "model.layers.8.linear_attn.in_proj_z.weight",
+      "model.language_model.layers.8.linear_attn.norm.weight": "model.layers.8.linear_attn.norm.weight",
+      "model.language_model.layers.8.linear_attn.out_proj.weight": "model.layers.8.linear_attn.out_proj.weight",
+      "model.language_model.layers.8.post_attention_layernorm.weight": "model.layers.8.post_attention_layernorm.weight",
+      "model.language_model.layers.9.input_layernorm.weight": "model.layers.9.input_layernorm.weight",
+      "model.language_model.layers.9.linear_attn.A_log": "model.layers.9.linear_attn.A_log",
+      "model.language_model.layers.9.linear_attn.conv1d.weight": "model.layers.9.linear_attn.conv1d.weight",
+      "model.language_model.layers.9.linear_attn.dt_bias": "model.layers.9.linear_attn.dt_bias",
+      "model.language_model.layers.9.linear_attn.in_proj_a.weight": "model.layers.9.linear_attn.in_proj_a.weight",
+      "model.language_model.layers.9.linear_attn.in_proj_b.weight": "model.layers.9.linear_attn.in_proj_b.weight",
+      "model.language_model.layers.9.linear_attn.in_proj_qkv.weight": "model.layers.9.linear_attn.in_proj_qkv.weight",
+      "model.language_model.layers.9.linear_attn.in_proj_z.weight": "model.layers.9.linear_attn.in_proj_z.weight",
+      "model.language_model.layers.9.linear_attn.norm.weight": "model.layers.9.linear_attn.norm.weight",
+      "model.language_model.layers.9.linear_attn.out_proj.weight": "model.layers.9.linear_attn.out_proj.weight",
+      "model.language_model.layers.9.post_attention_layernorm.weight": "model.layers.9.post_attention_layernorm.weight",
+      "model.language_model.norm.weight": "model.norm.weight"
+    },
+    "skipped_vision_or_mtp": [
+      "mtp.layers.0.mlp.down_proj.weight",
+      "mtp.layers.0.mlp.gate_proj.weight",
+      "mtp.layers.0.mlp.up_proj.weight",
+      "model.visual.blocks.0.attn.proj.bias",
+      "model.visual.blocks.0.attn.proj.weight",
+      "model.visual.blocks.0.attn.qkv.bias",
+      "model.visual.blocks.0.attn.qkv.weight",
+      "model.visual.blocks.0.mlp.linear_fc1.bias",
+      "model.visual.blocks.0.mlp.linear_fc1.weight",
+      "model.visual.blocks.0.mlp.linear_fc2.bias",
+      "model.visual.blocks.0.mlp.linear_fc2.weight",
+      "model.visual.blocks.0.norm1.bias",
+      "model.visual.blocks.0.norm1.weight",
+      "model.visual.blocks.0.norm2.bias",
+      "model.visual.blocks.0.norm2.weight",
+      "model.visual.blocks.1.attn.proj.bias",
+      "model.visual.blocks.1.attn.proj.weight",
+      "model.visual.blocks.1.attn.qkv.bias",
+      "model.visual.blocks.1.attn.qkv.weight",
+      "model.visual.blocks.1.mlp.linear_fc1.bias",
+      "model.visual.blocks.1.mlp.linear_fc1.weight",
+      "model.visual.blocks.1.mlp.linear_fc2.bias",
+      "model.visual.blocks.1.mlp.linear_fc2.weight",
+      "model.visual.blocks.1.norm1.bias",
+      "model.visual.blocks.1.norm1.weight",
+      "model.visual.blocks.1.norm2.bias",
+      "model.visual.blocks.1.norm2.weight",
+      "model.visual.blocks.10.attn.proj.bias",
+      "model.visual.blocks.10.attn.proj.weight",
+      "model.visual.blocks.10.attn.qkv.bias",
+      "model.visual.blocks.10.attn.qkv.weight",
+      "model.visual.blocks.10.mlp.linear_fc1.bias",
+      "model.visual.blocks.10.mlp.linear_fc1.weight",
+      "model.visual.blocks.10.mlp.linear_fc2.bias",
+      "model.visual.blocks.10.mlp.linear_fc2.weight",
+      "model.visual.blocks.10.norm1.bias",
+      "model.visual.blocks.10.norm1.weight",
+      "model.visual.blocks.10.norm2.bias",
+      "model.visual.blocks.10.norm2.weight",
+      "model.visual.blocks.11.attn.proj.bias",
+      "model.visual.blocks.11.attn.proj.weight",
+      "model.visual.blocks.11.attn.qkv.bias",
+      "model.visual.blocks.11.attn.qkv.weight",
+      "model.visual.blocks.11.mlp.linear_fc1.bias",
+      "model.visual.blocks.11.mlp.linear_fc1.weight",
+      "model.visual.blocks.11.mlp.linear_fc2.bias",
+      "model.visual.blocks.11.mlp.linear_fc2.weight",
+      "model.visual.blocks.11.norm1.bias",
+      "model.visual.blocks.11.norm1.weight",
+      "model.visual.blocks.11.norm2.bias",
+      "model.visual.blocks.11.norm2.weight",
+      "model.visual.blocks.12.attn.proj.bias",
+      "model.visual.blocks.12.attn.proj.weight",
+      "model.visual.blocks.12.attn.qkv.bias",
+      "model.visual.blocks.12.attn.qkv.weight",
+      "model.visual.blocks.12.mlp.linear_fc1.bias",
+      "model.visual.blocks.12.mlp.linear_fc1.weight",
+      "model.visual.blocks.12.mlp.linear_fc2.bias",
+      "model.visual.blocks.12.mlp.linear_fc2.weight",
+      "model.visual.blocks.12.norm1.bias",
+      "model.visual.blocks.12.norm1.weight",
+      "model.visual.blocks.12.norm2.bias",
+      "model.visual.blocks.12.norm2.weight",
+      "model.visual.blocks.13.attn.proj.bias",
+      "model.visual.blocks.13.attn.proj.weight",
+      "model.visual.blocks.13.attn.qkv.bias",
+      "model.visual.blocks.13.attn.qkv.weight",
+      "model.visual.blocks.13.mlp.linear_fc1.bias",
+      "model.visual.blocks.13.mlp.linear_fc1.weight",
+      "model.visual.blocks.13.mlp.linear_fc2.bias",
+      "model.visual.blocks.13.mlp.linear_fc2.weight",
+      "model.visual.blocks.13.norm1.bias",
+      "model.visual.blocks.13.norm1.weight",
+      "model.visual.blocks.13.norm2.bias",
+      "model.visual.blocks.13.norm2.weight",
+      "model.visual.blocks.14.attn.proj.bias",
+      "model.visual.blocks.14.attn.proj.weight",
+      "model.visual.blocks.14.attn.qkv.bias",
+      "model.visual.blocks.14.attn.qkv.weight",
+      "model.visual.blocks.14.mlp.linear_fc1.bias",
+      "model.visual.blocks.14.mlp.linear_fc1.weight",
+      "model.visual.blocks.14.mlp.linear_fc2.bias",
+      "model.visual.blocks.14.mlp.linear_fc2.weight",
+      "model.visual.blocks.14.norm1.bias",
+      "model.visual.blocks.14.norm1.weight",
+      "model.visual.blocks.14.norm2.bias",
+      "model.visual.blocks.14.norm2.weight",
+      "model.visual.blocks.15.attn.proj.bias",
+      "model.visual.blocks.15.attn.proj.weight",
+      "model.visual.blocks.15.attn.qkv.bias",
+      "model.visual.blocks.15.attn.qkv.weight",
+      "model.visual.blocks.15.mlp.linear_fc1.bias",
+      "model.visual.blocks.15.mlp.linear_fc1.weight",
+      "model.visual.blocks.15.mlp.linear_fc2.bias",
+      "model.visual.blocks.15.mlp.linear_fc2.weight",
+      "model.visual.blocks.15.norm1.bias",
+      "model.visual.blocks.15.norm1.weight",
+      "model.visual.blocks.15.norm2.bias",
+      "model.visual.blocks.15.norm2.weight",
+      "model.visual.blocks.16.attn.proj.bias",
+      "model.visual.blocks.16.attn.proj.weight",
+      "model.visual.blocks.16.attn.qkv.bias",
+      "model.visual.blocks.16.attn.qkv.weight",
+      "model.visual.blocks.16.mlp.linear_fc1.bias",
+      "model.visual.blocks.16.mlp.linear_fc1.weight",
+      "model.visual.blocks.16.mlp.linear_fc2.bias",
+      "model.visual.blocks.16.mlp.linear_fc2.weight",
+      "model.visual.blocks.16.norm1.bias",
+      "model.visual.blocks.16.norm1.weight",
+      "model.visual.blocks.16.norm2.bias",
+      "model.visual.blocks.16.norm2.weight",
+      "model.visual.blocks.17.attn.proj.bias",
+      "model.visual.blocks.17.attn.proj.weight",
+      "model.visual.blocks.17.attn.qkv.bias",
+      "model.visual.blocks.17.attn.qkv.weight",
+      "model.visual.blocks.17.mlp.linear_fc1.bias",
+      "model.visual.blocks.17.mlp.linear_fc1.weight",
+      "model.visual.blocks.17.mlp.linear_fc2.bias",
+      "model.visual.blocks.17.mlp.linear_fc2.weight",
+      "model.visual.blocks.17.norm1.bias",
+      "model.visual.blocks.17.norm1.weight",
+      "model.visual.blocks.17.norm2.bias",
+      "model.visual.blocks.17.norm2.weight",
+      "model.visual.blocks.18.attn.proj.bias",
+      "model.visual.blocks.18.attn.proj.weight",
+      "model.visual.blocks.18.attn.qkv.bias",
+      "model.visual.blocks.18.attn.qkv.weight",
+      "model.visual.blocks.18.mlp.linear_fc1.bias",
+      "model.visual.blocks.18.mlp.linear_fc1.weight",
+      "model.visual.blocks.18.mlp.linear_fc2.bias",
+      "model.visual.blocks.18.mlp.linear_fc2.weight",
+      "model.visual.blocks.18.norm1.bias",
+      "model.visual.blocks.18.norm1.weight",
+      "model.visual.blocks.18.norm2.bias",
+      "model.visual.blocks.18.norm2.weight",
+      "model.visual.blocks.19.attn.proj.bias",
+      "model.visual.blocks.19.attn.proj.weight",
+      "model.visual.blocks.19.attn.qkv.bias",
+      "model.visual.blocks.19.attn.qkv.weight",
+      "model.visual.blocks.19.mlp.linear_fc1.bias",
+      "model.visual.blocks.19.mlp.linear_fc1.weight",
+      "model.visual.blocks.19.mlp.linear_fc2.bias",
+      "model.visual.blocks.19.mlp.linear_fc2.weight",
+      "model.visual.blocks.19.norm1.bias",
+      "model.visual.blocks.19.norm1.weight",
+      "model.visual.blocks.19.norm2.bias",
+      "model.visual.blocks.19.norm2.weight",
+      "model.visual.blocks.2.attn.proj.bias",
+      "model.visual.blocks.2.attn.proj.weight",
+      "model.visual.blocks.2.attn.qkv.bias",
+      "model.visual.blocks.2.attn.qkv.weight",
+      "model.visual.blocks.2.mlp.linear_fc1.bias",
+      "model.visual.blocks.2.mlp.linear_fc1.weight",
+      "model.visual.blocks.2.mlp.linear_fc2.bias",
+      "model.visual.blocks.2.mlp.linear_fc2.weight",
+      "model.visual.blocks.2.norm1.bias",
+      "model.visual.blocks.2.norm1.weight",
+      "model.visual.blocks.2.norm2.bias",
+      "model.visual.blocks.2.norm2.weight",
+      "model.visual.blocks.20.attn.proj.bias",
+      "model.visual.blocks.20.attn.proj.weight",
+      "model.visual.blocks.20.attn.qkv.bias",
+      "model.visual.blocks.20.attn.qkv.weight",
+      "model.visual.blocks.20.mlp.linear_fc1.bias",
+      "model.visual.blocks.20.mlp.linear_fc1.weight",
+      "model.visual.blocks.20.mlp.linear_fc2.bias",
+      "model.visual.blocks.20.mlp.linear_fc2.weight",
+      "model.visual.blocks.20.norm1.bias",
+      "model.visual.blocks.20.norm1.weight",
+      "model.visual.blocks.20.norm2.bias",
+      "model.visual.blocks.20.norm2.weight",
+      "model.visual.blocks.21.attn.proj.bias",
+      "model.visual.blocks.21.attn.proj.weight",
+      "model.visual.blocks.21.attn.qkv.bias",
+      "model.visual.blocks.21.attn.qkv.weight",
+      "model.visual.blocks.21.mlp.linear_fc1.bias",
+      "model.visual.blocks.21.mlp.linear_fc1.weight",
+      "model.visual.blocks.21.mlp.linear_fc2.bias",
+      "model.visual.blocks.21.mlp.linear_fc2.weight",
+      "model.visual.blocks.21.norm1.bias",
+      "model.visual.blocks.21.norm1.weight",
+      "model.visual.blocks.21.norm2.bias",
+      "model.visual.blocks.21.norm2.weight",
+      "model.visual.blocks.22.attn.proj.bias",
+      "model.visual.blocks.22.attn.proj.weight",
+      "model.visual.blocks.22.attn.qkv.bias",
+      "model.visual.blocks.22.attn.qkv.weight",
+      "model.visual.blocks.22.mlp.linear_fc1.bias",
+      "model.visual.blocks.22.mlp.linear_fc1.weight",
+      "model.visual.blocks.22.mlp.linear_fc2.bias",
+      "model.visual.blocks.22.mlp.linear_fc2.weight",
+      "model.visual.blocks.22.norm1.bias",
+      "model.visual.blocks.22.norm1.weight",
+      "model.visual.blocks.22.norm2.bias",
+      "model.visual.blocks.22.norm2.weight",
+      "model.visual.blocks.23.attn.proj.bias",
+      "model.visual.blocks.23.attn.proj.weight",
+      "model.visual.blocks.23.attn.qkv.bias",
+      "model.visual.blocks.23.attn.qkv.weight",
+      "model.visual.blocks.23.mlp.linear_fc1.bias",
+      "model.visual.blocks.23.mlp.linear_fc1.weight",
+      "model.visual.blocks.23.mlp.linear_fc2.bias",
+      "model.visual.blocks.23.mlp.linear_fc2.weight",
+      "model.visual.blocks.23.norm1.bias",
+      "model.visual.blocks.23.norm1.weight",
+      "model.visual.blocks.23.norm2.bias",
+      "model.visual.blocks.23.norm2.weight",
+      "model.visual.blocks.3.attn.proj.bias",
+      "model.visual.blocks.3.attn.proj.weight",
+      "model.visual.blocks.3.attn.qkv.bias",
+      "model.visual.blocks.3.attn.qkv.weight",
+      "model.visual.blocks.3.mlp.linear_fc1.bias",
+      "model.visual.blocks.3.mlp.linear_fc1.weight",
+      "model.visual.blocks.3.mlp.linear_fc2.bias",
+      "model.visual.blocks.3.mlp.linear_fc2.weight",
+      "model.visual.blocks.3.norm1.bias",
+      "model.visual.blocks.3.norm1.weight",
+      "model.visual.blocks.3.norm2.bias",
+      "model.visual.blocks.3.norm2.weight",
+      "model.visual.blocks.4.attn.proj.bias",
+      "model.visual.blocks.4.attn.proj.weight",
+      "model.visual.blocks.4.attn.qkv.bias",
+      "model.visual.blocks.4.attn.qkv.weight",
+      "model.visual.blocks.4.mlp.linear_fc1.bias",
+      "model.visual.blocks.4.mlp.linear_fc1.weight",
+      "model.visual.blocks.4.mlp.linear_fc2.bias",
+      "model.visual.blocks.4.mlp.linear_fc2.weight",
+      "model.visual.blocks.4.norm1.bias",
+      "model.visual.blocks.4.norm1.weight",
+      "model.visual.blocks.4.norm2.bias",
+      "model.visual.blocks.4.norm2.weight",
+      "model.visual.blocks.5.attn.proj.bias",
+      "model.visual.blocks.5.attn.proj.weight",
+      "model.visual.blocks.5.attn.qkv.bias",
+      "model.visual.blocks.5.attn.qkv.weight",
+      "model.visual.blocks.5.mlp.linear_fc1.bias",
+      "model.visual.blocks.5.mlp.linear_fc1.weight",
+      "model.visual.blocks.5.mlp.linear_fc2.bias",
+      "model.visual.blocks.5.mlp.linear_fc2.weight",
+      "model.visual.blocks.5.norm1.bias",
+      "model.visual.blocks.5.norm1.weight",
+      "model.visual.blocks.5.norm2.bias",
+      "model.visual.blocks.5.norm2.weight",
+      "model.visual.blocks.6.attn.proj.bias",
+      "model.visual.blocks.6.attn.proj.weight",
+      "model.visual.blocks.6.attn.qkv.bias",
+      "model.visual.blocks.6.attn.qkv.weight",
+      "model.visual.blocks.6.mlp.linear_fc1.bias",
+      "model.visual.blocks.6.mlp.linear_fc1.weight",
+      "model.visual.blocks.6.mlp.linear_fc2.bias",
+      "model.visual.blocks.6.mlp.linear_fc2.weight",
+      "model.visual.blocks.6.norm1.bias",
+      "model.visual.blocks.6.norm1.weight",
+      "model.visual.blocks.6.norm2.bias",
+      "model.visual.blocks.6.norm2.weight",
+      "model.visual.blocks.7.attn.proj.bias",
+      "model.visual.blocks.7.attn.proj.weight",
+      "model.visual.blocks.7.attn.qkv.bias",
+      "model.visual.blocks.7.attn.qkv.weight",
+      "model.visual.blocks.7.mlp.linear_fc1.bias",
+      "model.visual.blocks.7.mlp.linear_fc1.weight",
+      "model.visual.blocks.7.mlp.linear_fc2.bias",
+      "model.visual.blocks.7.mlp.linear_fc2.weight",
+      "model.visual.blocks.7.norm1.bias",
+      "model.visual.blocks.7.norm1.weight",
+      "model.visual.blocks.7.norm2.bias",
+      "model.visual.blocks.7.norm2.weight",
+      "model.visual.blocks.8.attn.proj.bias",
+      "model.visual.blocks.8.attn.proj.weight",
+      "model.visual.blocks.8.attn.qkv.bias",
+      "model.visual.blocks.8.attn.qkv.weight",
+      "model.visual.blocks.8.mlp.linear_fc1.bias",
+      "model.visual.blocks.8.mlp.linear_fc1.weight",
+      "model.visual.blocks.8.mlp.linear_fc2.bias",
+      "model.visual.blocks.8.mlp.linear_fc2.weight",
+      "model.visual.blocks.8.norm1.bias",
+      "model.visual.blocks.8.norm1.weight",
+      "model.visual.blocks.8.norm2.bias",
+      "model.visual.blocks.8.norm2.weight",
+      "model.visual.blocks.9.attn.proj.bias",
+      "model.visual.blocks.9.attn.proj.weight",
+      "model.visual.blocks.9.attn.qkv.bias",
+      "model.visual.blocks.9.attn.qkv.weight",
+      "model.visual.blocks.9.mlp.linear_fc1.bias",
+      "model.visual.blocks.9.mlp.linear_fc1.weight",
+      "model.visual.blocks.9.mlp.linear_fc2.bias",
+      "model.visual.blocks.9.mlp.linear_fc2.weight",
+      "model.visual.blocks.9.norm1.bias",
+      "model.visual.blocks.9.norm1.weight",
+      "model.visual.blocks.9.norm2.bias",
+      "model.visual.blocks.9.norm2.weight",
+      "model.visual.merger.linear_fc1.bias",
+      "model.visual.merger.linear_fc1.weight",
+      "model.visual.merger.linear_fc2.bias",
+      "model.visual.merger.linear_fc2.weight",
+      "model.visual.merger.norm.bias",
+      "model.visual.merger.norm.weight",
+      "model.visual.patch_embed.proj.bias",
+      "model.visual.patch_embed.proj.weight",
+      "model.visual.pos_embed.weight",
+      "mtp.fc.weight",
+      "mtp.layers.0.input_layernorm.weight",
+      "mtp.layers.0.post_attention_layernorm.weight",
+      "mtp.layers.0.self_attn.k_norm.weight",
+      "mtp.layers.0.self_attn.k_proj.weight",
+      "mtp.layers.0.self_attn.o_proj.weight",
+      "mtp.layers.0.self_attn.q_norm.weight",
+      "mtp.layers.0.self_attn.q_proj.weight",
+      "mtp.layers.0.self_attn.v_proj.weight",
+      "mtp.norm.weight",
+      "mtp.pre_fc_norm_embedding.weight",
+      "mtp.pre_fc_norm_hidden.weight"
+    ],
+    "tied_keys": [
+      "lm_head.weight"
+    ],
+    "checked_tensors": 426,
+    "layer_types": [
+      "linear_attention",
+      "linear_attention",
+      "linear_attention",
+      "full_attention",
+      "linear_attention",
+      "linear_attention",
+      "linear_attention",
+      "full_attention",
+      "linear_attention",
+      "linear_attention",
+      "linear_attention",
+      "full_attention",
+      "linear_attention",
+      "linear_attention",
+      "linear_attention",
+      "full_attention",
+      "linear_attention",
+      "linear_attention",
+      "linear_attention",
+      "full_attention",
+      "linear_attention",
+      "linear_attention",
+      "linear_attention",
+      "full_attention",
+      "linear_attention",
+      "linear_attention",
+      "linear_attention",
+      "full_attention",
+      "linear_attention",
+      "linear_attention",
+      "linear_attention",
+      "full_attention"
+    ],
+    "input_tokens_sha256": "49e2a94ce0bd89728c81b5840e0ac36632a4b721b483e22003e2c69052f38a60",
+    "download": {
+      "repo_id": "Qwen/Qwen3.5-4B",
+      "revision": "851bf6e806efd8d0a36b00ddf55e13ccb7b8cd0a",
+      "token": false,
+      "files": {
+        "model.safetensors-00001-of-00002.safetensors": {
+          "bytes": 5329398688,
+          "sha256": "26a93f066e1916adb13453dae5a0c707c0fbc71299ed98779571a907b8e74c61"
+        },
+        "model.safetensors-00002-of-00002.safetensors": {
+          "bytes": 3990429408,
+          "sha256": "cb544bd9bfae93dc59b0f22b292f5933573854a7f9b97835c67060d7d910e188"
+        }
+      }
+    }
+  }
+}
