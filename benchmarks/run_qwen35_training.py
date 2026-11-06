@@ -23,6 +23,7 @@ def main() -> None:
     selection.add_argument("--native-consumer-only", action="store_true")
     selection.add_argument("--autograd-isolation-only", action="store_true")
     selection.add_argument("--causal-policy-only", action="store_true")
+    selection.add_argument("--native-graph-only", action="store_true")
     parser.add_argument("--emulate-precision-casts", action="store_true")
     parser.add_argument("--recompile-limit", type=int)
     parser.add_argument(
@@ -79,6 +80,13 @@ def main() -> None:
             ("native-graph", "native-graph"),
             ("peft-after", "peft"),
         ]
+    elif args.native_graph_only:
+        modes = [
+            ("peft-before", "peft"),
+            ("peft-implicit", "peft"),
+            ("native-graph", "native-graph"),
+            ("peft-after", "peft"),
+        ]
     for name, backend in modes:
         remaining = deadline - time.monotonic()
         if remaining < 30:
@@ -105,6 +113,7 @@ def main() -> None:
                 or args.whole_compile_only
                 or args.autograd_isolation_only
                 or args.causal_policy_only
+                or args.native_graph_only
                 else ["0", "1"]
             ),
         ]
@@ -120,7 +129,10 @@ def main() -> None:
         command += ["--compile-backend", compiler]
         if args.check_input_change:
             command.append("--check-input-change")
-        if args.causal_policy_only and name not in ("peft-before", "peft-after"):
+        if (args.causal_policy_only or args.native_graph_only) and name not in (
+            "peft-before",
+            "peft-after",
+        ):
             command.append("--implicit-causal")
         timeout = min(
             remaining, 300 if name in ("peft-before", "compiled-model") else 240

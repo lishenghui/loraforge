@@ -73,8 +73,13 @@ def install(model):
     if model.config._attn_implementation != "sdpa" or model.config.use_cache:
         raise ValueError("native SDPA and disabled KV cache required")
     attention = [m for m in model.modules() if type(m).__name__ == "Qwen3_5Attention"]
-    if len(attention) != 6 or not all(m.is_causal for m in attention):
-        raise ValueError("six native causal Qwen3.5 attention layers required")
+    expected = model.config.layer_types.count("full_attention")
+    if (
+        expected < 1
+        or len(attention) != expected
+        or not all(m.is_causal for m in attention)
+    ):
+        raise ValueError("native causal Qwen3.5 attention layers must match the config")
     AttentionInterface.register(NAME, sdpa_attention_forward)
     masks.AttentionMaskInterface.register(NAME, fixed_causal_mask)
     model.set_attn_implementation(NAME)

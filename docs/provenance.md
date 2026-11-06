@@ -480,3 +480,16 @@ after its `[1:]` selection; removing the separate automatic packing axis is
 scoped to the benchmark's known single contiguous sequence. Original framework
 files and the `sdpa` registry entry remain unchanged. Native source hashes and
 rejected automatic-packing guard attempts are retained with the experiment.
+
+### Larger Qwen3.5 training fixture
+
+The existing LoRAForge text-checkpoint preparer now reads indexed HF shards
+while checking duplicate/missing/misindexed weights, unchanged BF16 matrices,
+complete expected text names and serialized values. It copies no model loader
+or framework implementation. The original public Qwen3.5-4B revision and LFS
+checksums are pinned in `docs/qwen35-training-4b-mi250.json`; no model weights
+are vendored. Benchmark layer/attention counts and full PEFT parameter names
+are configuration-derived, preserving the old native methods. The new
+`--native-graph-only` selection calls the previously recorded native graph and
+fixed-causal policy with original PEFT controls. Its 4B performance and exact
+gradient/update results are separate from the earlier 0.8B evidence.

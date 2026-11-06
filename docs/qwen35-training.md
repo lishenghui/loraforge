@@ -14,6 +14,11 @@ batch one, dropout zero, checkpointing off, no padding/packing or KV cache.
 It does not establish convergence, QLoRA performance or a total-VRAM saving.
 225 CPU checks, Ruff and wheel/sdist checks pass.
 
+The [4B extension](qwen35-training-4b.md) also passes exact original-PEFT checks,
+but the same gains do not persist: 128-token speed is 2.466–2.621x, while
+1024/4096 are essentially unchanged. Its layer/adapter counts and indexed
+checkpoint audit are derived from the larger model's actual configuration.
+
 The older packed-projection and compiler measurements below retain their
 **failed original PEFT gradient/update gates**. Matched packed-reference success
 and those experimental timings must not be presented as native-equivalent

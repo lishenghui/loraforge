@@ -67,6 +67,14 @@ unit-test skips are separate from the completed whole-model GPU experiments.
 Ruff and wheel/sdist build checks accompany this change. All GPU jobs for this
 round have finished; no recurring follow-up or queued job remains.
 
+## Larger-model check
+
+The [Qwen3.5-4B follow-up](qwen35-training-4b.md) now passes exact native PEFT
+checks for all 496 factor tensors at the same three lengths. Its gains are
+2.466–2.621x at 128 tokens, essentially none at 1024, and none at 4096. The
+short-sequence benefit survives, but the 0.8B scaling must not be extrapolated
+to larger models. This is a separately controlled single-GCD job.
+
 ## Isolation results before the mask fix
 
 Job `23501814`, `nid005045`, completes all six workers in 5m27s: 18 cases,

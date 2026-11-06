@@ -76,7 +76,7 @@ def main() -> None:
         argv=sys.argv,
         backend=args.backend,
         cases=[],
-        scope="Whole 24-layer text-only BF16 Qwen3.5-0.8B; all-linear rank4 LoRA FP32 masters; dropout0; zero_grad+forward+causal_loss+backward+AdamW; synthetic fixed text, not convergence",
+        scope="Whole text-only BF16 Qwen3.5; all-linear rank4 LoRA FP32 masters; dropout0; zero_grad+forward+causal_loss+backward+AdamW; synthetic fixed text, not convergence",
         versions={
             n: importlib.metadata.version(n)
             for n in [
@@ -156,23 +156,49 @@ def main() -> None:
         loading.get(k)
         for k in ("missing_keys", "unexpected_keys", "mismatched_keys", "error_msgs")
     ), loading
-    assert len(model.model.layers) == 24
-    assert model.config.layer_types.count("linear_attention") == 18
-    assert model.config.layer_types.count("full_attention") == 6
+    config = model.config
+    assert (
+        len(model.model.layers) == config.num_hidden_layers == len(config.layer_types)
+    )
+    assert set(config.layer_types) == {"linear_attention", "full_attention"}
+    report["model"] = dict(
+        layers=config.num_hidden_layers,
+        hidden_size=config.hidden_size,
+        intermediate_size=config.intermediate_size,
+        gdn_layers=config.layer_types.count("linear_attention"),
+        attention_layers=config.layer_types.count("full_attention"),
+        base_parameters=sum(p.numel() for p in model.parameters()),
+    )
+    expected_adapters = {
+        f"base_model.model.{name}.lora_{factor}.default.weight"
+        for name, module in model.named_modules()
+        if isinstance(module, torch.nn.Linear) and name != "lm_head"
+        for factor in ("A", "B")
+    }
     # One full actual load audit per worker, outside the timed steps.
     checked = 0
     with safe_open(
         args.checkpoint / "model.safetensors", framework="pt", device="cpu"
     ) as f:
         for name, t in model.state_dict().items():
-            key = "model.embed_tokens.weight" if name == "lm_head.weight" else name
+            key = (
+                "model.embed_tokens.weight"
+                if name == "lm_head.weight"
+                and name not in f.keys()
+                and config.tie_word_embeddings
+                else name
+            )
             source = f.get_tensor(key)
             assert torch.equal(t.detach().cpu(), source.to(t.dtype)), name
             checked += 1
     report["checked_loaded_tensors"] = checked
-    assert model.lm_head.weight.data_ptr() == model.model.embed_tokens.weight.data_ptr()
+    if config.tie_word_embeddings:
+        assert (
+            model.lm_head.weight.data_ptr()
+            == model.model.embed_tokens.weight.data_ptr()
+        )
     gdn = [m for m in model.modules() if type(m).__name__ == "Qwen3_5GatedDeltaNet"]
-    assert len(gdn) == 18
+    assert len(gdn) == report["model"]["gdn_layers"]
     assert all(m.chunk_gated_delta_rule.__module__.startswith("fla.") for m in gdn)
     assert all(m.causal_conv1d_fn is not None for m in gdn)
     report["gdn"] = dict(
@@ -204,7 +230,13 @@ def main() -> None:
         k: v.detach().cpu().clone()
         for k, v in wrapper.adapter_parameters(model).items()
     }
-    assert len(initial) == 372, len(initial)
+    assert len(initial) == len(expected_adapters), (
+        len(initial),
+        len(expected_adapters),
+    )
+    assert set(initial) == expected_adapters, (
+        "unexpected PEFT trainable parameter ownership"
+    )
     report["adapter_tensors"] = len(initial)
     report["adapter_parameters"] = sum(p.numel() for p in initial.values())
     initial_hash = hashlib.sha256()
@@ -225,7 +257,7 @@ def main() -> None:
             args.backend if args.backend not in ("packed", "compiled-mlp") else "native"
         )
         count = wrapper.replace_mlps(model, backend)
-        assert count == 24, count
+        assert count == config.num_hidden_layers, count
         report["replaced_mlps"] = count
     if args.backend == "compiled-mlp":
         for module in model.modules():
