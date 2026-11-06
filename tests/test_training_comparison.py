@@ -30,6 +30,9 @@ spec.loader.exec_module(analysis)
         "changed-loss",
         "changed-grad",
         "changed-logits",
+        "batch",
+        "late-sequence",
+        "audit-batch",
     ],
 )
 def test_cpu_comparison_gates(tmp_path, monkeypatch, drift):
@@ -45,6 +48,15 @@ def test_cpu_comparison_gates(tmp_path, monkeypatch, drift):
                     state="complete",
                     input_receipt={"text_sha256": "same"},
                     initial_adapter_sha256="same",
+                    batch=(
+                        32
+                        if drift == "late-sequence"
+                        else 2
+                        if drift == "audit-batch"
+                        else 2
+                        if name == "packed" and drift == "batch"
+                        else 1
+                    ),
                     cases=[
                         dict(
                             tokens=128,
@@ -72,6 +84,10 @@ def test_cpu_comparison_gates(tmp_path, monkeypatch, drift):
         )
         for family in ("grad", "updated", "logits", "changed-grad", "changed-logits"):
             value = torch.ones(2, 3)
+            if drift == "late-sequence" and family in ("logits", "changed-logits"):
+                value = torch.ones(32, 3, 2)
+                if name == "packed":
+                    value[-1] += 0.03
             if name == "packed" and family == drift:
                 value += {
                     "grad": 0.1,
@@ -86,6 +102,14 @@ def test_cpu_comparison_gates(tmp_path, monkeypatch, drift):
     monkeypatch.setattr(
         sys, "argv", ["analyze_qwen35_training", str(tmp_path), "--output", str(output)]
     )
+    if drift == "batch":
+        with pytest.raises(AssertionError, match="microbatch mismatch"):
+            analysis.main()
+        return
+    if drift == "audit-batch":
+        with pytest.raises(AssertionError, match="audit batch dimension mismatch"):
+            analysis.main()
+        return
     analysis.main()
     result = json.loads(output.read_text())["comparisons"]
     assert len(result) == 1

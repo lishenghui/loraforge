@@ -15,7 +15,10 @@ from torch import nn
 def sample_logits(logits):
     tokens = logits.shape[1]
     # Slices + stack avoid constructing a host index Tensor during capture.
-    return torch.stack([logits[0, p, ::257] for p in (0, tokens // 2, tokens - 2)])
+    samples = torch.stack(
+        [logits[:, p, ::257] for p in (0, tokens // 2, tokens - 2)], dim=1
+    )
+    return samples[0] if logits.shape[0] == 1 else samples
 
 
 class LossAndSamples(nn.Module):

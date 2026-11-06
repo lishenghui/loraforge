@@ -493,3 +493,17 @@ are configuration-derived, preserving the old native methods. The new
 `--native-graph-only` selection calls the previously recorded native graph and
 fixed-causal policy with original PEFT controls. Its 4B performance and exact
 gradient/update results are separate from the earlier 0.8B evidence.
+
+### Real-microbatch training sweep
+
+`benchmarks/run_qwen35_training_batches.py` is new standalone LoRAForge
+orchestration, not an imported trainer. It invokes the existing native PEFT and
+Torch graph experiments in isolated processes, retains recognized GPU OOMs
+separately from ordinary failures, and performs CPU comparisons after GPU use.
+The benchmark input helper builds independent deterministic sequence rows;
+gradient accumulation remains one. The fixed-causal registration is extended
+to positive rectangular unpadded/unpacked batches without copying or editing
+native attention, model, graph, FLA or convolution implementations. Audit
+sampling now covers every sequence and adds a per-sequence numerical gate.
+The unchanged 4B checkpoint and prior-work attribution above still apply.
+See `docs/qwen35-training-batches.md` for the protocol, measurements and limits.

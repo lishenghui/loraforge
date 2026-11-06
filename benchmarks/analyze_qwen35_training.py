@@ -20,6 +20,7 @@ def main() -> None:
     gates = dict(
         loss_max_abs=0.01,
         sampled_logits_relative_l2=0.02,
+        sampled_logits_per_sequence_relative_l2=0.02,
         per_parameter_gradient_relative_l2=0.05,
         updated_parameter_max_abs=0.0001,
     )
@@ -73,6 +74,28 @@ def main() -> None:
                     b.double().square().sum().item(),
                 )
                 relative = math.sqrt(en / max(rn, 1e-40))
+                sequence_relative = None
+                if (
+                    family.endswith("logits")
+                    and report["workers"][candidate].get("batch", 1) > 1
+                ):
+                    assert a.ndim == 3, "audit batch dimension mismatch"
+                if family.endswith("logits") and a.ndim == 3:
+                    assert a.shape[0] == report["workers"][candidate].get("batch", 1), (
+                        "audit batch dimension mismatch"
+                    )
+                    sequence_relative = (
+                        (
+                            diff.double().flatten(1).square().sum(1)
+                            / b.double().flatten(1).square().sum(1).clamp_min(1e-40)
+                        )
+                        .sqrt()
+                        .max()
+                        .item()
+                    )
+                    summary["max_sequence_relative_l2"] = max(
+                        summary.get("max_sequence_relative_l2", 0), sequence_relative
+                    )
                 error_norm += en
                 reference_norm += rn
                 summary["tensors"] += 1
@@ -89,6 +112,11 @@ def main() -> None:
                         else "sampled_logits_relative_l2"
                     ]
                 )
+                if sequence_relative is not None:
+                    passed &= (
+                        sequence_relative
+                        <= gates["sampled_logits_per_sequence_relative_l2"]
+                    )
                 if not passed:
                     summary["failed"].append(
                         dict(name=key, max_abs=maximum, relative_l2=relative)
@@ -132,12 +160,19 @@ def main() -> None:
             candidate,
             reference,
         )
+        assert c.get("batch", 1) == r.get("batch", 1), "microbatch mismatch"
         reference_cases = {(v["checkpointing"], v["tokens"]): v for v in r["cases"]}
         for value in c["cases"]:
             key = value["checkpointing"], value["tokens"]
             if key not in reference_cases:
                 continue
             rc = reference_cases[key]
+            assert value.get("batch", c.get("batch", 1)) == rc.get(
+                "batch", r.get("batch", 1)
+            ), "microbatch mismatch"
+            assert value.get("input_sha256") == rc.get("input_sha256"), (
+                "original inputs differ"
+            )
             loss_error = max(
                 abs(a - b) for a, b in zip(value["losses"], rc["losses"], strict=True)
             )
@@ -146,6 +181,7 @@ def main() -> None:
                 reference=reference,
                 checkpointing=key[0],
                 tokens=key[1],
+                batch=c.get("batch", 1),
                 speedup=rc["median_wall_ms"] / value["median_wall_ms"],
                 loss_max_abs=loss_error,
             )

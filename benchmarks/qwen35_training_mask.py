@@ -16,13 +16,17 @@ NAME = "loraforge_fixed_causal_sdpa"
 def fixed_positions(ids):
     import torch
 
-    if ids.ndim != 2 or ids.shape[0] != 1 or ids.shape[1] < 2:
-        raise ValueError("one fixed full sequence required")
+    if ids.ndim != 2 or ids.shape[0] < 1 or ids.shape[1] < 2:
+        raise ValueError("positive batch of fixed full sequences required")
     # Native Qwen3.5 constructs four identical axes, then uses [1:] for RoPE
     # and axis zero for automatic packing detection. We provide exactly those
     # three RoPE axes for this already-known unpacked sequence. No positions
     # are removed from the rotary calculation; no custom user positions enter.
-    return torch.arange(ids.shape[1], device=ids.device).view(1, 1, -1).expand(3, 1, -1)
+    return (
+        torch.arange(ids.shape[1], device=ids.device)
+        .view(1, 1, -1)
+        .expand(3, ids.shape[0], -1)
+    )
 
 
 def validate_fixed_causal(
@@ -37,7 +41,7 @@ def validate_fixed_causal(
     **kwargs,
 ):
     if (
-        batch_size != 1
+        batch_size < 1
         or q_length < 2
         or q_length != kv_length
         or q_offset != 0
@@ -88,7 +92,7 @@ def install(model):
         name=NAME,
         transformers=version,
         attention_layers=len(attention),
-        scope="batch1, unpadded/unpacked, no KV cache, q_length=kv_length, zero offsets, causal SDPA retained",
+        scope="positive rectangular unpadded/unpacked batch, no KV cache, q_length=kv_length, zero offsets, causal SDPA retained",
         native_source_sha256={
             fn.__name__: hashlib.sha256(inspect.getsource(fn).encode()).hexdigest()
             for fn in (

@@ -16,7 +16,8 @@ probe = importlib.util.module_from_spec(spec)
 spec.loader.exec_module(probe)
 
 
-def test_loss_wrapper_keeps_native_parameters_and_detaches_audit():
+@pytest.mark.parametrize("batch", [1, 4])
+def test_loss_wrapper_keeps_native_parameters_and_detaches_audit(batch):
     class Model(torch.nn.Module):
         def __init__(self):
             super().__init__()
@@ -30,14 +31,22 @@ def test_loss_wrapper_keeps_native_parameters_and_detaches_audit():
     model = Model()
     wrapper = probe.LossAndSamples(model)
     assert next(wrapper.parameters()) is model.weight
-    ids = torch.arange(6).reshape(1, 6)
+    ids = (torch.arange(batch * 6) % 8).reshape(batch, 6)
     loss, audit = wrapper(ids)
     ref = model(ids, ids, False)
-    assert torch.equal(audit, ref.logits.detach()[0, [0, 3, 4], ::257])
+    expected_audit = ref.logits.detach()[:, [0, 3, 4], ::257]
+    assert torch.equal(audit, expected_audit[0] if batch == 1 else expected_audit)
     assert not audit.requires_grad
     expected = torch.autograd.grad(ref.loss, model.weight)[0]
     loss.backward()
     assert torch.equal(model.weight.grad, expected)
+
+
+def test_audit_includes_last_sequence():
+    logits = torch.arange(8 * 6 * 513).reshape(8, 6, 513).float()
+    samples = probe.sample_logits(logits)
+    assert samples.shape == (8, 3, 2)
+    assert torch.equal(samples[-1], logits[-1, [0, 3, 4], ::257])
 
 
 @pytest.mark.parametrize("raise_inside", [False, True])

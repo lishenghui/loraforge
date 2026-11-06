@@ -16,6 +16,22 @@ from contextlib import nullcontext
 from pathlib import Path
 
 
+def make_input_ids(token_ids, *, batch_size, tokens, device):
+    """Distinct deterministic full sequences; batch one preserves old inputs."""
+    import torch
+
+    if not token_ids or batch_size < 1 or tokens < 2:
+        raise ValueError(
+            "nonempty tokens, positive batch and sequence length >=2 required"
+        )
+    base = torch.tensor(
+        (token_ids * ((tokens + len(token_ids) - 1) // len(token_ids)))[:tokens],
+        dtype=torch.long,
+        device=device,
+    )
+    return torch.stack([base.roll(17 * row) for row in range(batch_size)])
+
+
 def main() -> None:
     p = argparse.ArgumentParser(description=__doc__)
     p.add_argument("checkpoint", type=Path)
@@ -37,6 +53,7 @@ def main() -> None:
         required=True,
     )
     p.add_argument("--tokens", type=int, nargs="+", default=[128, 1024, 4096])
+    p.add_argument("--batch-size", type=int, default=1)
     p.add_argument(
         "--checkpointing", type=int, nargs="+", choices=[0, 1], default=[0, 1]
     )
@@ -52,6 +69,8 @@ def main() -> None:
     p.add_argument("--check-input-change", action="store_true")
     p.add_argument("--implicit-causal", action="store_true")
     args = p.parse_args()
+    if args.batch_size < 1 or min(args.tokens) < 2:
+        p.error("positive batch and sequence lengths >=2 required")
     args.output.mkdir(exist_ok=False)
     import importlib.metadata
 
@@ -105,7 +124,7 @@ def main() -> None:
             args.backend.startswith("compiled") and args.compile_backend == "cudagraphs"
         ),
         gradient_accumulation=1,
-        batch=1,
+        batch=args.batch_size,
         rank=4,
         alpha=4,
         lr=0.0001,
@@ -317,20 +336,20 @@ def main() -> None:
         model.train()
         assert base.is_gradient_checkpointing == bool(checkpointing)
         for tokens in args.tokens:
-            ids = torch.tensor(
-                (input_ids * ((tokens + len(input_ids) - 1) // len(input_ids)))[
-                    :tokens
-                ],
-                dtype=torch.long,
-                device="cuda",
-            ).reshape(1, tokens)
+            ids = make_input_ids(
+                input_ids, batch_size=args.batch_size, tokens=tokens, device="cuda"
+            )
             batch = dict(input_ids=ids, labels=ids, use_cache=False)
             if args.implicit_causal and model.config.pad_token_id is not None:
                 assert not (ids == model.config.pad_token_id).any().item(), (
                     "padding unsupported"
                 )
             case = dict(
+                batch=args.batch_size,
                 tokens=tokens,
+                input_tokens_per_step=args.batch_size * tokens,
+                supervised_tokens_per_step=args.batch_size * (tokens - 1),
+                input_sha256=hashlib.sha256(ids.cpu().numpy().tobytes()).hexdigest(),
                 checkpointing=bool(checkpointing),
                 losses=[],
                 sample_losses=[],
@@ -478,7 +497,15 @@ def main() -> None:
                 gpu_ms=gpu,
                 median_wall_ms=statistics.median(wall),
                 median_gpu_ms=statistics.median(gpu),
-                tokens_per_second=tokens * 1000 / statistics.median(wall),
+                tokens_per_second=args.batch_size
+                * tokens
+                * 1000
+                / statistics.median(wall),
+                supervised_tokens_per_second=args.batch_size
+                * (tokens - 1)
+                * 1000
+                / statistics.median(wall),
+                sequences_per_second=args.batch_size * 1000 / statistics.median(wall),
                 resident_allocated_bytes=resident,
                 peak_allocated_bytes=torch.cuda.max_memory_allocated(),
                 peak_reserved_bytes=torch.cuda.max_memory_reserved(),
@@ -499,6 +526,7 @@ def main() -> None:
                 "STEP_CASE",
                 args.backend,
                 checkpointing,
+                args.batch_size,
                 tokens,
                 round(case["median_wall_ms"], 3),
                 round(case["peak_allocated_bytes"] / 2**30, 3),

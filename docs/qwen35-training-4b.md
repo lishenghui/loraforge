@@ -4,6 +4,9 @@ The [Qwen3.5-4B model](https://huggingface.co/Qwen/Qwen3.5-4B) retains a
 short-sequence benefit, but does **not** reproduce the 0.8B model's 1024-token
 speedup. All saved numerical comparisons are exact against original PEFT.
 This measures the complete optimizer step, with both paths at rank four.
+These initial measurements use batch one. See the separate
+[real-microbatch sweep](qwen35-training-batches.md) for larger-batch throughput;
+the short-sequence batch-one ratio is not a representative training default.
 
 ## Verified complete-step result
 

@@ -18,7 +18,7 @@ spec.loader.exec_module(probe)
     "change",
     [
         {},
-        {"batch_size": 2},
+        {"batch_size": 0},
         {"q_length": 1},
         {"kv_length": 8},
         {"q_offset": 1},
@@ -50,17 +50,18 @@ def test_implicit_causal_sdpa_does_not_read_future():
     assert torch.equal(implicit[:, :, :-1], changed[:, :, :-1])
 
 
-def test_explicit_rope_axes_equal_native_default_without_packing_axis():
+@pytest.mark.parametrize("batch", [1, 2, 8, 32])
+def test_explicit_rope_axes_equal_native_default_without_packing_axis(batch):
     torch = pytest.importorskip("torch")
-    ids = torch.arange(16).reshape(1, 16)
-    native = torch.arange(16).view(1, 1, -1).expand(4, 1, -1)[1:]
+    ids = torch.arange(16).reshape(1, 16).expand(batch, -1)
+    native = torch.arange(16).view(1, 1, -1).expand(4, batch, -1)[1:]
     explicit = probe.fixed_positions(ids)
     assert torch.equal(explicit, native)
     assert explicit.shape == native.shape and explicit.stride() == native.stride()
 
 
-@pytest.mark.parametrize("shape", [(2, 16), (1, 1), (16,)])
+@pytest.mark.parametrize("shape", [(0, 16), (1, 1), (16,)])
 def test_explicit_rope_rejects_other_layouts(shape):
     torch = pytest.importorskip("torch")
-    with pytest.raises(ValueError, match="one fixed full sequence"):
+    with pytest.raises(ValueError, match="fixed full sequences"):
         probe.fixed_positions(torch.ones(shape, dtype=torch.long))
