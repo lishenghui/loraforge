@@ -1,5 +1,9 @@
 # NF4 base with BF16 LoRA on MI250
 
+The [byte-pair follow-up](qwen35-storage-nf4.md) adds a further exact,
+explicit `--nf4-byte-pairs` opt-in and separately removes the BF16 GDN
+prototype's duplicate weight storage. Earlier results below remain historical.
+
 This experiment serves Qwen3.5-0.8B with an NF4 base and separate BF16 LoRA
 factors. Compute activations, LoRA A/B buffers, KV and recurrent state keep the
 preceding BF16 configuration. Four deterministic synthetic compact rank-4

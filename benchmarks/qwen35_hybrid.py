@@ -240,17 +240,24 @@ def install_packed_experiment():
         from qwen35_packed_loader import install
 
         install()
+        if os.environ.get("LF_GDN_STORAGE") == "1":
+            from qwen35_gdn_storage import install as install_storage
+
+            install_storage()
 
 
 def install_nf4_experiment():
     if os.environ.get("LORAFORGE_BENCH_QWEN35_NF4") == "1":
-        from qwen35_nf4_compat import install
+        from loraforge.integrations.sglang_experimental import install_qwen35_nf4
 
-        install()
+        mode = "stock"
         if os.environ.get("LORAFORGE_BENCH_QWEN35_NF4_LINEAR") == "1":
-            from qwen35_nf4_linear import install as install_linear
-
-            install_linear()
+            mode = (
+                "byte-pairs"
+                if os.environ.get("LORAFORGE_BENCH_QWEN35_NF4_PAIRS") == "1"
+                else "cached-scales"
+            )
+        install_qwen35_nf4(mode=mode)
 
 
 def install_cold_prefill_experiment():
@@ -724,7 +731,16 @@ if __name__ == "__main__":
         action="store_true",
         help="Experimental NF4 large-batch path; cache FP32 scales, not BF16 weights",
     )
+    parser.add_argument(
+        "--nf4-byte-pairs",
+        action="store_true",
+        help="Experimental exact byte-pair dequantization; requires --nf4-cached-scales",
+    )
     args = parser.parse_args()
+    if args.nf4_byte_pairs:
+        if not args.nf4_cached_scales:
+            parser.error("--nf4-byte-pairs requires --nf4-cached-scales")
+        os.environ["LORAFORGE_BENCH_QWEN35_NF4_PAIRS"] = "1"
     if args.nf4_cached_scales:
         if not args.nf4_experiment:
             parser.error("--nf4-cached-scales requires --nf4-experiment")

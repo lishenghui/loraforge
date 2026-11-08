@@ -58,6 +58,14 @@ import loraforge.runtime.retained
 import loraforge.adapters.sglang
 import loraforge.integrations._sglang_fleet
 import loraforge.integrations._sglang_qwen35
+import loraforge.annotations
+import loraforge.ops.nf4
+import loraforge.integrations.sglang_experimental
+import loraforge.integrations._sglang_gdn_storage
+import loraforge.integrations._sglang_gdn
+import loraforge.integrations._sglang_nf4_linear
+import loraforge.integrations._sglang_nf4_compat
+import loraforge.integrations._sglang_qwen35_loader
 print(json.dumps({'version': loraforge.__version__}))
 """
     result = subprocess.run(

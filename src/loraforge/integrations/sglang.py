@@ -224,6 +224,20 @@ def install_sglang_backend():
 
 def install():
     """SGLang plugin entrypoint; inert unless explicitly enabled."""
+    nf4 = os.environ.get("LORAFORGE_EXPERIMENTAL_QWEN35_NF4", "")
+    gdn = os.environ.get("LORAFORGE_EXPERIMENTAL_QWEN35_GDN", "0")
+    if nf4 and gdn not in ("", "0"):
+        raise ValueError("experimental NF4 and BF16 GDN fusion are mutually exclusive")
+    if gdn not in ("", "0", "1", "packed"):
+        raise ValueError("LORAFORGE_EXPERIMENTAL_QWEN35_GDN must be 0, 1, or packed")
+    if nf4:
+        from .sglang_experimental import install_qwen35_nf4
+
+        install_qwen35_nf4(mode=nf4)
+    if gdn in ("1", "packed"):
+        from .sglang_experimental import install_qwen35_gdn
+
+        install_qwen35_gdn(packed_checkpoint=gdn == "packed")
     if os.environ.get("LORAFORGE_SGLANG_QWEN35") == "1":
         from ._sglang_qwen35 import install_qwen35_lora
 

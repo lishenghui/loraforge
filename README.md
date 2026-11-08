@@ -11,6 +11,21 @@ and is in early development. An opt-in SGLang 0.5.22 decode integration is inclu
 [the migration plan](docs/migration.md).
 The experimental [Qwen3.5 hybrid adapter bridge](docs/qwen35.md) handles GDN
 projection packing; its validation status and benchmark scope are separate.
+Selected NF4 and BF16 GDN implementations also expose installed alpha APIs,
+with inspectable `ExperimentalAPI` metadata and explicit per-worker opt-ins.
+See [experimental APIs](docs/experimental.md) for usage and support limits.
+
+## Documentation
+
+The [documentation website](https://lishenghui.github.io/loraforge/) includes
+installation, guides, generated API signatures and recorded experiment limits.
+It labels development snapshots with their source revision. To build locally
+with Python 3.11 or newer:
+
+```bash
+python -m pip install ".[docs]"
+python -m sphinx -W --keep-going -b html docs docs/_build/html
+```
 
 ## Install from source
 

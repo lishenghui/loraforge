@@ -1,0 +1,59 @@
+html {
+  --pst-font-family-base: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+  --pst-font-family-heading: var(--pst-font-family-base);
+  --pst-font-family-monospace: "SFMono-Regular", Consolas, "Liberation Mono", monospace;
+  --pst-font-size-base: 16px;
+}
+html[data-theme="light"] {
+  --pst-color-primary: #087f6e;
+  --pst-color-secondary: #087f6e;
+  --pst-color-link: #087f6e;
+  --pst-color-text-base: #20302d;
+  --pst-color-background: #ffffff;
+  --pst-color-surface: #f5f8f7;
+  --lf-border: #dce5e2;
+  --lf-muted: #5a6d67;
+  --lf-soft: #eef7f3;
+}
+html[data-theme="dark"] {
+  --pst-color-primary: #62d9bb;
+  --pst-color-secondary: #62d9bb;
+  --pst-color-link: #62d9bb;
+  --pst-color-background: #111a19;
+  --pst-color-surface: #192522;
+  --lf-border: #30423c;
+  --lf-muted: #a3b9b0;
+  --lf-soft: #1a3028;
+}
+.navbar-brand img { width: 32px; height: 32px; margin-right: .65rem; }
+.navbar-brand .logo__title { font-size: 1.18rem; font-weight: 730; letter-spacing: -.035em; }
+.bd-header { border-bottom: 1px solid var(--lf-border); box-shadow: none; }
+.bd-article-container { max-width: 66rem; }
+.bd-article { padding-top: 2rem; }
+.bd-article h1 { font-size: clamp(2rem, 4vw, 2.8rem); font-weight: 730; letter-spacing: -.045em; }
+.bd-article h2 { font-size: 1.55rem; font-weight: 690; letter-spacing: -.025em; margin-top: 2.4rem; }
+.bd-article p { line-height: 1.7; }
+.lf-kicker { color: var(--pst-color-primary); font-size: .75rem; font-weight: 750; letter-spacing: .14em; text-transform: uppercase; margin-bottom: 1rem; }
+.lf-intro { font-size: 1.15rem; color: var(--lf-muted); max-width: 42rem; line-height: 1.65; margin: .8rem 0 1.4rem; }
+.lf-actions { display: flex; gap: .65rem; flex-wrap: wrap; margin: 1.5rem 0 2.4rem; }
+.lf-actions .sd-btn { border-radius: .4rem; font-size: .9rem; padding: .65rem 1.1rem; }
+.lf-status { border-left: 3px solid var(--pst-color-primary); background: var(--lf-soft); padding: 1rem 1.15rem; border-radius: 0 .35rem .35rem 0; font-size: .9rem; margin: 1.4rem 0 2rem; }
+.sd-card { border-color: var(--lf-border) !important; box-shadow: none !important; border-radius: .5rem; }
+.sd-card:hover { border-color: var(--pst-color-primary) !important; }
+.sd-card .sd-card-header { font-weight: 700; background: transparent; border: 0; padding-bottom: 0; }
+.sd-card .sd-card-text { font-size: .94rem; line-height: 1.65; }
+.sd-card .sd-card-body { padding: 1.2rem; }
+.experimental-api { border-left-width: 3px; }
+.experimental-api .admonition-title { font-size: .88rem; font-weight: 700; }
+div.highlight { border: 1px solid var(--lf-border); border-radius: .4rem; box-shadow: none; }
+.bd-sidebar-primary { font-size: .89rem; }
+.bd-sidebar-secondary { font-size: .82rem; }
+.lf-build-status { color: var(--lf-muted); font-size: .75rem; }
+.bd-footer { border-top: 1px solid var(--lf-border); margin-top: 2rem; }
+table { font-size: .9rem; }
+@media (max-width: 767px) {
+  .bd-article { padding-top: 1.2rem; }
+  .lf-intro { font-size: 1.05rem; }
+  .lf-actions { margin-bottom: 1.5rem; }
+  .bd-article h1 { line-height: 1.15; }
+}

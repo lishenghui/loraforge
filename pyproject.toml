@@ -26,6 +26,13 @@ dev = ["build>=1", "pytest>=8", "ruff>=0.9"]
 gpu = ["torch>=2.7", "ninja>=1.11"]
 adapters = ["torch>=2.7", "safetensors>=0.5"]
 test-adapters = ["peft==0.18.0", "transformers>=4.52,<5", "pytest>=8"]
+docs = [
+  "sphinx>=8.2,<9",
+  "myst-parser>=4,<5",
+  "pydata-sphinx-theme>=0.24,<0.25",
+  "sphinx-design>=0.7,<0.8",
+  "sphinx-copybutton>=0.5,<0.6",
+]
 
 [project.entry-points."sglang.srt.plugins"]
 loraforge = "loraforge.integrations.sglang:install"
@@ -33,6 +40,7 @@ loraforge = "loraforge.integrations.sglang:install"
 [project.urls]
 Repository = "https://github.com/lishenghui/loraforge"
 Issues = "https://github.com/lishenghui/loraforge/issues"
+Documentation = "https://lishenghui.github.io/loraforge/"
 
 [tool.setuptools.dynamic]
 version = {attr = "loraforge._version.__version__"}

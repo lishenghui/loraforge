@@ -8,6 +8,8 @@ do not edit them as part of extracting library functionality.
   adding numerical implementations or integrations.
 - Keep top-level imports free of device initialization, kernel compilation, and
   serving-framework imports.
+- Use English for repository code, comments, docstrings, documentation, test
+  messages and pull request text.
 - FlashTSQR is the default accelerated compression backend. Do not silently
   replace it with generic QR or relabel reference runs as FlashTSQR results.
 - Preserve import provenance, licenses and attribution in the same change as

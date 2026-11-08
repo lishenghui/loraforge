@@ -1,0 +1,129 @@
+{
+  "state": "passed",
+  "job": 23496963,
+  "node": "nid005031",
+  "elapsed": "00:09:04",
+  "exit_code": "0:0",
+  "resources": {
+    "partition": "small-g",
+    "GCDs": 1,
+    "CPUs": 7,
+    "host_memory_GB": 40,
+    "time_limit_minutes": 20
+  },
+  "scope": "Installed alpha API migration, synthetic rank4 fixed work; not trained quality or a new speedup study",
+  "validation": {
+    "prompt_tokens": 128,
+    "forced_output_tokens": 64,
+    "KV_tokens": 16384,
+    "request_slots": 32,
+    "GDN_slots": 64,
+    "adapters": 4
+  },
+  "tensor_tests": {
+    "job": 23491911,
+    "passed": 4,
+    "scope": "NF4 exact values, owned output, captured replay, cross-stream ordering, alias rejection"
+  },
+  "serving_comparisons": {
+    "nf4": {
+      "cases": 44,
+      "same_token_cases": 44,
+      "same_tokens": true,
+      "max_common_prefix_logprob_difference": 0.0,
+      "numerical_pass": true
+    },
+    "bf16": {
+      "cases": 44,
+      "same_token_cases": 44,
+      "same_tokens": true,
+      "max_common_prefix_logprob_difference": 0.0,
+      "numerical_pass": true
+    }
+  },
+  "installed_path_proofs": {
+    "nf4": {
+      "package": "isolated wheel installation: site/loraforge/__init__.py",
+      "alpha": "alpha",
+      "nf4_mode": "byte-pairs",
+      "dispatch_module": "loraforge.integrations._sglang_nf4_linear",
+      "pair_exact_checks": 96
+    },
+    "bf16": {
+      "package": "isolated wheel installation: site/loraforge/__init__.py",
+      "alpha": "alpha",
+      "nf4_mode": null,
+      "dispatch_module": "loraforge.integrations._sglang_gdn",
+      "gdn_stats": {
+        "prepared": 18,
+        "fused_calls": 324,
+        "fallback_calls": 828
+      },
+      "shared_pairs": 18
+    }
+  },
+  "components": {
+    "nf4-legacy": {
+      "parameter_storage_bytes": 959550144,
+      "parameter_and_gdn_storage_bytes": 959550144,
+      "gdn_extra_storage_bytes": 0,
+      "lora_pool_bytes": 40826880,
+      "gdn_packed_base_bytes": 0,
+      "nf4_scale_cache_bytes": 31100928,
+      "mamba_state_tensor_bytes": 1269964800,
+      "kv_tensor_bytes": 201338880
+    },
+    "nf4-package": {
+      "parameter_storage_bytes": 959550144,
+      "parameter_and_gdn_storage_bytes": 959550144,
+      "gdn_extra_storage_bytes": 0,
+      "lora_pool_bytes": 40826880,
+      "gdn_packed_base_bytes": 0,
+      "nf4_scale_cache_bytes": 31100928,
+      "mamba_state_tensor_bytes": 1269964800,
+      "kv_tensor_bytes": 201338880
+    },
+    "bf16-legacy": {
+      "parameter_storage_bytes": 1705972416,
+      "parameter_and_gdn_storage_bytes": 1705972416,
+      "gdn_extra_storage_bytes": 0,
+      "lora_pool_bytes": 40826880,
+      "gdn_packed_base_bytes": 303169536,
+      "nf4_scale_cache_bytes": 0,
+      "mamba_state_tensor_bytes": 1269964800,
+      "kv_tensor_bytes": 201338880
+    },
+    "bf16-package": {
+      "parameter_storage_bytes": 1705972416,
+      "parameter_and_gdn_storage_bytes": 1705972416,
+      "gdn_extra_storage_bytes": 0,
+      "lora_pool_bytes": 40826880,
+      "gdn_packed_base_bytes": 303169536,
+      "nf4_scale_cache_bytes": 0,
+      "mamba_state_tensor_bytes": 1269964800,
+      "kv_tensor_bytes": 201338880
+    }
+  },
+  "failed_attempt": {
+    "job": 23491911,
+    "state": "failed",
+    "reason": "Test-only audit asserted96 prepared scales at construction before eager warmup; corrected to inspect the first eligible non-captured forward. Package source unchanged."
+  },
+  "package_source_sha256": {
+    "annotations.py": "49c3fca88b4862c9474f4e8cde408df55d6b606cf7cdf85b9b38c6fa9734a70a",
+    "ops/nf4.py": "1dd5b9841f05e349c4217c572684976dca73395c67f48a59c934a4d780735a2e",
+    "ops/_nf4_kernels.py": "84de3e44489ce6ce6da4a6016c384a077f248337db75c5cc9a8b11b6ba25b581",
+    "integrations/sglang_experimental.py": "cd11e46937a9ed5b309aed5ec307b73916e455744971659004e6d8a32d81b5cc",
+    "integrations/_sglang_gdn.py": "6032a9355bcb887bdc07a3d64a7f4f658fa2a5fc43b963af6d9ce221c10bbd9f",
+    "integrations/_sglang_gdn_storage.py": "4d78cf0277bfb2035502f955eaccb1651cb46b45e13e859d3dd6df6ec5841f66",
+    "integrations/_sglang_nf4_compat.py": "bfb9e3843d7a7d2c7e6d61395c0f1fba84a89fd179f7496e9a245c618cdb5d94",
+    "integrations/_sglang_nf4_linear.py": "54c58398964fd5abb986ae0b73eedd18acd1545e967b210651a97418afbb4c02",
+    "integrations/_sglang_qwen35_loader.py": "ba2c789baf40a2dac140880d717b5fe1853362a61fc7e16991733d4c23c56ee6",
+    "integrations/sglang.py": "77d478dcf995823e49158db11a5766bea0e80e0219468164fbb695ecbd6901d4"
+  },
+  "limits": [
+    "All four arms have one timing repeat for sanity only; no new performance ratio is claimed.",
+    "Prior compression/native numerical failures and trained-quality limitations remain unchanged.",
+    "The installed SGLang0.5.22 environment, gfx90a and TP1 are the tested combination."
+  ]
+}
