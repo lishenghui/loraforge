@@ -22,3 +22,22 @@ and successful incremental comparisons do not change those results.
 ../qwen35-resources
 ../qwen35-storage-nf4
 ```
+
+## Standalone training experiments
+
+These programs remain research harnesses rather than installed Trainer APIs.
+Their reports distinguish original-reference comparisons, rejected numerical
+paths, capacity-only results and untested convergence/task quality.
+
+```{toctree}
+:maxdepth: 1
+
+../lora-training-transfer
+../lora-swiglu-training
+../qwen35-training
+../qwen35-training-autograd
+../qwen35-training-4b
+../qwen35-training-batches
+../qwen35-training-loss
+../qwen35-training-head
+```

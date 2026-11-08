@@ -387,6 +387,189 @@ The source and destination files, dimensions, scaling and hashes are recorded.
 The comparison is an inference throughput experiment, not trained compression
 quality; random spectra and changed outputs remain explicit in its results.
 
+### Training transfer feasibility probe
+
+`benchmarks/lora_training.py` and `check_lora_training.py` are new LoRAForge
+experiments using standard frozen-base LoRA derivatives and the existing NF4
+decoder. No Unsloth kernel or autograd implementation was copied. The reviewed
+reference is Unsloth commit `157305f6596d6196189bbc3e393bb8fe8ed604a0`:
+`unsloth/kernels/fast_lora.py` blob `b61333c1261ef29980509ecd7b057267f0c11f2d`
+and `swiglu.py` blob `b82c396c2bf02243c38baece006f3cb0d3b6d554`, Apache-2.0,
+Daniel Han-Chen and the Unsloth team. The custom frozen-base lifetime and
+rematerialization concepts are attributed prior work, not new algorithm claims.
+The probe is first-order only and does not alter inference autograd restrictions
+or install training hooks. See `docs/lora-training-transfer.md` for exact
+forward/gradient evidence, scope, failed checker attempts and limitations.
+
+### BF16 LoRA MLP training fusion experiment
+
+`benchmarks/lora_swiglu_training.py`, `lora_swiglu_kernels.py` and
+`check_lora_swiglu_training.py` are new LoRAForge benchmark implementations of
+standard LoRA and SwiGLU forward/first-order backward equations. No Unsloth
+source was copied. The saved-wide-activation/rematerialization approach is
+established prior work; the same pinned Unsloth `fast_lora.py` and `swiglu.py`
+references above informed the experiment. This is not a novelty claim.
+
+The new kernels combine tiny-rank expansion with activation consumption, and
+combine input-gradient LoRA corrections with residual addition. BF16 rounding
+boundaries remain explicit. The compact backward scales a freshly generated
+gradient buffer only after the frozen-base input-gradient GEMM has consumed it
+on the same stream. It never writes into saved input/activation/parameter
+storage. Trainable FP32 masters are recast on every invocation; no inference
+weight shadow is reused across optimizer updates. GPU kernels run only through
+the explicit standalone benchmark, with a CPU dense path solely for derivative
+and checkpoint tests. See `docs/lora-swiglu-training.md` for measured scope,
+compiled-baseline comparisons and rejected rank-32 scheduling.
+
+### Whole-model Qwen3.5 training harness
+
+`prepare_qwen35_training.py`, `qwen35_training_mlp.py`,
+`benchmark_qwen35_training.py`, `run_qwen35_training.py` and
+`analyze_qwen35_training.py` are new standalone benchmark glue, not extracted
+model or FLA kernels. They call Transformers 5.10.1's native Qwen3.5 text model
+and PEFT 0.21.1, preserve actual trainable Parameter ownership, and compare
+complete forward/loss/backward/AdamW steps. Original HF weights are preserved
+with explicit text-only name mapping and a complete tensor audit.
+
+FLA 0.6.0 is a separate isolated test dependency, using its published MIT
+license and upstream implementation; no FLA source is vendored into LoRAForge.
+The dependency wheel hashes and numerical/timing scope are recorded in
+`docs/qwen35-training.md`. The dependency selection follows the upstream
+[backend installation guide](https://github.com/fla-org/flash-linear-attention/blob/main/INSTALL.md)
+without resolving or replacing the working ROCm Torch/Triton installation.
+
+### Separate native-base training consumers
+
+`lora_native_training.py` and the separate-base kernel in
+`lora_swiglu_kernels.py` are new LoRAForge benchmark implementations. They retain
+PEFT's actual projection modules, master Parameters, input-cast boundaries and
+separate base-projection autograd nodes. The expansion-only, activation-only
+and combined consumer ablations do not copy an upstream implementation.
+They use the same standard first-order LoRA/SwiGLU equations and prior-work
+attribution as the preceding training experiments. `check_native_silu.py`
+screens Triton's ROCm math interfaces against the installed native Torch
+activation on a stated finite BF16 input range; it is not a new activation
+algorithm or a whole-model equivalence test. The numerical failures and
+limited complete-step gains remain explicit in `docs/qwen35-training.md`.
+The optional `--compile-backend cudagraphs` path calls Torch's installed AOT/
+graph backend through its public compile interface; it vendors no compiler or
+graph implementation. Backend-managed capture warnings and failed native gates
+are retained rather than relabeled as consumer-kernel improvements.
+
+### Native-autograd graph isolation
+
+`benchmarks/qwen35_training_graph.py` is new LoRAForge benchmark glue around
+Torch's installed `torch.cuda.make_graphed_callables` API. No Torch graph,
+Transformers model, FLA or causal-convolution implementation is copied or edited.
+It keeps original trainable Parameters and independent base projections, binds
+fixed-shape loss execution, disables AMP weight caching during capture, and
+owns the static input copy. Capture/replay counters instrument only graph
+objects constructed in this worker and restore the original factory after
+capture. The separate Dynamo-eager, AOT-eager and AOT graph-backend controls call
+Torch's installed compiler backends; they are not LoRAForge compiler or kernel
+implementations. The optimizer remains outside graph capture and updates real
+FP32 LoRA masters. Changed-input, timed-loss and per-parameter acceptance checks
+remain explicit in the standalone model training experiment.
+
+`benchmarks/qwen35_training_mask.py` is new fixed-scenario registration glue
+for Transformers 5.10.1. It reuses the original SDPA attention callable under
+a distinct interface key and guards the unpadded, unpacked, uncached causal
+contract. It copies no attention/mask/packing implementation. The explicit
+three rotary-position axes equal the native text model's four-axis default
+after its `[1:]` selection; removing the separate automatic packing axis is
+scoped to the benchmark's known single contiguous sequence. Original framework
+files and the `sdpa` registry entry remain unchanged. Native source hashes and
+rejected automatic-packing guard attempts are retained with the experiment.
+
+### Larger Qwen3.5 training fixture
+
+The existing LoRAForge text-checkpoint preparer now reads indexed HF shards
+while checking duplicate/missing/misindexed weights, unchanged BF16 matrices,
+complete expected text names and serialized values. It copies no model loader
+or framework implementation. The original public Qwen3.5-4B revision and LFS
+checksums are pinned in `docs/qwen35-training-4b-mi250.json`; no model weights
+are vendored. Benchmark layer/attention counts and full PEFT parameter names
+are configuration-derived, preserving the old native methods. The new
+`--native-graph-only` selection calls the previously recorded native graph and
+fixed-causal policy with original PEFT controls. Its 4B performance and exact
+gradient/update results are separate from the earlier 0.8B evidence.
+
+### Real-microbatch training sweep
+
+`benchmarks/run_qwen35_training_batches.py` is new standalone LoRAForge
+orchestration, not an imported trainer. It invokes the existing native PEFT and
+Torch graph experiments in isolated processes, retains recognized GPU OOMs
+separately from ordinary failures, and performs CPU comparisons after GPU use.
+The benchmark input helper builds independent deterministic sequence rows;
+gradient accumulation remains one. The fixed-causal registration is extended
+to positive rectangular unpadded/unpacked batches without copying or editing
+native attention, model, graph, FLA or convolution implementations. Audit
+sampling now covers every sequence and adds a per-sequence numerical gate.
+The unchanged 4B checkpoint and prior-work attribution above still apply.
+See `docs/qwen35-training-batches.md` for the protocol, measurements and limits.
+
+### Isolated Unsloth cross-entropy experiment
+
+`benchmarks/qwen35_training_loss.py`, `check_unsloth_training_loss.py` and
+`run_qwen35_training_loss.py` and `diagnose_unsloth_training_loss.py` are new
+experiment glue around pinned external
+Unsloth source. They do not vendor a kernel, import the complete trainer, or
+apply upstream global model patches. The caller supplies the original
+Apache-2.0 files at Unsloth revision
+`a0197ca266e14d22f66c0dcffc452fe1ce42bb0f`:
+`unsloth/kernels/cross_entropy_loss.py`, `utils.py` and `rope_embedding.py`.
+Copyright Daniel Han-Chen and the Unsloth team. All three SHA256 values are
+checked before selecting unchanged definitions through Python AST. The original
+notices remain with the external files. On ROCm/Triton 3.6, the dependency
+bindings use native Torch device context, Triton casts/libdevice and the HIP
+predicate. The optional, explicitly reported HIP launch selects 16384 elements
+and eight warps for the original chunked forward kernel; it does not change
+the forward/backward equations. The original launch is checked separately.
+
+Unsloth Zoo revision `771dcfb9d9da713db32cc2abda73299ff3db33cd`,
+`unsloth_zoo/loss_utils.py` and
+`unsloth_zoo/fused_losses/cross_entropy_loss.py` (LGPLv3) were reviewed to
+understand fused CE registration and the separate chunked LM-head/loss path.
+No Zoo implementation is copied or executed by this ablation. The model
+instance's loss alone is replaced after unchanged weight loading; its LM-head
+GEMM, original adapters, FLA layers and optimizer remain in place. This is not a
+measurement of the complete Unsloth training stack.
+
+The opt-in eager first-step audit saves sampled real head logits, initial
+adapter gradients and the first AdamW update before interpreting multi-step
+drift. Its actual-logit kernel comparison uses a stated BF16-rounded FP64
+oracle; parameter comparisons run separately on CPU. Diagnostic tensor copies
+are outside step timing and do not change parameter ownership or loss scaling.
+
+### Frozen LM-head and native CE chunking
+
+`benchmarks/qwen35_training_head.py`, `check_qwen35_training_head.py` and
+`run_qwen35_training_head.py` are new LoRAForge benchmark code using native
+Torch linear/CE/autograd operations. No Unsloth or Zoo implementation is copied
+or executed by these paths. Chunked loss and precomputed first-order gradients
+are established approaches; the pinned Unsloth/Zoo references above informed
+the experiment, not a novelty claim.
+
+The frozen-head function computes owned dHidden chunks in forward and returns
+them through the original model's backward. It updates no Parameter or caller
+storage. It rejects a trainable head and supports first derivatives only. The
+benchmark uses unit upstream loss gradients with BF16 compute and no GradScaler;
+scaled BF16 loss gradients can have different rounding. A fully chunked head
+avoids a full-vocabulary output/gradient matrix. The separate full-reuse control
+preserves the original large GEMM shapes and reuses one private BF16 logits
+buffer for dLogits after each native CE backward has consumed that chunk.
+No output consumer or saved graph retains the overwritten logits. These are
+distinct strategies and their memory claims must not be conflated.
+
+The wrapper calls the original already-adapted text backbone, retaining the
+identical original trainable Parameter objects and external AdamW optimizer.
+It is scoped to the existing single-adapter, dropout-zero, unpadded/unpacked
+Qwen3.5 experiment, not arbitrary PEFT hooks, trainable heads or a public Trainer
+integration. Graph mode passes this loss module to the existing native Torch
+graph API; no framework/GDN/attention kernel is replaced. Optional first-step
+full-vocabulary audit samples are detached and copied before private scratch is
+reused, then disabled before timing.
+
 ### Qwen3.5 memory and phase accounting
 
 `qwen35_resource_audit.py`, `run_qwen35_resources.py` and

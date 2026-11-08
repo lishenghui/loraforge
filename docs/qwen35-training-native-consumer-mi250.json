@@ -1,0 +1,3324 @@
+{
+  "scope": "Whole BF16 Qwen3.5 text training step; fixed text, no convergence claim",
+  "gates": {
+    "loss_max_abs": 0.01,
+    "sampled_logits_relative_l2": 0.02,
+    "per_parameter_gradient_relative_l2": 0.05,
+    "updated_parameter_max_abs": 0.0001
+  },
+  "workers": {
+    "native-consumer": {
+      "state": "complete",
+      "backend": "native-consumer",
+      "cases": [
+        {
+          "tokens": 128,
+          "checkpointing": false,
+          "losses": [
+            2.3260498046875,
+            2.3083736896514893,
+            2.2494430541992188
+          ],
+          "sample_losses": [
+            2.2494430541992188,
+            2.168785333633423,
+            2.070876121520996,
+            1.963481068611145,
+            1.8538914918899536
+          ],
+          "wall_ms": [
+            229.69889896921813,
+            221.5023650205694,
+            221.39692102791741,
+            221.63776797242463,
+            221.08292201301083
+          ],
+          "gpu_ms": [
+            229.6344757080078,
+            221.4626922607422,
+            221.35580444335938,
+            221.59950256347656,
+            221.04701232910156
+          ],
+          "median_wall_ms": 221.5023650205694,
+          "median_gpu_ms": 221.4626922607422,
+          "tokens_per_second": 577.8719337290756,
+          "resident_allocated_bytes": 1696689664,
+          "peak_allocated_bytes": 2329093632,
+          "peak_reserved_bytes": 2441084928
+        },
+        {
+          "tokens": 1024,
+          "checkpointing": false,
+          "losses": [
+            0.2921494245529175,
+            0.28920838236808777,
+            0.2819117605686188
+          ],
+          "sample_losses": [
+            0.2819117605686188,
+            0.2716631293296814,
+            0.25901272892951965,
+            0.245719313621521,
+            0.23248302936553955
+          ],
+          "wall_ms": [
+            236.25137604540214,
+            221.60422301385552,
+            221.42162901582196,
+            221.16335795726627,
+            220.91139998519793
+          ],
+          "gpu_ms": [
+            236.1988983154297,
+            221.57102966308594,
+            221.38734436035156,
+            221.12413024902344,
+            220.87741088867188
+          ],
+          "median_wall_ms": 221.42162901582196,
+          "median_gpu_ms": 221.38734436035156,
+          "tokens_per_second": 4624.66112525452,
+          "resident_allocated_bytes": 1696696832,
+          "peak_allocated_bytes": 6770278912,
+          "peak_reserved_bytes": 7352614912
+        },
+        {
+          "tokens": 4096,
+          "checkpointing": false,
+          "losses": [
+            0.07325632870197296,
+            0.0725511983036995,
+            0.07063224911689758
+          ],
+          "sample_losses": [
+            0.07063224911689758,
+            0.06808846443891525,
+            0.06498835235834122,
+            0.06168801710009575,
+            0.05838148668408394
+          ],
+          "wall_ms": [
+            460.8640580554493,
+            461.6976630059071,
+            460.47446300508454,
+            459.9907060037367,
+            459.7953970078379
+          ],
+          "gpu_ms": [
+            460.8213195800781,
+            461.67303466796875,
+            460.4490051269531,
+            459.9654846191406,
+            459.7681884765625
+          ],
+          "median_wall_ms": 460.47446300508454,
+          "median_gpu_ms": 460.4490051269531,
+          "tokens_per_second": 8895.172977170663,
+          "resident_allocated_bytes": 1696721408,
+          "peak_allocated_bytes": 21694161408,
+          "peak_reserved_bytes": 24121442304
+        },
+        {
+          "tokens": 128,
+          "checkpointing": true,
+          "losses": [
+            2.3260498046875,
+            2.3083736896514893,
+            2.2494430541992188
+          ],
+          "sample_losses": [
+            2.2494430541992188,
+            2.168785333633423,
+            2.070876121520996,
+            1.963481068611145,
+            1.8538914918899536
+          ],
+          "wall_ms": [
+            368.5614949790761,
+            365.1524590095505,
+            364.8040249827318,
+            365.31718797050416,
+            364.89371297648177
+          ],
+          "gpu_ms": [
+            368.5093994140625,
+            365.11865234375,
+            364.76153564453125,
+            365.2786560058594,
+            364.860107421875
+          ],
+          "median_wall_ms": 365.1524590095505,
+          "median_gpu_ms": 365.11865234375,
+          "tokens_per_second": 350.53851300136574,
+          "resident_allocated_bytes": 1696689664,
+          "peak_allocated_bytes": 2087323648,
+          "peak_reserved_bytes": 2235564032
+        },
+        {
+          "tokens": 1024,
+          "checkpointing": true,
+          "losses": [
+            0.2921494245529175,
+            0.28920838236808777,
+            0.2819117605686188
+          ],
+          "sample_losses": [
+            0.2819117605686188,
+            0.2716631293296814,
+            0.25901272892951965,
+            0.245719313621521,
+            0.23248302936553955
+          ],
+          "wall_ms": [
+            368.9037630101666,
+            365.15283497283235,
+            364.7736900020391,
+            365.4924719594419,
+            364.9542809580453
+          ],
+          "gpu_ms": [
+            368.8498840332031,
+            365.1197509765625,
+            364.7398986816406,
+            365.4548034667969,
+            364.9187927246094
+          ],
+          "median_wall_ms": 365.15283497283235,
+          "median_gpu_ms": 365.1197509765625,
+          "tokens_per_second": 2804.305216680534,
+          "resident_allocated_bytes": 1696696832,
+          "peak_allocated_bytes": 4803907072,
+          "peak_reserved_bytes": 5406457856
+        },
+        {
+          "tokens": 4096,
+          "checkpointing": true,
+          "losses": [
+            0.07325632870197296,
+            0.0725511983036995,
+            0.07063224911689758
+          ],
+          "sample_losses": [
+            0.07063224911689758,
+            0.06808846443891525,
+            0.06498835235834122,
+            0.06168801710009575,
+            0.05838148668408394
+          ],
+          "wall_ms": [
+            597.0385380205698,
+            594.9849800090306,
+            595.3655269695446,
+            594.9147129431367,
+            594.9987660278566
+          ],
+          "gpu_ms": [
+            596.9934692382812,
+            594.958740234375,
+            595.3406982421875,
+            594.890869140625,
+            594.973876953125
+          ],
+          "median_wall_ms": 594.9987660278566,
+          "median_gpu_ms": 594.973876953125,
+          "tokens_per_second": 6884.047890291312,
+          "resident_allocated_bytes": 1696721408,
+          "peak_allocated_bytes": 14121352704,
+          "peak_reserved_bytes": 16475226112
+        }
+      ],
+      "scope": "Whole 24-layer text-only BF16 Qwen3.5-0.8B; all-linear rank4 LoRA FP32 masters; dropout0; zero_grad+forward+causal_loss+backward+AdamW; synthetic fixed text, not convergence",
+      "versions": {
+        "torch": "2.11.0+rocm7.2.lumi.aif.20260929120822",
+        "transformers": "5.10.1",
+        "peft": "0.21.1",
+        "fla-core": "0.6.0",
+        "flash-linear-attention": "0.6.0"
+      },
+      "device": "AMD Instinct MI250X",
+      "cuda_graph_replay": false,
+      "gradient_accumulation": 1,
+      "batch": 1,
+      "rank": 4,
+      "alpha": 4,
+      "lr": 0.0001,
+      "warmup": 2,
+      "samples": 5,
+      "compiler_settings": {
+        "emulate_precision_casts": false,
+        "recompile_limit": 8,
+        "float32_matmul_precision": "highest"
+      },
+      "source_sha256": {
+        "benchmark_qwen35_training.py": "ce6212500957da4c1a3dfeb6a8df0830584429692892768186c1db9e5fbbf1b0",
+        "qwen35_training_mlp.py": "9c7d4ab2cbbf6c9c3ac9858971a13d3f70d9381129ff418930672ef594e2f61a",
+        "lora_swiglu_training.py": "3d2e24f06dfa2df10eea2860ec4043cc9749854b2f4019451e5b46811722e576",
+        "lora_swiglu_kernels.py": "a7a4e909d7bab6ddd1fd8537c75b56ffb22285323b9182f85998aa5f3046e732",
+        "lora_native_training.py": "6ee4d39697fc6c4d90b9d626bd23f96de6b17474aa75bb5a528f52b9a19f135c"
+      },
+      "loading": {
+        "missing_keys": "set()",
+        "unexpected_keys": "set()",
+        "mismatched_keys": "set()",
+        "error_msgs": []
+      },
+      "checked_loaded_tensors": 321,
+      "gdn": {
+        "layers": 18,
+        "chunk_function": "fla.ops.gated_delta_rule.chunk",
+        "norm": "FusedRMSNormGated",
+        "conv_function": "causal_conv1d.causal_conv1d_interface"
+      },
+      "adapter_tensors": 372,
+      "adapter_parameters": 2705664,
+      "initial_adapter_sha256": "80f8ccd54d0d735b845f5dbd2571fa4fce84d2394e0847245c6d888c1a7e24aa",
+      "replaced_mlps": 24,
+      "compiler_counters": {},
+      "raw_report_sha256": "8b80288b981c23dfc003ba82eead214c5e01d3e897c69cda3d65794910ab4497"
+    },
+    "peft-after": {
+      "state": "complete",
+      "backend": "peft",
+      "cases": [
+        {
+          "tokens": 128,
+          "checkpointing": false,
+          "losses": [
+            2.3260498046875,
+            2.3083736896514893,
+            2.2494430541992188
+          ],
+          "sample_losses": [
+            2.2494430541992188,
+            2.168785333633423,
+            2.070876121520996,
+            1.963481068611145,
+            1.8538914918899536
+          ],
+          "wall_ms": [
+            230.89118697680533,
+            221.4099169941619,
+            221.18157404474914,
+            221.10284201335162,
+            220.81342100864276
+          ],
+          "gpu_ms": [
+            230.82933044433594,
+            221.36968994140625,
+            221.14503479003906,
+            221.06280517578125,
+            220.77639770507812
+          ],
+          "median_wall_ms": 221.18157404474914,
+          "median_gpu_ms": 221.14503479003906,
+          "tokens_per_second": 578.7100510194543,
+          "resident_allocated_bytes": 1696689664,
+          "peak_allocated_bytes": 2352489984,
+          "peak_reserved_bytes": 2459959296
+        },
+        {
+          "tokens": 1024,
+          "checkpointing": false,
+          "losses": [
+            0.2921494245529175,
+            0.28924882411956787,
+            0.28185540437698364
+          ],
+          "sample_losses": [
+            0.28185540437698364,
+            0.271668940782547,
+            0.25942084193229675,
+            0.2457171082496643,
+            0.23255592584609985
+          ],
+          "wall_ms": [
+            235.77116196975112,
+            221.08176996698603,
+            221.12044598907232,
+            220.93539696652442,
+            220.50629602745175
+          ],
+          "gpu_ms": [
+            235.7165985107422,
+            221.0458526611328,
+            221.08680725097656,
+            220.90151977539062,
+            220.47384643554688
+          ],
+          "median_wall_ms": 221.08176996698603,
+          "median_gpu_ms": 221.0458526611328,
+          "tokens_per_second": 4631.770408536684,
+          "resident_allocated_bytes": 1696696832,
+          "peak_allocated_bytes": 6931038720,
+          "peak_reserved_bytes": 7482638336
+        },
+        {
+          "tokens": 4096,
+          "checkpointing": false,
+          "losses": [
+            0.07325632870197296,
+            0.0725511983036995,
+            0.07063224911689758
+          ],
+          "sample_losses": [
+            0.07063224911689758,
+            0.06808846443891525,
+            0.06498835235834122,
+            0.06168801710009575,
+            0.05838148668408394
+          ],
+          "wall_ms": [
+            467.6605129498057,
+            467.49872900545597,
+            466.29925502929837,
+            466.8297830503434,
+            466.44288301467896
+          ],
+          "gpu_ms": [
+            467.6121520996094,
+            467.4715576171875,
+            466.27520751953125,
+            466.7993469238281,
+            466.41839599609375
+          ],
+          "median_wall_ms": 466.8297830503434,
+          "median_gpu_ms": 466.7993469238281,
+          "tokens_per_second": 8774.076009538327,
+          "resident_allocated_bytes": 1696721408,
+          "peak_allocated_bytes": 22400180736,
+          "peak_reserved_bytes": 24807211008
+        },
+        {
+          "tokens": 128,
+          "checkpointing": true,
+          "losses": [
+            2.3260498046875,
+            2.3083736896514893,
+            2.2494430541992188
+          ],
+          "sample_losses": [
+            2.2494430541992188,
+            2.168785333633423,
+            2.070876121520996,
+            1.963481068611145,
+            1.8538914918899536
+          ],
+          "wall_ms": [
+            375.9186810348183,
+            371.96663400391117,
+            371.33531004656106,
+            371.5972480131313,
+            371.7217189841904
+          ],
+          "gpu_ms": [
+            375.8660583496094,
+            371.9313049316406,
+            371.29766845703125,
+            371.565185546875,
+            371.6886901855469
+          ],
+          "median_wall_ms": 371.7217189841904,
+          "median_gpu_ms": 371.6886901855469,
+          "tokens_per_second": 344.3436136844184,
+          "resident_allocated_bytes": 1696689664,
+          "peak_allocated_bytes": 2087323648,
+          "peak_reserved_bytes": 2233466880
+        },
+        {
+          "tokens": 1024,
+          "checkpointing": true,
+          "losses": [
+            0.2921494245529175,
+            0.28924882411956787,
+            0.28185540437698364
+          ],
+          "sample_losses": [
+            0.28185540437698364,
+            0.271668940782547,
+            0.25942084193229675,
+            0.2457171082496643,
+            0.23255592584609985
+          ],
+          "wall_ms": [
+            374.9068399774842,
+            371.0531939868815,
+            370.8112350432202,
+            371.5208499925211,
+            371.01650302065536
+          ],
+          "gpu_ms": [
+            374.85516357421875,
+            371.0197448730469,
+            370.7792663574219,
+            371.4885559082031,
+            370.98309326171875
+          ],
+          "median_wall_ms": 371.0531939868815,
+          "median_gpu_ms": 371.0197448730469,
+          "tokens_per_second": 2759.712129135326,
+          "resident_allocated_bytes": 1696696832,
+          "peak_allocated_bytes": 4803907072,
+          "peak_reserved_bytes": 5406457856
+        },
+        {
+          "tokens": 4096,
+          "checkpointing": true,
+          "losses": [
+            0.07325632870197296,
+            0.0725511983036995,
+            0.07063224911689758
+          ],
+          "sample_losses": [
+            0.07063224911689758,
+            0.06808846443891525,
+            0.06498835235834122,
+            0.06168801710009575,
+            0.05838148668408394
+          ],
+          "wall_ms": [
+            606.3694540061988,
+            604.6877570333891,
+            605.2111590397544,
+            605.083622969687,
+            604.7173530096188
+          ],
+          "gpu_ms": [
+            606.3267211914062,
+            604.6572875976562,
+            605.1815795898438,
+            605.0585327148438,
+            604.6864013671875
+          ],
+          "median_wall_ms": 605.083622969687,
+          "median_gpu_ms": 605.0585327148438,
+          "tokens_per_second": 6769.312280998884,
+          "resident_allocated_bytes": 1696721408,
+          "peak_allocated_bytes": 14121352704,
+          "peak_reserved_bytes": 16466837504
+        }
+      ],
+      "scope": "Whole 24-layer text-only BF16 Qwen3.5-0.8B; all-linear rank4 LoRA FP32 masters; dropout0; zero_grad+forward+causal_loss+backward+AdamW; synthetic fixed text, not convergence",
+      "versions": {
+        "torch": "2.11.0+rocm7.2.lumi.aif.20260929120822",
+        "transformers": "5.10.1",
+        "peft": "0.21.1",
+        "fla-core": "0.6.0",
+        "flash-linear-attention": "0.6.0"
+      },
+      "device": "AMD Instinct MI250X",
+      "cuda_graph_replay": false,
+      "gradient_accumulation": 1,
+      "batch": 1,
+      "rank": 4,
+      "alpha": 4,
+      "lr": 0.0001,
+      "warmup": 2,
+      "samples": 5,
+      "compiler_settings": {
+        "emulate_precision_casts": false,
+        "recompile_limit": 8,
+        "float32_matmul_precision": "highest"
+      },
+      "source_sha256": {
+        "benchmark_qwen35_training.py": "ce6212500957da4c1a3dfeb6a8df0830584429692892768186c1db9e5fbbf1b0",
+        "qwen35_training_mlp.py": "9c7d4ab2cbbf6c9c3ac9858971a13d3f70d9381129ff418930672ef594e2f61a",
+        "lora_swiglu_training.py": "3d2e24f06dfa2df10eea2860ec4043cc9749854b2f4019451e5b46811722e576",
+        "lora_swiglu_kernels.py": "a7a4e909d7bab6ddd1fd8537c75b56ffb22285323b9182f85998aa5f3046e732",
+        "lora_native_training.py": "6ee4d39697fc6c4d90b9d626bd23f96de6b17474aa75bb5a528f52b9a19f135c"
+      },
+      "loading": {
+        "missing_keys": "set()",
+        "unexpected_keys": "set()",
+        "mismatched_keys": "set()",
+        "error_msgs": []
+      },
+      "checked_loaded_tensors": 321,
+      "gdn": {
+        "layers": 18,
+        "chunk_function": "fla.ops.gated_delta_rule.chunk",
+        "norm": "FusedRMSNormGated",
+        "conv_function": "causal_conv1d.causal_conv1d_interface"
+      },
+      "adapter_tensors": 372,
+      "adapter_parameters": 2705664,
+      "initial_adapter_sha256": "80f8ccd54d0d735b845f5dbd2571fa4fce84d2394e0847245c6d888c1a7e24aa",
+      "compiler_counters": {},
+      "raw_report_sha256": "3c710c9d9ea88cccbd689def65d6513bfae37d7ff924c32825fe98d60971d12b"
+    },
+    "native-activation": {
+      "state": "complete",
+      "backend": "native-activation",
+      "cases": [
+        {
+          "tokens": 128,
+          "checkpointing": false,
+          "losses": [
+            2.3260498046875,
+            2.3083736896514893,
+            2.2494430541992188
+          ],
+          "sample_losses": [
+            2.2494430541992188,
+            2.168785333633423,
+            2.070876121520996,
+            1.963481068611145,
+            1.8538914918899536
+          ],
+          "wall_ms": [
+            236.11768701812252,
+            225.97609495278448,
+            225.45582603197545,
+            225.71390599478036,
+            225.22308601764962
+          ],
+          "gpu_ms": [
+            236.04351806640625,
+            225.9405059814453,
+            225.4156951904297,
+            225.6742706298828,
+            225.18817138671875
+          ],
+          "median_wall_ms": 225.71390599478036,
+          "median_gpu_ms": 225.6742706298828,
+          "tokens_per_second": 567.0895616106169,
+          "resident_allocated_bytes": 1696689664,
+          "peak_allocated_bytes": 2330469888,
+          "peak_reserved_bytes": 2436890624
+        },
+        {
+          "tokens": 1024,
+          "checkpointing": false,
+          "losses": [
+            0.2921494245529175,
+            0.28920838236808777,
+            0.2819117605686188
+          ],
+          "sample_losses": [
+            0.2819117605686188,
+            0.2716631293296814,
+            0.25901272892951965,
+            0.245719313621521,
+            0.23248302936553955
+          ],
+          "wall_ms": [
+            240.0098090292886,
+            226.61541303386912,
+            226.10646701650694,
+            226.23926401138306,
+            226.09082597773522
+          ],
+          "gpu_ms": [
+            239.95892333984375,
+            226.57733154296875,
+            226.0733184814453,
+            226.20147705078125,
+            226.0568389892578
+          ],
+          "median_wall_ms": 226.23926401138306,
+          "median_gpu_ms": 226.20147705078125,
+          "tokens_per_second": 4526.1816266714795,
+          "resident_allocated_bytes": 1696696832,
+          "peak_allocated_bytes": 6763266560,
+          "peak_reserved_bytes": 7331643392
+        },
+        {
+          "tokens": 4096,
+          "checkpointing": false,
+          "losses": [
+            0.07325632870197296,
+            0.0725511983036995,
+            0.07063224911689758
+          ],
+          "sample_losses": [
+            0.07063224911689758,
+            0.06808846443891525,
+            0.06498835235834122,
+            0.06168801710009575,
+            0.05838148668408394
+          ],
+          "wall_ms": [
+            459.73707403754815,
+            460.6295039993711,
+            458.98006699280813,
+            458.9566119830124,
+            458.32630997756496
+          ],
+          "gpu_ms": [
+            459.6939392089844,
+            460.6045227050781,
+            458.9552001953125,
+            458.93121337890625,
+            458.3008117675781
+          ],
+          "median_wall_ms": 458.98006699280813,
+          "median_gpu_ms": 458.9552001953125,
+          "tokens_per_second": 8924.13482536744,
+          "resident_allocated_bytes": 1696721408,
+          "peak_allocated_bytes": 21695537664,
+          "peak_reserved_bytes": 24102567936
+        },
+        {
+          "tokens": 128,
+          "checkpointing": true,
+          "losses": [
+            2.3260498046875,
+            2.3083736896514893,
+            2.2494430541992188
+          ],
+          "sample_losses": [
+            2.2494430541992188,
+            2.168785333633423,
+            2.070876121520996,
+            1.963481068611145,
+            1.8538914918899536
+          ],
+          "wall_ms": [
+            380.30332897324115,
+            376.5297660138458,
+            376.44542200723663,
+            376.4535079826601,
+            376.2902020243928
+          ],
+          "gpu_ms": [
+            380.247802734375,
+            376.49127197265625,
+            376.4026184082031,
+            376.4158935546875,
+            376.2515869140625
+          ],
+          "median_wall_ms": 376.4535079826601,
+          "median_gpu_ms": 376.4158935546875,
+          "tokens_per_second": 340.01542630304255,
+          "resident_allocated_bytes": 1696689664,
+          "peak_allocated_bytes": 2087323648,
+          "peak_reserved_bytes": 2233466880
+        },
+        {
+          "tokens": 1024,
+          "checkpointing": true,
+          "losses": [
+            0.2921494245529175,
+            0.28920838236808777,
+            0.2819117605686188
+          ],
+          "sample_losses": [
+            0.2819117605686188,
+            0.2716631293296814,
+            0.25901272892951965,
+            0.245719313621521,
+            0.23248302936553955
+          ],
+          "wall_ms": [
+            381.14194304216653,
+            377.6939020026475,
+            377.9116640216671,
+            376.5310079907067,
+            376.52203103061765
+          ],
+          "gpu_ms": [
+            381.08843994140625,
+            377.65753173828125,
+            377.87353515625,
+            376.4960632324219,
+            376.4893493652344
+          ],
+          "median_wall_ms": 377.6939020026475,
+          "median_gpu_ms": 377.65753173828125,
+          "tokens_per_second": 2711.190184883689,
+          "resident_allocated_bytes": 1696696832,
+          "peak_allocated_bytes": 4803907072,
+          "peak_reserved_bytes": 5406457856
+        },
+        {
+          "tokens": 4096,
+          "checkpointing": true,
+          "losses": [
+            0.07325632870197296,
+            0.0725511983036995,
+            0.07063224911689758
+          ],
+          "sample_losses": [
+            0.07063224911689758,
+            0.06808846443891525,
+            0.06498835235834122,
+            0.06168801710009575,
+            0.05838148668408394
+          ],
+          "wall_ms": [
+            598.9811100298539,
+            596.3582469848916,
+            596.0260540014133,
+            596.4506070013158,
+            596.430367033463
+          ],
+          "gpu_ms": [
+            598.9368286132812,
+            596.3280029296875,
+            596.00048828125,
+            596.4260864257812,
+            596.4049682617188
+          ],
+          "median_wall_ms": 596.430367033463,
+          "median_gpu_ms": 596.4049682617188,
+          "tokens_per_second": 6867.524234845327,
+          "resident_allocated_bytes": 1696721408,
+          "peak_allocated_bytes": 14121352704,
+          "peak_reserved_bytes": 16450060288
+        }
+      ],
+      "scope": "Whole 24-layer text-only BF16 Qwen3.5-0.8B; all-linear rank4 LoRA FP32 masters; dropout0; zero_grad+forward+causal_loss+backward+AdamW; synthetic fixed text, not convergence",
+      "versions": {
+        "torch": "2.11.0+rocm7.2.lumi.aif.20260929120822",
+        "transformers": "5.10.1",
+        "peft": "0.21.1",
+        "fla-core": "0.6.0",
+        "flash-linear-attention": "0.6.0"
+      },
+      "device": "AMD Instinct MI250X",
+      "cuda_graph_replay": false,
+      "gradient_accumulation": 1,
+      "batch": 1,
+      "rank": 4,
+      "alpha": 4,
+      "lr": 0.0001,
+      "warmup": 2,
+      "samples": 5,
+      "compiler_settings": {
+        "emulate_precision_casts": false,
+        "recompile_limit": 8,
+        "float32_matmul_precision": "highest"
+      },
+      "source_sha256": {
+        "benchmark_qwen35_training.py": "ce6212500957da4c1a3dfeb6a8df0830584429692892768186c1db9e5fbbf1b0",
+        "qwen35_training_mlp.py": "9c7d4ab2cbbf6c9c3ac9858971a13d3f70d9381129ff418930672ef594e2f61a",
+        "lora_swiglu_training.py": "3d2e24f06dfa2df10eea2860ec4043cc9749854b2f4019451e5b46811722e576",
+        "lora_swiglu_kernels.py": "a7a4e909d7bab6ddd1fd8537c75b56ffb22285323b9182f85998aa5f3046e732",
+        "lora_native_training.py": "6ee4d39697fc6c4d90b9d626bd23f96de6b17474aa75bb5a528f52b9a19f135c"
+      },
+      "loading": {
+        "missing_keys": "set()",
+        "unexpected_keys": "set()",
+        "mismatched_keys": "set()",
+        "error_msgs": []
+      },
+      "checked_loaded_tensors": 321,
+      "gdn": {
+        "layers": 18,
+        "chunk_function": "fla.ops.gated_delta_rule.chunk",
+        "norm": "FusedRMSNormGated",
+        "conv_function": "causal_conv1d.causal_conv1d_interface"
+      },
+      "adapter_tensors": 372,
+      "adapter_parameters": 2705664,
+      "initial_adapter_sha256": "80f8ccd54d0d735b845f5dbd2571fa4fce84d2394e0847245c6d888c1a7e24aa",
+      "replaced_mlps": 24,
+      "compiler_counters": {},
+      "raw_report_sha256": "ee3db58b6c65b645e229141522a48b13d004dfbff99afc68bd2862ce861c8020"
+    },
+    "native-expand": {
+      "state": "complete",
+      "backend": "native-expand",
+      "cases": [
+        {
+          "tokens": 128,
+          "checkpointing": false,
+          "losses": [
+            2.3260498046875,
+            2.3083736896514893,
+            2.2494430541992188
+          ],
+          "sample_losses": [
+            2.2494430541992188,
+            2.168785333633423,
+            2.070876121520996,
+            1.963481068611145,
+            1.8538914918899536
+          ],
+          "wall_ms": [
+            235.3705660207197,
+            227.11766400607303,
+            225.8893449907191,
+            226.03979596169665,
+            226.51441703783348
+          ],
+          "gpu_ms": [
+            235.30892944335938,
+            227.07618713378906,
+            225.85345458984375,
+            225.99937438964844,
+            226.4758758544922
+          ],
+          "median_wall_ms": 226.51441703783348,
+          "median_gpu_ms": 226.4758758544922,
+          "tokens_per_second": 565.0854443345248,
+          "resident_allocated_bytes": 1696689664,
+          "peak_allocated_bytes": 2351113728,
+          "peak_reserved_bytes": 2459959296
+        },
+        {
+          "tokens": 1024,
+          "checkpointing": false,
+          "losses": [
+            0.2921494245529175,
+            0.28924882411956787,
+            0.28185540437698364
+          ],
+          "sample_losses": [
+            0.28185540437698364,
+            0.271668940782547,
+            0.25942084193229675,
+            0.2457171082496643,
+            0.23255592584609985
+          ],
+          "wall_ms": [
+            240.44992896961048,
+            226.24268801882863,
+            225.44709697831422,
+            225.53597996011376,
+            225.19563999958336
+          ],
+          "gpu_ms": [
+            240.3992462158203,
+            226.20355224609375,
+            225.40785217285156,
+            225.50018310546875,
+            225.15762329101562
+          ],
+          "median_wall_ms": 225.53597996011376,
+          "median_gpu_ms": 225.50018310546875,
+          "tokens_per_second": 4540.29552260839,
+          "resident_allocated_bytes": 1696696832,
+          "peak_allocated_bytes": 6933856768,
+          "peak_reserved_bytes": 7491026944
+        },
+        {
+          "tokens": 4096,
+          "checkpointing": false,
+          "losses": [
+            0.07325632870197296,
+            0.0725511983036995,
+            0.07063224911689758
+          ],
+          "sample_losses": [
+            0.07063224911689758,
+            0.06808846443891525,
+            0.06498835235834122,
+            0.06168801710009575,
+            0.05838148668408394
+          ],
+          "wall_ms": [
+            465.27190500637516,
+            465.7578369951807,
+            463.9661340042949,
+            464.7427889867686,
+            464.59946199320257
+          ],
+          "gpu_ms": [
+            465.22967529296875,
+            465.73095703125,
+            463.940673828125,
+            464.71527099609375,
+            464.56951904296875
+          ],
+          "median_wall_ms": 464.7427889867686,
+          "median_gpu_ms": 464.71527099609375,
+          "tokens_per_second": 8813.477254655403,
+          "resident_allocated_bytes": 1696721408,
+          "peak_allocated_bytes": 22398804480,
+          "peak_reserved_bytes": 24805113856
+        },
+        {
+          "tokens": 128,
+          "checkpointing": true,
+          "losses": [
+            2.3260498046875,
+            2.3083736896514893,
+            2.2494430541992188
+          ],
+          "sample_losses": [
+            2.2494430541992188,
+            2.168785333633423,
+            2.070876121520996,
+            1.963481068611145,
+            1.8538914918899536
+          ],
+          "wall_ms": [
+            378.04748001508415,
+            374.2799509782344,
+            374.4440079899505,
+            374.1489269887097,
+            374.1427450440824
+          ],
+          "gpu_ms": [
+            377.9962158203125,
+            374.2427062988281,
+            374.4041748046875,
+            374.1108703613281,
+            374.1095886230469
+          ],
+          "median_wall_ms": 374.2799509782344,
+          "median_gpu_ms": 374.2427062988281,
+          "tokens_per_second": 341.9899988376444,
+          "resident_allocated_bytes": 1696689664,
+          "peak_allocated_bytes": 2087323648,
+          "peak_reserved_bytes": 2233466880
+        },
+        {
+          "tokens": 1024,
+          "checkpointing": true,
+          "losses": [
+            0.2921494245529175,
+            0.28924882411956787,
+            0.28185540437698364
+          ],
+          "sample_losses": [
+            0.28185540437698364,
+            0.271668940782547,
+            0.25942084193229675,
+            0.2457171082496643,
+            0.23255592584609985
+          ],
+          "wall_ms": [
+            378.0355469789356,
+            374.134037992917,
+            374.60136198205873,
+            374.1686949506402,
+            374.1408200003207
+          ],
+          "gpu_ms": [
+            377.9834289550781,
+            374.0961608886719,
+            374.56512451171875,
+            374.13519287109375,
+            374.103515625
+          ],
+          "median_wall_ms": 374.1686949506402,
+          "median_gpu_ms": 374.13519287109375,
+          "tokens_per_second": 2736.733494326896,
+          "resident_allocated_bytes": 1696696832,
+          "peak_allocated_bytes": 4803907072,
+          "peak_reserved_bytes": 5406457856
+        },
+        {
+          "tokens": 4096,
+          "checkpointing": true,
+          "losses": [
+            0.07325632870197296,
+            0.0725511983036995,
+            0.07063224911689758
+          ],
+          "sample_losses": [
+            0.07063224911689758,
+            0.06808846443891525,
+            0.06498835235834122,
+            0.06168801710009575,
+            0.05838148668408394
+          ],
+          "wall_ms": [
+            606.1404650099576,
+            604.0921760140918,
+            604.217518994119,
+            604.4276459724642,
+            604.3313289992511
+          ],
+          "gpu_ms": [
+            606.096435546875,
+            604.0669555664062,
+            604.1949462890625,
+            604.3968505859375,
+            604.303955078125
+          ],
+          "median_wall_ms": 604.3313289992511,
+          "median_gpu_ms": 604.303955078125,
+          "tokens_per_second": 6777.738971075378,
+          "resident_allocated_bytes": 1696721408,
+          "peak_allocated_bytes": 14121352704,
+          "peak_reserved_bytes": 16466837504
+        }
+      ],
+      "scope": "Whole 24-layer text-only BF16 Qwen3.5-0.8B; all-linear rank4 LoRA FP32 masters; dropout0; zero_grad+forward+causal_loss+backward+AdamW; synthetic fixed text, not convergence",
+      "versions": {
+        "torch": "2.11.0+rocm7.2.lumi.aif.20260929120822",
+        "transformers": "5.10.1",
+        "peft": "0.21.1",
+        "fla-core": "0.6.0",
+        "flash-linear-attention": "0.6.0"
+      },
+      "device": "AMD Instinct MI250X",
+      "cuda_graph_replay": false,
+      "gradient_accumulation": 1,
+      "batch": 1,
+      "rank": 4,
+      "alpha": 4,
+      "lr": 0.0001,
+      "warmup": 2,
+      "samples": 5,
+      "compiler_settings": {
+        "emulate_precision_casts": false,
+        "recompile_limit": 8,
+        "float32_matmul_precision": "highest"
+      },
+      "source_sha256": {
+        "benchmark_qwen35_training.py": "ce6212500957da4c1a3dfeb6a8df0830584429692892768186c1db9e5fbbf1b0",
+        "qwen35_training_mlp.py": "9c7d4ab2cbbf6c9c3ac9858971a13d3f70d9381129ff418930672ef594e2f61a",
+        "lora_swiglu_training.py": "3d2e24f06dfa2df10eea2860ec4043cc9749854b2f4019451e5b46811722e576",
+        "lora_swiglu_kernels.py": "a7a4e909d7bab6ddd1fd8537c75b56ffb22285323b9182f85998aa5f3046e732",
+        "lora_native_training.py": "6ee4d39697fc6c4d90b9d626bd23f96de6b17474aa75bb5a528f52b9a19f135c"
+      },
+      "loading": {
+        "missing_keys": "set()",
+        "unexpected_keys": "set()",
+        "mismatched_keys": "set()",
+        "error_msgs": []
+      },
+      "checked_loaded_tensors": 321,
+      "gdn": {
+        "layers": 18,
+        "chunk_function": "fla.ops.gated_delta_rule.chunk",
+        "norm": "FusedRMSNormGated",
+        "conv_function": "causal_conv1d.causal_conv1d_interface"
+      },
+      "adapter_tensors": 372,
+      "adapter_parameters": 2705664,
+      "initial_adapter_sha256": "80f8ccd54d0d735b845f5dbd2571fa4fce84d2394e0847245c6d888c1a7e24aa",
+      "replaced_mlps": 24,
+      "compiler_counters": {},
+      "raw_report_sha256": "bdc312c3a749a341c288cf174f8b3e7a2ae4ff3fc7fa930ec8cf9bad5bd62874"
+    },
+    "peft-before": {
+      "state": "complete",
+      "backend": "peft",
+      "cases": [
+        {
+          "tokens": 128,
+          "checkpointing": false,
+          "losses": [
+            2.3260498046875,
+            2.3083736896514893,
+            2.2494430541992188
+          ],
+          "sample_losses": [
+            2.2494430541992188,
+            2.168785333633423,
+            2.070876121520996,
+            1.963481068611145,
+            1.8538914918899536
+          ],
+          "wall_ms": [
+            232.62885201256722,
+            223.34153798874468,
+            222.38253999967128,
+            223.4003619523719,
+            223.6017220420763
+          ],
+          "gpu_ms": [
+            232.54795837402344,
+            223.29776000976562,
+            222.3452606201172,
+            223.3566436767578,
+            223.5667266845703
+          ],
+          "median_wall_ms": 223.4003619523719,
+          "median_gpu_ms": 223.3566436767578,
+          "tokens_per_second": 572.9623662261081,
+          "resident_allocated_bytes": 1696689664,
+          "peak_allocated_bytes": 2352489984,
+          "peak_reserved_bytes": 2459959296
+        },
+        {
+          "tokens": 1024,
+          "checkpointing": false,
+          "losses": [
+            0.2921494245529175,
+            0.28924882411956787,
+            0.28185540437698364
+          ],
+          "sample_losses": [
+            0.28185540437698364,
+            0.271668940782547,
+            0.25942084193229675,
+            0.2457171082496643,
+            0.23255592584609985
+          ],
+          "wall_ms": [
+            237.26437299046665,
+            223.64410402951762,
+            223.38861000025645,
+            223.53211703011766,
+            223.31214096629992
+          ],
+          "gpu_ms": [
+            237.2102508544922,
+            223.60671997070312,
+            223.35455322265625,
+            223.4910430908203,
+            223.2783966064453
+          ],
+          "median_wall_ms": 223.53211703011766,
+          "median_gpu_ms": 223.4910430908203,
+          "tokens_per_second": 4580.997190045989,
+          "resident_allocated_bytes": 1696696832,
+          "peak_allocated_bytes": 6931038720,
+          "peak_reserved_bytes": 7482638336
+        },
+        {
+          "tokens": 4096,
+          "checkpointing": false,
+          "losses": [
+            0.07325632870197296,
+            0.0725511983036995,
+            0.07063224911689758
+          ],
+          "sample_losses": [
+            0.07063224911689758,
+            0.06808846443891525,
+            0.06498835235834122,
+            0.06168801710009575,
+            0.05838148668408394
+          ],
+          "wall_ms": [
+            463.69696996407583,
+            464.5793699892238,
+            462.70823397208005,
+            462.1978460345417,
+            462.4534420436248
+          ],
+          "gpu_ms": [
+            463.6527099609375,
+            464.5506286621094,
+            462.68115234375,
+            462.17218017578125,
+            462.42724609375
+          ],
+          "median_wall_ms": 462.70823397208005,
+          "median_gpu_ms": 462.68115234375,
+          "tokens_per_second": 8852.230626713148,
+          "resident_allocated_bytes": 1696721408,
+          "peak_allocated_bytes": 22400180736,
+          "peak_reserved_bytes": 24807211008
+        },
+        {
+          "tokens": 128,
+          "checkpointing": true,
+          "losses": [
+            2.3260498046875,
+            2.3083736896514893,
+            2.2494430541992188
+          ],
+          "sample_losses": [
+            2.2494430541992188,
+            2.168785333633423,
+            2.070876121520996,
+            1.963481068611145,
+            1.8538914918899536
+          ],
+          "wall_ms": [
+            377.23033397924155,
+            374.2813300341368,
+            374.1528799873777,
+            374.4932300178334,
+            370.31115795252845
+          ],
+          "gpu_ms": [
+            377.178955078125,
+            374.2491455078125,
+            374.1142272949219,
+            374.4585876464844,
+            370.2775573730469
+          ],
+          "median_wall_ms": 374.2813300341368,
+          "median_gpu_ms": 374.2491455078125,
+          "tokens_per_second": 341.9887387605618,
+          "resident_allocated_bytes": 1696689664,
+          "peak_allocated_bytes": 2087323648,
+          "peak_reserved_bytes": 2233466880
+        },
+        {
+          "tokens": 1024,
+          "checkpointing": true,
+          "losses": [
+            0.2921494245529175,
+            0.28924882411956787,
+            0.28185540437698364
+          ],
+          "sample_losses": [
+            0.28185540437698364,
+            0.271668940782547,
+            0.25942084193229675,
+            0.2457171082496643,
+            0.23255592584609985
+          ],
+          "wall_ms": [
+            376.9778040004894,
+            373.44490899704397,
+            373.5315260128118,
+            374.1128539550118,
+            374.39906800864264
+          ],
+          "gpu_ms": [
+            376.92645263671875,
+            373.40655517578125,
+            373.4975891113281,
+            374.0763244628906,
+            374.36126708984375
+          ],
+          "median_wall_ms": 374.1128539550118,
+          "median_gpu_ms": 374.0763244628906,
+          "tokens_per_second": 2737.141985832807,
+          "resident_allocated_bytes": 1696696832,
+          "peak_allocated_bytes": 4803907072,
+          "peak_reserved_bytes": 5406457856
+        },
+        {
+          "tokens": 4096,
+          "checkpointing": true,
+          "losses": [
+            0.07325632870197296,
+            0.0725511983036995,
+            0.07063224911689758
+          ],
+          "sample_losses": [
+            0.07063224911689758,
+            0.06808846443891525,
+            0.06498835235834122,
+            0.06168801710009575,
+            0.05838148668408394
+          ],
+          "wall_ms": [
+            603.548688988667,
+            600.1115699764341,
+            600.4673689603806,
+            600.1562469755299,
+            600.5474249832332
+          ],
+          "gpu_ms": [
+            603.5048828125,
+            600.08447265625,
+            600.44189453125,
+            600.1318359375,
+            600.5225830078125
+          ],
+          "median_wall_ms": 600.4673689603806,
+          "median_gpu_ms": 600.44189453125,
+          "tokens_per_second": 6821.353185422235,
+          "resident_allocated_bytes": 1696721408,
+          "peak_allocated_bytes": 14121352704,
+          "peak_reserved_bytes": 16466837504
+        }
+      ],
+      "scope": "Whole 24-layer text-only BF16 Qwen3.5-0.8B; all-linear rank4 LoRA FP32 masters; dropout0; zero_grad+forward+causal_loss+backward+AdamW; synthetic fixed text, not convergence",
+      "versions": {
+        "torch": "2.11.0+rocm7.2.lumi.aif.20260929120822",
+        "transformers": "5.10.1",
+        "peft": "0.21.1",
+        "fla-core": "0.6.0",
+        "flash-linear-attention": "0.6.0"
+      },
+      "device": "AMD Instinct MI250X",
+      "cuda_graph_replay": false,
+      "gradient_accumulation": 1,
+      "batch": 1,
+      "rank": 4,
+      "alpha": 4,
+      "lr": 0.0001,
+      "warmup": 2,
+      "samples": 5,
+      "compiler_settings": {
+        "emulate_precision_casts": false,
+        "recompile_limit": 8,
+        "float32_matmul_precision": "highest"
+      },
+      "source_sha256": {
+        "benchmark_qwen35_training.py": "ce6212500957da4c1a3dfeb6a8df0830584429692892768186c1db9e5fbbf1b0",
+        "qwen35_training_mlp.py": "9c7d4ab2cbbf6c9c3ac9858971a13d3f70d9381129ff418930672ef594e2f61a",
+        "lora_swiglu_training.py": "3d2e24f06dfa2df10eea2860ec4043cc9749854b2f4019451e5b46811722e576",
+        "lora_swiglu_kernels.py": "a7a4e909d7bab6ddd1fd8537c75b56ffb22285323b9182f85998aa5f3046e732",
+        "lora_native_training.py": "6ee4d39697fc6c4d90b9d626bd23f96de6b17474aa75bb5a528f52b9a19f135c"
+      },
+      "loading": {
+        "missing_keys": "set()",
+        "unexpected_keys": "set()",
+        "mismatched_keys": "set()",
+        "error_msgs": []
+      },
+      "checked_loaded_tensors": 321,
+      "gdn": {
+        "layers": 18,
+        "chunk_function": "fla.ops.gated_delta_rule.chunk",
+        "norm": "FusedRMSNormGated",
+        "conv_function": "causal_conv1d.causal_conv1d_interface"
+      },
+      "adapter_tensors": 372,
+      "adapter_parameters": 2705664,
+      "initial_adapter_sha256": "80f8ccd54d0d735b845f5dbd2571fa4fce84d2394e0847245c6d888c1a7e24aa",
+      "compiler_counters": {},
+      "raw_report_sha256": "5b6e3a30ffd475a94460be151f4ab97943a5115567612b3dcb7a35658c60db52"
+    }
+  },
+  "comparisons": [
+    {
+      "candidate": "native-activation",
+      "reference": "peft-before",
+      "checkpointing": false,
+      "tokens": 128,
+      "speedup": 0.9897501040876854,
+      "loss_max_abs": 0.0,
+      "grad": {
+        "tensors": 372,
+        "exact_tensors": 372,
+        "max_abs": 0.0,
+        "max_relative_l2": 0.0,
+        "passed": true,
+        "aggregate_relative_l2": 0.0,
+        "failed_count": 0,
+        "worst_failures": []
+      },
+      "updated": {
+        "tensors": 372,
+        "exact_tensors": 372,
+        "max_abs": 0.0,
+        "max_relative_l2": 0.0,
+        "passed": true,
+        "aggregate_relative_l2": 0.0,
+        "failed_count": 0,
+        "worst_failures": []
+      },
+      "logits": {
+        "tensors": 1,
+        "exact_tensors": 1,
+        "max_abs": 0.0,
+        "max_relative_l2": 0.0,
+        "passed": true,
+        "aggregate_relative_l2": 0.0,
+        "failed_count": 0,
+        "worst_failures": []
+      },
+      "numerics_passed": true
+    },
+    {
+      "candidate": "native-activation",
+      "reference": "peft-before",
+      "checkpointing": false,
+      "tokens": 1024,
+      "speedup": 0.9880341416725561,
+      "loss_max_abs": 5.6356191635131836e-05,
+      "grad": {
+        "tensors": 372,
+        "exact_tensors": 0,
+        "max_abs": 0.000335693359375,
+        "max_relative_l2": 0.27287860555781823,
+        "passed": false,
+        "aggregate_relative_l2": 0.028861972201479645,
+        "failed_count": 11,
+        "worst_failures": [
+          {
+            "name": "base_model.model.model.layers.20.linear_attn.in_proj_b.lora_A.default.weight",
+            "max_abs": 3.4458935260772705e-07,
+            "relative_l2": 0.27287860555781823
+          },
+          {
+            "name": "base_model.model.model.layers.0.linear_attn.in_proj_a.lora_B.default.weight",
+            "max_abs": 1.1801719665527344e-05,
+            "relative_l2": 0.14891858068835553
+          },
+          {
+            "name": "base_model.model.model.layers.8.linear_attn.in_proj_b.lora_A.default.weight",
+            "max_abs": 3.688037395477295e-07,
+            "relative_l2": 0.13149301123825166
+          },
+          {
+            "name": "base_model.model.model.layers.4.linear_attn.in_proj_b.lora_A.default.weight",
+            "max_abs": 7.972121238708496e-07,
+            "relative_l2": 0.11977715126465453
+          },
+          {
+            "name": "base_model.model.model.layers.10.linear_attn.in_proj_b.lora_A.default.weight",
+            "max_abs": 5.755573511123657e-07,
+            "relative_l2": 0.09609295755969419
+          }
+        ]
+      },
+      "updated": {
+        "tensors": 372,
+        "exact_tensors": 0,
+        "max_abs": 0.0005860633682459593,
+        "max_relative_l2": 0.2384286764659689,
+        "passed": false,
+        "aggregate_relative_l2": 0.0017062979724038188,
+        "failed_count": 329,
+        "worst_failures": [
+          {
+            "name": "base_model.model.model.layers.6.linear_attn.out_proj.lora_B.default.weight",
+            "max_abs": 0.0005860633682459593,
+            "relative_l2": 0.06616377382065745
+          },
+          {
+            "name": "base_model.model.model.layers.19.mlp.up_proj.lora_B.default.weight",
+            "max_abs": 0.000575460959225893,
+            "relative_l2": 0.053261937060347694
+          },
+          {
+            "name": "base_model.model.model.layers.2.mlp.up_proj.lora_B.default.weight",
+            "max_abs": 0.0005737703759223223,
+            "relative_l2": 0.07627369675589181
+          },
+          {
+            "name": "base_model.model.model.layers.7.self_attn.q_proj.lora_B.default.weight",
+            "max_abs": 0.0005687875673174858,
+            "relative_l2": 0.0726862613194621
+          },
+          {
+            "name": "base_model.model.model.layers.5.linear_attn.in_proj_qkv.lora_B.default.weight",
+            "max_abs": 0.0005661629838868976,
+            "relative_l2": 0.0736434888241047
+          }
+        ]
+      },
+      "logits": {
+        "tensors": 1,
+        "exact_tensors": 0,
+        "max_abs": 0.21875,
+        "max_relative_l2": 0.010772424005065145,
+        "passed": true,
+        "aggregate_relative_l2": 0.010772424005065145,
+        "failed_count": 0,
+        "worst_failures": []
+      },
+      "numerics_passed": false
+    },
+    {
+      "candidate": "native-activation",
+      "reference": "peft-before",
+      "checkpointing": false,
+      "tokens": 4096,
+      "speedup": 1.0081227208922132,
+      "loss_max_abs": 0.0,
+      "grad": {
+        "tensors": 372,
+        "exact_tensors": 372,
+        "max_abs": 0.0,
+        "max_relative_l2": 0.0,
+        "passed": true,
+        "aggregate_relative_l2": 0.0,
+        "failed_count": 0,
+        "worst_failures": []
+      },
+      "updated": {
+        "tensors": 372,
+        "exact_tensors": 372,
+        "max_abs": 0.0,
+        "max_relative_l2": 0.0,
+        "passed": true,
+        "aggregate_relative_l2": 0.0,
+        "failed_count": 0,
+        "worst_failures": []
+      },
+      "logits": {
+        "tensors": 1,
+        "exact_tensors": 1,
+        "max_abs": 0.0,
+        "max_relative_l2": 0.0,
+        "passed": true,
+        "aggregate_relative_l2": 0.0,
+        "failed_count": 0,
+        "worst_failures": []
+      },
+      "numerics_passed": true
+    },
+    {
+      "candidate": "native-activation",
+      "reference": "peft-before",
+      "checkpointing": true,
+      "tokens": 128,
+      "speedup": 0.9942298905377092,
+      "loss_max_abs": 0.0,
+      "grad": {
+        "tensors": 372,
+        "exact_tensors": 372,
+        "max_abs": 0.0,
+        "max_relative_l2": 0.0,
+        "passed": true,
+        "aggregate_relative_l2": 0.0,
+        "failed_count": 0,
+        "worst_failures": []
+      },
+      "updated": {
+        "tensors": 372,
+        "exact_tensors": 372,
+        "max_abs": 0.0,
+        "max_relative_l2": 0.0,
+        "passed": true,
+        "aggregate_relative_l2": 0.0,
+        "failed_count": 0,
+        "worst_failures": []
+      },
+      "logits": {
+        "tensors": 1,
+        "exact_tensors": 1,
+        "max_abs": 0.0,
+        "max_relative_l2": 0.0,
+        "passed": true,
+        "aggregate_relative_l2": 0.0,
+        "failed_count": 0,
+        "worst_failures": []
+      },
+      "numerics_passed": true
+    },
+    {
+      "candidate": "native-activation",
+      "reference": "peft-before",
+      "checkpointing": true,
+      "tokens": 1024,
+      "speedup": 0.9905186500797394,
+      "loss_max_abs": 5.6356191635131836e-05,
+      "grad": {
+        "tensors": 372,
+        "exact_tensors": 0,
+        "max_abs": 0.000335693359375,
+        "max_relative_l2": 0.27287860555781823,
+        "passed": false,
+        "aggregate_relative_l2": 0.028861972201479645,
+        "failed_count": 11,
+        "worst_failures": [
+          {
+            "name": "base_model.model.model.layers.20.linear_attn.in_proj_b.lora_A.default.weight",
+            "max_abs": 3.4458935260772705e-07,
+            "relative_l2": 0.27287860555781823
+          },
+          {
+            "name": "base_model.model.model.layers.0.linear_attn.in_proj_a.lora_B.default.weight",
+            "max_abs": 1.1801719665527344e-05,
+            "relative_l2": 0.14891858068835553
+          },
+          {
+            "name": "base_model.model.model.layers.8.linear_attn.in_proj_b.lora_A.default.weight",
+            "max_abs": 3.688037395477295e-07,
+            "relative_l2": 0.13149301123825166
+          },
+          {
+            "name": "base_model.model.model.layers.4.linear_attn.in_proj_b.lora_A.default.weight",
+            "max_abs": 7.972121238708496e-07,
+            "relative_l2": 0.11977715126465453
+          },
+          {
+            "name": "base_model.model.model.layers.10.linear_attn.in_proj_b.lora_A.default.weight",
+            "max_abs": 5.755573511123657e-07,
+            "relative_l2": 0.09609295755969419
+          }
+        ]
+      },
+      "updated": {
+        "tensors": 372,
+        "exact_tensors": 0,
+        "max_abs": 0.0005860633682459593,
+        "max_relative_l2": 0.2384286764659689,
+        "passed": false,
+        "aggregate_relative_l2": 0.0017062979724038188,
+        "failed_count": 329,
+        "worst_failures": [
+          {
+            "name": "base_model.model.model.layers.6.linear_attn.out_proj.lora_B.default.weight",
+            "max_abs": 0.0005860633682459593,
+            "relative_l2": 0.06616377382065745
+          },
+          {
+            "name": "base_model.model.model.layers.19.mlp.up_proj.lora_B.default.weight",
+            "max_abs": 0.000575460959225893,
+            "relative_l2": 0.053261937060347694
+          },
+          {
+            "name": "base_model.model.model.layers.2.mlp.up_proj.lora_B.default.weight",
+            "max_abs": 0.0005737703759223223,
+            "relative_l2": 0.07627369675589181
+          },
+          {
+            "name": "base_model.model.model.layers.7.self_attn.q_proj.lora_B.default.weight",
+            "max_abs": 0.0005687875673174858,
+            "relative_l2": 0.0726862613194621
+          },
+          {
+            "name": "base_model.model.model.layers.5.linear_attn.in_proj_qkv.lora_B.default.weight",
+            "max_abs": 0.0005661629838868976,
+            "relative_l2": 0.0736434888241047
+          }
+        ]
+      },
+      "logits": {
+        "tensors": 1,
+        "exact_tensors": 0,
+        "max_abs": 0.21875,
+        "max_relative_l2": 0.010772424005065145,
+        "passed": true,
+        "aggregate_relative_l2": 0.010772424005065145,
+        "failed_count": 0,
+        "worst_failures": []
+      },
+      "numerics_passed": false
+    },
+    {
+      "candidate": "native-activation",
+      "reference": "peft-before",
+      "checkpointing": true,
+      "tokens": 4096,
+      "speedup": 1.0067686056077207,
+      "loss_max_abs": 0.0,
+      "grad": {
+        "tensors": 372,
+        "exact_tensors": 372,
+        "max_abs": 0.0,
+        "max_relative_l2": 0.0,
+        "passed": true,
+        "aggregate_relative_l2": 0.0,
+        "failed_count": 0,
+        "worst_failures": []
+      },
+      "updated": {
+        "tensors": 372,
+        "exact_tensors": 372,
+        "max_abs": 0.0,
+        "max_relative_l2": 0.0,
+        "passed": true,
+        "aggregate_relative_l2": 0.0,
+        "failed_count": 0,
+        "worst_failures": []
+      },
+      "logits": {
+        "tensors": 1,
+        "exact_tensors": 1,
+        "max_abs": 0.0,
+        "max_relative_l2": 0.0,
+        "passed": true,
+        "aggregate_relative_l2": 0.0,
+        "failed_count": 0,
+        "worst_failures": []
+      },
+      "numerics_passed": true
+    },
+    {
+      "candidate": "native-consumer",
+      "reference": "peft-before",
+      "checkpointing": false,
+      "tokens": 128,
+      "speedup": 1.0085687434155668,
+      "loss_max_abs": 0.0,
+      "grad": {
+        "tensors": 372,
+        "exact_tensors": 372,
+        "max_abs": 0.0,
+        "max_relative_l2": 0.0,
+        "passed": true,
+        "aggregate_relative_l2": 0.0,
+        "failed_count": 0,
+        "worst_failures": []
+      },
+      "updated": {
+        "tensors": 372,
+        "exact_tensors": 372,
+        "max_abs": 0.0,
+        "max_relative_l2": 0.0,
+        "passed": true,
+        "aggregate_relative_l2": 0.0,
+        "failed_count": 0,
+        "worst_failures": []
+      },
+      "logits": {
+        "tensors": 1,
+        "exact_tensors": 1,
+        "max_abs": 0.0,
+        "max_relative_l2": 0.0,
+        "passed": true,
+        "aggregate_relative_l2": 0.0,
+        "failed_count": 0,
+        "worst_failures": []
+      },
+      "numerics_passed": true
+    },
+    {
+      "candidate": "native-consumer",
+      "reference": "peft-before",
+      "checkpointing": false,
+      "tokens": 1024,
+      "speedup": 1.009531535034208,
+      "loss_max_abs": 5.6356191635131836e-05,
+      "grad": {
+        "tensors": 372,
+        "exact_tensors": 0,
+        "max_abs": 0.000335693359375,
+        "max_relative_l2": 0.27287860555781823,
+        "passed": false,
+        "aggregate_relative_l2": 0.028861972201479645,
+        "failed_count": 11,
+        "worst_failures": [
+          {
+            "name": "base_model.model.model.layers.20.linear_attn.in_proj_b.lora_A.default.weight",
+            "max_abs": 3.4458935260772705e-07,
+            "relative_l2": 0.27287860555781823
+          },
+          {
+            "name": "base_model.model.model.layers.0.linear_attn.in_proj_a.lora_B.default.weight",
+            "max_abs": 1.1801719665527344e-05,
+            "relative_l2": 0.14891858068835553
+          },
+          {
+            "name": "base_model.model.model.layers.8.linear_attn.in_proj_b.lora_A.default.weight",
+            "max_abs": 3.688037395477295e-07,
+            "relative_l2": 0.13149301123825166
+          },
+          {
+            "name": "base_model.model.model.layers.4.linear_attn.in_proj_b.lora_A.default.weight",
+            "max_abs": 7.972121238708496e-07,
+            "relative_l2": 0.11977715126465453
+          },
+          {
+            "name": "base_model.model.model.layers.10.linear_attn.in_proj_b.lora_A.default.weight",
+            "max_abs": 5.755573511123657e-07,
+            "relative_l2": 0.09609295755969419
+          }
+        ]
+      },
+      "updated": {
+        "tensors": 372,
+        "exact_tensors": 0,
+        "max_abs": 0.0005860633682459593,
+        "max_relative_l2": 0.2384286764659689,
+        "passed": false,
+        "aggregate_relative_l2": 0.0017062979724038188,
+        "failed_count": 329,
+        "worst_failures": [
+          {
+            "name": "base_model.model.model.layers.6.linear_attn.out_proj.lora_B.default.weight",
+            "max_abs": 0.0005860633682459593,
+            "relative_l2": 0.06616377382065745
+          },
+          {
+            "name": "base_model.model.model.layers.19.mlp.up_proj.lora_B.default.weight",
+            "max_abs": 0.000575460959225893,
+            "relative_l2": 0.053261937060347694
+          },
+          {
+            "name": "base_model.model.model.layers.2.mlp.up_proj.lora_B.default.weight",
+            "max_abs": 0.0005737703759223223,
+            "relative_l2": 0.07627369675589181
+          },
+          {
+            "name": "base_model.model.model.layers.7.self_attn.q_proj.lora_B.default.weight",
+            "max_abs": 0.0005687875673174858,
+            "relative_l2": 0.0726862613194621
+          },
+          {
+            "name": "base_model.model.model.layers.5.linear_attn.in_proj_qkv.lora_B.default.weight",
+            "max_abs": 0.0005661629838868976,
+            "relative_l2": 0.0736434888241047
+          }
+        ]
+      },
+      "logits": {
+        "tensors": 1,
+        "exact_tensors": 0,
+        "max_abs": 0.21875,
+        "max_relative_l2": 0.010772424005065145,
+        "passed": true,
+        "aggregate_relative_l2": 0.010772424005065145,
+        "failed_count": 0,
+        "worst_failures": []
+      },
+      "numerics_passed": false
+    },
+    {
+      "candidate": "native-consumer",
+      "reference": "peft-before",
+      "checkpointing": false,
+      "tokens": 4096,
+      "speedup": 1.0048510202985368,
+      "loss_max_abs": 0.0,
+      "grad": {
+        "tensors": 372,
+        "exact_tensors": 372,
+        "max_abs": 0.0,
+        "max_relative_l2": 0.0,
+        "passed": true,
+        "aggregate_relative_l2": 0.0,
+        "failed_count": 0,
+        "worst_failures": []
+      },
+      "updated": {
+        "tensors": 372,
+        "exact_tensors": 372,
+        "max_abs": 0.0,
+        "max_relative_l2": 0.0,
+        "passed": true,
+        "aggregate_relative_l2": 0.0,
+        "failed_count": 0,
+        "worst_failures": []
+      },
+      "logits": {
+        "tensors": 1,
+        "exact_tensors": 1,
+        "max_abs": 0.0,
+        "max_relative_l2": 0.0,
+        "passed": true,
+        "aggregate_relative_l2": 0.0,
+        "failed_count": 0,
+        "worst_failures": []
+      },
+      "numerics_passed": true
+    },
+    {
+      "candidate": "native-consumer",
+      "reference": "peft-before",
+      "checkpointing": true,
+      "tokens": 128,
+      "speedup": 1.025000163080779,
+      "loss_max_abs": 0.0,
+      "grad": {
+        "tensors": 372,
+        "exact_tensors": 372,
+        "max_abs": 0.0,
+        "max_relative_l2": 0.0,
+        "passed": true,
+        "aggregate_relative_l2": 0.0,
+        "failed_count": 0,
+        "worst_failures": []
+      },
+      "updated": {
+        "tensors": 372,
+        "exact_tensors": 372,
+        "max_abs": 0.0,
+        "max_relative_l2": 0.0,
+        "passed": true,
+        "aggregate_relative_l2": 0.0,
+        "failed_count": 0,
+        "worst_failures": []
+      },
+      "logits": {
+        "tensors": 1,
+        "exact_tensors": 1,
+        "max_abs": 0.0,
+        "max_relative_l2": 0.0,
+        "passed": true,
+        "aggregate_relative_l2": 0.0,
+        "failed_count": 0,
+        "worst_failures": []
+      },
+      "numerics_passed": true
+    },
+    {
+      "candidate": "native-consumer",
+      "reference": "peft-before",
+      "checkpointing": true,
+      "tokens": 1024,
+      "speedup": 1.0245377226301586,
+      "loss_max_abs": 5.6356191635131836e-05,
+      "grad": {
+        "tensors": 372,
+        "exact_tensors": 0,
+        "max_abs": 0.000335693359375,
+        "max_relative_l2": 0.27287860555781823,
+        "passed": false,
+        "aggregate_relative_l2": 0.028861972201479645,
+        "failed_count": 11,
+        "worst_failures": [
+          {
+            "name": "base_model.model.model.layers.20.linear_attn.in_proj_b.lora_A.default.weight",
+            "max_abs": 3.4458935260772705e-07,
+            "relative_l2": 0.27287860555781823
+          },
+          {
+            "name": "base_model.model.model.layers.0.linear_attn.in_proj_a.lora_B.default.weight",
+            "max_abs": 1.1801719665527344e-05,
+            "relative_l2": 0.14891858068835553
+          },
+          {
+            "name": "base_model.model.model.layers.8.linear_attn.in_proj_b.lora_A.default.weight",
+            "max_abs": 3.688037395477295e-07,
+            "relative_l2": 0.13149301123825166
+          },
+          {
+            "name": "base_model.model.model.layers.4.linear_attn.in_proj_b.lora_A.default.weight",
+            "max_abs": 7.972121238708496e-07,
+            "relative_l2": 0.11977715126465453
+          },
+          {
+            "name": "base_model.model.model.layers.10.linear_attn.in_proj_b.lora_A.default.weight",
+            "max_abs": 5.755573511123657e-07,
+            "relative_l2": 0.09609295755969419
+          }
+        ]
+      },
+      "updated": {
+        "tensors": 372,
+        "exact_tensors": 0,
+        "max_abs": 0.0005860633682459593,
+        "max_relative_l2": 0.2384286764659689,
+        "passed": false,
+        "aggregate_relative_l2": 0.0017062979724038188,
+        "failed_count": 329,
+        "worst_failures": [
+          {
+            "name": "base_model.model.model.layers.6.linear_attn.out_proj.lora_B.default.weight",
+            "max_abs": 0.0005860633682459593,
+            "relative_l2": 0.06616377382065745
+          },
+          {
+            "name": "base_model.model.model.layers.19.mlp.up_proj.lora_B.default.weight",
+            "max_abs": 0.000575460959225893,
+            "relative_l2": 0.053261937060347694
+          },
+          {
+            "name": "base_model.model.model.layers.2.mlp.up_proj.lora_B.default.weight",
+            "max_abs": 0.0005737703759223223,
+            "relative_l2": 0.07627369675589181
+          },
+          {
+            "name": "base_model.model.model.layers.7.self_attn.q_proj.lora_B.default.weight",
+            "max_abs": 0.0005687875673174858,
+            "relative_l2": 0.0726862613194621
+          },
+          {
+            "name": "base_model.model.model.layers.5.linear_attn.in_proj_qkv.lora_B.default.weight",
+            "max_abs": 0.0005661629838868976,
+            "relative_l2": 0.0736434888241047
+          }
+        ]
+      },
+      "logits": {
+        "tensors": 1,
+        "exact_tensors": 0,
+        "max_abs": 0.21875,
+        "max_relative_l2": 0.010772424005065145,
+        "passed": true,
+        "aggregate_relative_l2": 0.010772424005065145,
+        "failed_count": 0,
+        "worst_failures": []
+      },
+      "numerics_passed": false
+    },
+    {
+      "candidate": "native-consumer",
+      "reference": "peft-before",
+      "checkpointing": true,
+      "tokens": 4096,
+      "speedup": 1.0091909483594927,
+      "loss_max_abs": 0.0,
+      "grad": {
+        "tensors": 372,
+        "exact_tensors": 372,
+        "max_abs": 0.0,
+        "max_relative_l2": 0.0,
+        "passed": true,
+        "aggregate_relative_l2": 0.0,
+        "failed_count": 0,
+        "worst_failures": []
+      },
+      "updated": {
+        "tensors": 372,
+        "exact_tensors": 372,
+        "max_abs": 0.0,
+        "max_relative_l2": 0.0,
+        "passed": true,
+        "aggregate_relative_l2": 0.0,
+        "failed_count": 0,
+        "worst_failures": []
+      },
+      "logits": {
+        "tensors": 1,
+        "exact_tensors": 1,
+        "max_abs": 0.0,
+        "max_relative_l2": 0.0,
+        "passed": true,
+        "aggregate_relative_l2": 0.0,
+        "failed_count": 0,
+        "worst_failures": []
+      },
+      "numerics_passed": true
+    },
+    {
+      "candidate": "native-expand",
+      "reference": "peft-before",
+      "checkpointing": false,
+      "tokens": 128,
+      "speedup": 0.9862522874871075,
+      "loss_max_abs": 0.0,
+      "grad": {
+        "tensors": 372,
+        "exact_tensors": 372,
+        "max_abs": 0.0,
+        "max_relative_l2": 0.0,
+        "passed": true,
+        "aggregate_relative_l2": 0.0,
+        "failed_count": 0,
+        "worst_failures": []
+      },
+      "updated": {
+        "tensors": 372,
+        "exact_tensors": 372,
+        "max_abs": 0.0,
+        "max_relative_l2": 0.0,
+        "passed": true,
+        "aggregate_relative_l2": 0.0,
+        "failed_count": 0,
+        "worst_failures": []
+      },
+      "logits": {
+        "tensors": 1,
+        "exact_tensors": 1,
+        "max_abs": 0.0,
+        "max_relative_l2": 0.0,
+        "passed": true,
+        "aggregate_relative_l2": 0.0,
+        "failed_count": 0,
+        "worst_failures": []
+      },
+      "numerics_passed": true
+    },
+    {
+      "candidate": "native-expand",
+      "reference": "peft-before",
+      "checkpointing": false,
+      "tokens": 1024,
+      "speedup": 0.9911151075302908,
+      "loss_max_abs": 0.0,
+      "grad": {
+        "tensors": 372,
+        "exact_tensors": 372,
+        "max_abs": 0.0,
+        "max_relative_l2": 0.0,
+        "passed": true,
+        "aggregate_relative_l2": 0.0,
+        "failed_count": 0,
+        "worst_failures": []
+      },
+      "updated": {
+        "tensors": 372,
+        "exact_tensors": 372,
+        "max_abs": 0.0,
+        "max_relative_l2": 0.0,
+        "passed": true,
+        "aggregate_relative_l2": 0.0,
+        "failed_count": 0,
+        "worst_failures": []
+      },
+      "logits": {
+        "tensors": 1,
+        "exact_tensors": 1,
+        "max_abs": 0.0,
+        "max_relative_l2": 0.0,
+        "passed": true,
+        "aggregate_relative_l2": 0.0,
+        "failed_count": 0,
+        "worst_failures": []
+      },
+      "numerics_passed": true
+    },
+    {
+      "candidate": "native-expand",
+      "reference": "peft-before",
+      "checkpointing": false,
+      "tokens": 4096,
+      "speedup": 0.9956221913219476,
+      "loss_max_abs": 0.0,
+      "grad": {
+        "tensors": 372,
+        "exact_tensors": 372,
+        "max_abs": 0.0,
+        "max_relative_l2": 0.0,
+        "passed": true,
+        "aggregate_relative_l2": 0.0,
+        "failed_count": 0,
+        "worst_failures": []
+      },
+      "updated": {
+        "tensors": 372,
+        "exact_tensors": 372,
+        "max_abs": 0.0,
+        "max_relative_l2": 0.0,
+        "passed": true,
+        "aggregate_relative_l2": 0.0,
+        "failed_count": 0,
+        "worst_failures": []
+      },
+      "logits": {
+        "tensors": 1,
+        "exact_tensors": 1,
+        "max_abs": 0.0,
+        "max_relative_l2": 0.0,
+        "passed": true,
+        "aggregate_relative_l2": 0.0,
+        "failed_count": 0,
+        "worst_failures": []
+      },
+      "numerics_passed": true
+    },
+    {
+      "candidate": "native-expand",
+      "reference": "peft-before",
+      "checkpointing": true,
+      "tokens": 128,
+      "speedup": 1.0000036845572378,
+      "loss_max_abs": 0.0,
+      "grad": {
+        "tensors": 372,
+        "exact_tensors": 372,
+        "max_abs": 0.0,
+        "max_relative_l2": 0.0,
+        "passed": true,
+        "aggregate_relative_l2": 0.0,
+        "failed_count": 0,
+        "worst_failures": []
+      },
+      "updated": {
+        "tensors": 372,
+        "exact_tensors": 372,
+        "max_abs": 0.0,
+        "max_relative_l2": 0.0,
+        "passed": true,
+        "aggregate_relative_l2": 0.0,
+        "failed_count": 0,
+        "worst_failures": []
+      },
+      "logits": {
+        "tensors": 1,
+        "exact_tensors": 1,
+        "max_abs": 0.0,
+        "max_relative_l2": 0.0,
+        "passed": true,
+        "aggregate_relative_l2": 0.0,
+        "failed_count": 0,
+        "worst_failures": []
+      },
+      "numerics_passed": true
+    },
+    {
+      "candidate": "native-expand",
+      "reference": "peft-before",
+      "checkpointing": true,
+      "tokens": 1024,
+      "speedup": 0.9998507598407297,
+      "loss_max_abs": 0.0,
+      "grad": {
+        "tensors": 372,
+        "exact_tensors": 372,
+        "max_abs": 0.0,
+        "max_relative_l2": 0.0,
+        "passed": true,
+        "aggregate_relative_l2": 0.0,
+        "failed_count": 0,
+        "worst_failures": []
+      },
+      "updated": {
+        "tensors": 372,
+        "exact_tensors": 372,
+        "max_abs": 0.0,
+        "max_relative_l2": 0.0,
+        "passed": true,
+        "aggregate_relative_l2": 0.0,
+        "failed_count": 0,
+        "worst_failures": []
+      },
+      "logits": {
+        "tensors": 1,
+        "exact_tensors": 1,
+        "max_abs": 0.0,
+        "max_relative_l2": 0.0,
+        "passed": true,
+        "aggregate_relative_l2": 0.0,
+        "failed_count": 0,
+        "worst_failures": []
+      },
+      "numerics_passed": true
+    },
+    {
+      "candidate": "native-expand",
+      "reference": "peft-before",
+      "checkpointing": true,
+      "tokens": 4096,
+      "speedup": 0.9936062225248704,
+      "loss_max_abs": 0.0,
+      "grad": {
+        "tensors": 372,
+        "exact_tensors": 372,
+        "max_abs": 0.0,
+        "max_relative_l2": 0.0,
+        "passed": true,
+        "aggregate_relative_l2": 0.0,
+        "failed_count": 0,
+        "worst_failures": []
+      },
+      "updated": {
+        "tensors": 372,
+        "exact_tensors": 372,
+        "max_abs": 0.0,
+        "max_relative_l2": 0.0,
+        "passed": true,
+        "aggregate_relative_l2": 0.0,
+        "failed_count": 0,
+        "worst_failures": []
+      },
+      "logits": {
+        "tensors": 1,
+        "exact_tensors": 1,
+        "max_abs": 0.0,
+        "max_relative_l2": 0.0,
+        "passed": true,
+        "aggregate_relative_l2": 0.0,
+        "failed_count": 0,
+        "worst_failures": []
+      },
+      "numerics_passed": true
+    },
+    {
+      "candidate": "native-consumer",
+      "reference": "native-activation",
+      "checkpointing": false,
+      "tokens": 128,
+      "speedup": 1.0190135259902071,
+      "loss_max_abs": 0.0,
+      "grad": {
+        "tensors": 372,
+        "exact_tensors": 372,
+        "max_abs": 0.0,
+        "max_relative_l2": 0.0,
+        "passed": true,
+        "aggregate_relative_l2": 0.0,
+        "failed_count": 0,
+        "worst_failures": []
+      },
+      "updated": {
+        "tensors": 372,
+        "exact_tensors": 372,
+        "max_abs": 0.0,
+        "max_relative_l2": 0.0,
+        "passed": true,
+        "aggregate_relative_l2": 0.0,
+        "failed_count": 0,
+        "worst_failures": []
+      },
+      "logits": {
+        "tensors": 1,
+        "exact_tensors": 1,
+        "max_abs": 0.0,
+        "max_relative_l2": 0.0,
+        "passed": true,
+        "aggregate_relative_l2": 0.0,
+        "failed_count": 0,
+        "worst_failures": []
+      },
+      "numerics_passed": true
+    },
+    {
+      "candidate": "native-consumer",
+      "reference": "native-activation",
+      "checkpointing": false,
+      "tokens": 1024,
+      "speedup": 1.0217577434371456,
+      "loss_max_abs": 0.0,
+      "grad": {
+        "tensors": 372,
+        "exact_tensors": 372,
+        "max_abs": 0.0,
+        "max_relative_l2": 0.0,
+        "passed": true,
+        "aggregate_relative_l2": 0.0,
+        "failed_count": 0,
+        "worst_failures": []
+      },
+      "updated": {
+        "tensors": 372,
+        "exact_tensors": 372,
+        "max_abs": 0.0,
+        "max_relative_l2": 0.0,
+        "passed": true,
+        "aggregate_relative_l2": 0.0,
+        "failed_count": 0,
+        "worst_failures": []
+      },
+      "logits": {
+        "tensors": 1,
+        "exact_tensors": 1,
+        "max_abs": 0.0,
+        "max_relative_l2": 0.0,
+        "passed": true,
+        "aggregate_relative_l2": 0.0,
+        "failed_count": 0,
+        "worst_failures": []
+      },
+      "numerics_passed": true
+    },
+    {
+      "candidate": "native-consumer",
+      "reference": "native-activation",
+      "checkpointing": false,
+      "tokens": 4096,
+      "speedup": 0.9967546603941424,
+      "loss_max_abs": 0.0,
+      "grad": {
+        "tensors": 372,
+        "exact_tensors": 372,
+        "max_abs": 0.0,
+        "max_relative_l2": 0.0,
+        "passed": true,
+        "aggregate_relative_l2": 0.0,
+        "failed_count": 0,
+        "worst_failures": []
+      },
+      "updated": {
+        "tensors": 372,
+        "exact_tensors": 372,
+        "max_abs": 0.0,
+        "max_relative_l2": 0.0,
+        "passed": true,
+        "aggregate_relative_l2": 0.0,
+        "failed_count": 0,
+        "worst_failures": []
+      },
+      "logits": {
+        "tensors": 1,
+        "exact_tensors": 1,
+        "max_abs": 0.0,
+        "max_relative_l2": 0.0,
+        "passed": true,
+        "aggregate_relative_l2": 0.0,
+        "failed_count": 0,
+        "worst_failures": []
+      },
+      "numerics_passed": true
+    },
+    {
+      "candidate": "native-consumer",
+      "reference": "native-activation",
+      "checkpointing": true,
+      "tokens": 128,
+      "speedup": 1.0309488507999176,
+      "loss_max_abs": 0.0,
+      "grad": {
+        "tensors": 372,
+        "exact_tensors": 372,
+        "max_abs": 0.0,
+        "max_relative_l2": 0.0,
+        "passed": true,
+        "aggregate_relative_l2": 0.0,
+        "failed_count": 0,
+        "worst_failures": []
+      },
+      "updated": {
+        "tensors": 372,
+        "exact_tensors": 372,
+        "max_abs": 0.0,
+        "max_relative_l2": 0.0,
+        "passed": true,
+        "aggregate_relative_l2": 0.0,
+        "failed_count": 0,
+        "worst_failures": []
+      },
+      "logits": {
+        "tensors": 1,
+        "exact_tensors": 1,
+        "max_abs": 0.0,
+        "max_relative_l2": 0.0,
+        "passed": true,
+        "aggregate_relative_l2": 0.0,
+        "failed_count": 0,
+        "worst_failures": []
+      },
+      "numerics_passed": true
+    },
+    {
+      "candidate": "native-consumer",
+      "reference": "native-activation",
+      "checkpointing": true,
+      "tokens": 1024,
+      "speedup": 1.0343447067328622,
+      "loss_max_abs": 0.0,
+      "grad": {
+        "tensors": 372,
+        "exact_tensors": 372,
+        "max_abs": 0.0,
+        "max_relative_l2": 0.0,
+        "passed": true,
+        "aggregate_relative_l2": 0.0,
+        "failed_count": 0,
+        "worst_failures": []
+      },
+      "updated": {
+        "tensors": 372,
+        "exact_tensors": 372,
+        "max_abs": 0.0,
+        "max_relative_l2": 0.0,
+        "passed": true,
+        "aggregate_relative_l2": 0.0,
+        "failed_count": 0,
+        "worst_failures": []
+      },
+      "logits": {
+        "tensors": 1,
+        "exact_tensors": 1,
+        "max_abs": 0.0,
+        "max_relative_l2": 0.0,
+        "passed": true,
+        "aggregate_relative_l2": 0.0,
+        "failed_count": 0,
+        "worst_failures": []
+      },
+      "numerics_passed": true
+    },
+    {
+      "candidate": "native-consumer",
+      "reference": "native-activation",
+      "checkpointing": true,
+      "tokens": 4096,
+      "speedup": 1.0024060571001912,
+      "loss_max_abs": 0.0,
+      "grad": {
+        "tensors": 372,
+        "exact_tensors": 372,
+        "max_abs": 0.0,
+        "max_relative_l2": 0.0,
+        "passed": true,
+        "aggregate_relative_l2": 0.0,
+        "failed_count": 0,
+        "worst_failures": []
+      },
+      "updated": {
+        "tensors": 372,
+        "exact_tensors": 372,
+        "max_abs": 0.0,
+        "max_relative_l2": 0.0,
+        "passed": true,
+        "aggregate_relative_l2": 0.0,
+        "failed_count": 0,
+        "worst_failures": []
+      },
+      "logits": {
+        "tensors": 1,
+        "exact_tensors": 1,
+        "max_abs": 0.0,
+        "max_relative_l2": 0.0,
+        "passed": true,
+        "aggregate_relative_l2": 0.0,
+        "failed_count": 0,
+        "worst_failures": []
+      },
+      "numerics_passed": true
+    },
+    {
+      "candidate": "peft-after",
+      "reference": "peft-before",
+      "checkpointing": false,
+      "tokens": 128,
+      "speedup": 1.0100315223689196,
+      "loss_max_abs": 0.0,
+      "grad": {
+        "tensors": 372,
+        "exact_tensors": 372,
+        "max_abs": 0.0,
+        "max_relative_l2": 0.0,
+        "passed": true,
+        "aggregate_relative_l2": 0.0,
+        "failed_count": 0,
+        "worst_failures": []
+      },
+      "updated": {
+        "tensors": 372,
+        "exact_tensors": 372,
+        "max_abs": 0.0,
+        "max_relative_l2": 0.0,
+        "passed": true,
+        "aggregate_relative_l2": 0.0,
+        "failed_count": 0,
+        "worst_failures": []
+      },
+      "logits": {
+        "tensors": 1,
+        "exact_tensors": 1,
+        "max_abs": 0.0,
+        "max_relative_l2": 0.0,
+        "passed": true,
+        "aggregate_relative_l2": 0.0,
+        "failed_count": 0,
+        "worst_failures": []
+      },
+      "numerics_passed": true
+    },
+    {
+      "candidate": "peft-after",
+      "reference": "peft-before",
+      "checkpointing": false,
+      "tokens": 1024,
+      "speedup": 1.0110834424000565,
+      "loss_max_abs": 0.0,
+      "grad": {
+        "tensors": 372,
+        "exact_tensors": 372,
+        "max_abs": 0.0,
+        "max_relative_l2": 0.0,
+        "passed": true,
+        "aggregate_relative_l2": 0.0,
+        "failed_count": 0,
+        "worst_failures": []
+      },
+      "updated": {
+        "tensors": 372,
+        "exact_tensors": 372,
+        "max_abs": 0.0,
+        "max_relative_l2": 0.0,
+        "passed": true,
+        "aggregate_relative_l2": 0.0,
+        "failed_count": 0,
+        "worst_failures": []
+      },
+      "logits": {
+        "tensors": 1,
+        "exact_tensors": 1,
+        "max_abs": 0.0,
+        "max_relative_l2": 0.0,
+        "passed": true,
+        "aggregate_relative_l2": 0.0,
+        "failed_count": 0,
+        "worst_failures": []
+      },
+      "numerics_passed": true
+    },
+    {
+      "candidate": "peft-after",
+      "reference": "peft-before",
+      "checkpointing": false,
+      "tokens": 4096,
+      "speedup": 0.991171195095282,
+      "loss_max_abs": 0.0,
+      "grad": {
+        "tensors": 372,
+        "exact_tensors": 372,
+        "max_abs": 0.0,
+        "max_relative_l2": 0.0,
+        "passed": true,
+        "aggregate_relative_l2": 0.0,
+        "failed_count": 0,
+        "worst_failures": []
+      },
+      "updated": {
+        "tensors": 372,
+        "exact_tensors": 372,
+        "max_abs": 0.0,
+        "max_relative_l2": 0.0,
+        "passed": true,
+        "aggregate_relative_l2": 0.0,
+        "failed_count": 0,
+        "worst_failures": []
+      },
+      "logits": {
+        "tensors": 1,
+        "exact_tensors": 1,
+        "max_abs": 0.0,
+        "max_relative_l2": 0.0,
+        "passed": true,
+        "aggregate_relative_l2": 0.0,
+        "failed_count": 0,
+        "worst_failures": []
+      },
+      "numerics_passed": true
+    },
+    {
+      "candidate": "peft-after",
+      "reference": "peft-before",
+      "checkpointing": true,
+      "tokens": 128,
+      "speedup": 1.0068858259262898,
+      "loss_max_abs": 0.0,
+      "grad": {
+        "tensors": 372,
+        "exact_tensors": 372,
+        "max_abs": 0.0,
+        "max_relative_l2": 0.0,
+        "passed": true,
+        "aggregate_relative_l2": 0.0,
+        "failed_count": 0,
+        "worst_failures": []
+      },
+      "updated": {
+        "tensors": 372,
+        "exact_tensors": 372,
+        "max_abs": 0.0,
+        "max_relative_l2": 0.0,
+        "passed": true,
+        "aggregate_relative_l2": 0.0,
+        "failed_count": 0,
+        "worst_failures": []
+      },
+      "logits": {
+        "tensors": 1,
+        "exact_tensors": 1,
+        "max_abs": 0.0,
+        "max_relative_l2": 0.0,
+        "passed": true,
+        "aggregate_relative_l2": 0.0,
+        "failed_count": 0,
+        "worst_failures": []
+      },
+      "numerics_passed": true
+    },
+    {
+      "candidate": "peft-after",
+      "reference": "peft-before",
+      "checkpointing": true,
+      "tokens": 1024,
+      "speedup": 1.008245879614335,
+      "loss_max_abs": 0.0,
+      "grad": {
+        "tensors": 372,
+        "exact_tensors": 372,
+        "max_abs": 0.0,
+        "max_relative_l2": 0.0,
+        "passed": true,
+        "aggregate_relative_l2": 0.0,
+        "failed_count": 0,
+        "worst_failures": []
+      },
+      "updated": {
+        "tensors": 372,
+        "exact_tensors": 372,
+        "max_abs": 0.0,
+        "max_relative_l2": 0.0,
+        "passed": true,
+        "aggregate_relative_l2": 0.0,
+        "failed_count": 0,
+        "worst_failures": []
+      },
+      "logits": {
+        "tensors": 1,
+        "exact_tensors": 1,
+        "max_abs": 0.0,
+        "max_relative_l2": 0.0,
+        "passed": true,
+        "aggregate_relative_l2": 0.0,
+        "failed_count": 0,
+        "worst_failures": []
+      },
+      "numerics_passed": true
+    },
+    {
+      "candidate": "peft-after",
+      "reference": "peft-before",
+      "checkpointing": true,
+      "tokens": 4096,
+      "speedup": 0.9923708825787577,
+      "loss_max_abs": 0.0,
+      "grad": {
+        "tensors": 372,
+        "exact_tensors": 372,
+        "max_abs": 0.0,
+        "max_relative_l2": 0.0,
+        "passed": true,
+        "aggregate_relative_l2": 0.0,
+        "failed_count": 0,
+        "worst_failures": []
+      },
+      "updated": {
+        "tensors": 372,
+        "exact_tensors": 372,
+        "max_abs": 0.0,
+        "max_relative_l2": 0.0,
+        "passed": true,
+        "aggregate_relative_l2": 0.0,
+        "failed_count": 0,
+        "worst_failures": []
+      },
+      "logits": {
+        "tensors": 1,
+        "exact_tensors": 1,
+        "max_abs": 0.0,
+        "max_relative_l2": 0.0,
+        "passed": true,
+        "aggregate_relative_l2": 0.0,
+        "failed_count": 0,
+        "worst_failures": []
+      },
+      "numerics_passed": true
+    }
+  ],
+  "run": {
+    "state": "complete",
+    "workers": [
+      {
+        "name": "peft-before",
+        "backend": "peft",
+        "state": "complete",
+        "returncode": 0,
+        "seconds": 81.21442244498758
+      },
+      {
+        "name": "native-activation",
+        "backend": "native-activation",
+        "state": "complete",
+        "returncode": 0,
+        "seconds": 43.79434725799365
+      },
+      {
+        "name": "native-consumer",
+        "backend": "native-consumer",
+        "state": "complete",
+        "returncode": 0,
+        "seconds": 43.04355049500009
+      },
+      {
+        "name": "native-expand",
+        "backend": "native-expand",
+        "state": "complete",
+        "returncode": 0,
+        "seconds": 43.09314744203584
+      },
+      {
+        "name": "peft-after",
+        "backend": "peft",
+        "state": "complete",
+        "returncode": 0,
+        "seconds": 42.392718053015415
+      }
+    ]
+  },
+  "checkpoint": {
+    "state": "complete",
+    "scope": "unchanged BF16 text weights; no vision inputs",
+    "source_file": "model.safetensors-00001-of-00001.safetensors",
+    "source_sha256": "04b1c301231dd422b8860db31311ab2721511346a32cb1e079c4c4e5f1fe4696",
+    "text_sha256": "aa364f2a0e1d96b7ffb69e52bbdd4f1f07634ce27d10d3686ffff0c90824f7dd",
+    "source_to_text": {
+      "model.language_model.embed_tokens.weight": "model.embed_tokens.weight",
+      "model.language_model.layers.0.input_layernorm.weight": "model.layers.0.input_layernorm.weight",
+      "model.language_model.layers.0.linear_attn.A_log": "model.layers.0.linear_attn.A_log",
+      "model.language_model.layers.0.linear_attn.conv1d.weight": "model.layers.0.linear_attn.conv1d.weight",
+      "model.language_model.layers.0.linear_attn.dt_bias": "model.layers.0.linear_attn.dt_bias",
+      "model.language_model.layers.0.linear_attn.in_proj_a.weight": "model.layers.0.linear_attn.in_proj_a.weight",
+      "model.language_model.layers.0.linear_attn.in_proj_b.weight": "model.layers.0.linear_attn.in_proj_b.weight",
+      "model.language_model.layers.0.linear_attn.in_proj_qkv.weight": "model.layers.0.linear_attn.in_proj_qkv.weight",
+      "model.language_model.layers.0.linear_attn.in_proj_z.weight": "model.layers.0.linear_attn.in_proj_z.weight",
+      "model.language_model.layers.0.linear_attn.norm.weight": "model.layers.0.linear_attn.norm.weight",
+      "model.language_model.layers.0.linear_attn.out_proj.weight": "model.layers.0.linear_attn.out_proj.weight",
+      "model.language_model.layers.0.mlp.down_proj.weight": "model.layers.0.mlp.down_proj.weight",
+      "model.language_model.layers.0.mlp.gate_proj.weight": "model.layers.0.mlp.gate_proj.weight",
+      "model.language_model.layers.0.mlp.up_proj.weight": "model.layers.0.mlp.up_proj.weight",
+      "model.language_model.layers.0.post_attention_layernorm.weight": "model.layers.0.post_attention_layernorm.weight",
+      "model.language_model.layers.1.input_layernorm.weight": "model.layers.1.input_layernorm.weight",
+      "model.language_model.layers.1.linear_attn.A_log": "model.layers.1.linear_attn.A_log",
+      "model.language_model.layers.1.linear_attn.conv1d.weight": "model.layers.1.linear_attn.conv1d.weight",
+      "model.language_model.layers.1.linear_attn.dt_bias": "model.layers.1.linear_attn.dt_bias",
+      "model.language_model.layers.1.linear_attn.in_proj_a.weight": "model.layers.1.linear_attn.in_proj_a.weight",
+      "model.language_model.layers.1.linear_attn.in_proj_b.weight": "model.layers.1.linear_attn.in_proj_b.weight",
+      "model.language_model.layers.1.linear_attn.in_proj_qkv.weight": "model.layers.1.linear_attn.in_proj_qkv.weight",
+      "model.language_model.layers.1.linear_attn.in_proj_z.weight": "model.layers.1.linear_attn.in_proj_z.weight",
+      "model.language_model.layers.1.linear_attn.norm.weight": "model.layers.1.linear_attn.norm.weight",
+      "model.language_model.layers.1.linear_attn.out_proj.weight": "model.layers.1.linear_attn.out_proj.weight",
+      "model.language_model.layers.1.mlp.down_proj.weight": "model.layers.1.mlp.down_proj.weight",
+      "model.language_model.layers.1.mlp.gate_proj.weight": "model.layers.1.mlp.gate_proj.weight",
+      "model.language_model.layers.1.mlp.up_proj.weight": "model.layers.1.mlp.up_proj.weight",
+      "model.language_model.layers.1.post_attention_layernorm.weight": "model.layers.1.post_attention_layernorm.weight",
+      "model.language_model.layers.10.input_layernorm.weight": "model.layers.10.input_layernorm.weight",
+      "model.language_model.layers.10.linear_attn.A_log": "model.layers.10.linear_attn.A_log",
+      "model.language_model.layers.10.linear_attn.conv1d.weight": "model.layers.10.linear_attn.conv1d.weight",
+      "model.language_model.layers.10.linear_attn.dt_bias": "model.layers.10.linear_attn.dt_bias",
+      "model.language_model.layers.10.linear_attn.in_proj_a.weight": "model.layers.10.linear_attn.in_proj_a.weight",
+      "model.language_model.layers.10.linear_attn.in_proj_b.weight": "model.layers.10.linear_attn.in_proj_b.weight",
+      "model.language_model.layers.10.linear_attn.in_proj_qkv.weight": "model.layers.10.linear_attn.in_proj_qkv.weight",
+      "model.language_model.layers.10.linear_attn.in_proj_z.weight": "model.layers.10.linear_attn.in_proj_z.weight",
+      "model.language_model.layers.10.linear_attn.norm.weight": "model.layers.10.linear_attn.norm.weight",
+      "model.language_model.layers.10.linear_attn.out_proj.weight": "model.layers.10.linear_attn.out_proj.weight",
+      "model.language_model.layers.10.mlp.down_proj.weight": "model.layers.10.mlp.down_proj.weight",
+      "model.language_model.layers.10.mlp.gate_proj.weight": "model.layers.10.mlp.gate_proj.weight",
+      "model.language_model.layers.10.mlp.up_proj.weight": "model.layers.10.mlp.up_proj.weight",
+      "model.language_model.layers.10.post_attention_layernorm.weight": "model.layers.10.post_attention_layernorm.weight",
+      "model.language_model.layers.11.input_layernorm.weight": "model.layers.11.input_layernorm.weight",
+      "model.language_model.layers.11.mlp.down_proj.weight": "model.layers.11.mlp.down_proj.weight",
+      "model.language_model.layers.11.mlp.gate_proj.weight": "model.layers.11.mlp.gate_proj.weight",
+      "model.language_model.layers.11.mlp.up_proj.weight": "model.layers.11.mlp.up_proj.weight",
+      "model.language_model.layers.11.post_attention_layernorm.weight": "model.layers.11.post_attention_layernorm.weight",
+      "model.language_model.layers.11.self_attn.k_norm.weight": "model.layers.11.self_attn.k_norm.weight",
+      "model.language_model.layers.11.self_attn.k_proj.weight": "model.layers.11.self_attn.k_proj.weight",
+      "model.language_model.layers.11.self_attn.o_proj.weight": "model.layers.11.self_attn.o_proj.weight",
+      "model.language_model.layers.11.self_attn.q_norm.weight": "model.layers.11.self_attn.q_norm.weight",
+      "model.language_model.layers.11.self_attn.q_proj.weight": "model.layers.11.self_attn.q_proj.weight",
+      "model.language_model.layers.11.self_attn.v_proj.weight": "model.layers.11.self_attn.v_proj.weight",
+      "model.language_model.layers.12.input_layernorm.weight": "model.layers.12.input_layernorm.weight",
+      "model.language_model.layers.12.linear_attn.A_log": "model.layers.12.linear_attn.A_log",
+      "model.language_model.layers.12.linear_attn.conv1d.weight": "model.layers.12.linear_attn.conv1d.weight",
+      "model.language_model.layers.12.linear_attn.dt_bias": "model.layers.12.linear_attn.dt_bias",
+      "model.language_model.layers.12.linear_attn.in_proj_a.weight": "model.layers.12.linear_attn.in_proj_a.weight",
+      "model.language_model.layers.12.linear_attn.in_proj_b.weight": "model.layers.12.linear_attn.in_proj_b.weight",
+      "model.language_model.layers.12.linear_attn.in_proj_qkv.weight": "model.layers.12.linear_attn.in_proj_qkv.weight",
+      "model.language_model.layers.12.linear_attn.in_proj_z.weight": "model.layers.12.linear_attn.in_proj_z.weight",
+      "model.language_model.layers.12.linear_attn.norm.weight": "model.layers.12.linear_attn.norm.weight",
+      "model.language_model.layers.12.linear_attn.out_proj.weight": "model.layers.12.linear_attn.out_proj.weight",
+      "model.language_model.layers.12.mlp.down_proj.weight": "model.layers.12.mlp.down_proj.weight",
+      "model.language_model.layers.12.mlp.gate_proj.weight": "model.layers.12.mlp.gate_proj.weight",
+      "model.language_model.layers.12.mlp.up_proj.weight": "model.layers.12.mlp.up_proj.weight",
+      "model.language_model.layers.12.post_attention_layernorm.weight": "model.layers.12.post_attention_layernorm.weight",
+      "model.language_model.layers.13.input_layernorm.weight": "model.layers.13.input_layernorm.weight",
+      "model.language_model.layers.13.linear_attn.A_log": "model.layers.13.linear_attn.A_log",
+      "model.language_model.layers.13.linear_attn.conv1d.weight": "model.layers.13.linear_attn.conv1d.weight",
+      "model.language_model.layers.13.linear_attn.dt_bias": "model.layers.13.linear_attn.dt_bias",
+      "model.language_model.layers.13.linear_attn.in_proj_a.weight": "model.layers.13.linear_attn.in_proj_a.weight",
+      "model.language_model.layers.13.linear_attn.in_proj_b.weight": "model.layers.13.linear_attn.in_proj_b.weight",
+      "model.language_model.layers.13.linear_attn.in_proj_qkv.weight": "model.layers.13.linear_attn.in_proj_qkv.weight",
+      "model.language_model.layers.13.linear_attn.in_proj_z.weight": "model.layers.13.linear_attn.in_proj_z.weight",
+      "model.language_model.layers.13.linear_attn.norm.weight": "model.layers.13.linear_attn.norm.weight",
+      "model.language_model.layers.13.linear_attn.out_proj.weight": "model.layers.13.linear_attn.out_proj.weight",
+      "model.language_model.layers.13.mlp.down_proj.weight": "model.layers.13.mlp.down_proj.weight",
+      "model.language_model.layers.13.mlp.gate_proj.weight": "model.layers.13.mlp.gate_proj.weight",
+      "model.language_model.layers.13.mlp.up_proj.weight": "model.layers.13.mlp.up_proj.weight",
+      "model.language_model.layers.13.post_attention_layernorm.weight": "model.layers.13.post_attention_layernorm.weight",
+      "model.language_model.layers.14.input_layernorm.weight": "model.layers.14.input_layernorm.weight",
+      "model.language_model.layers.14.linear_attn.A_log": "model.layers.14.linear_attn.A_log",
+      "model.language_model.layers.14.linear_attn.conv1d.weight": "model.layers.14.linear_attn.conv1d.weight",
+      "model.language_model.layers.14.linear_attn.dt_bias": "model.layers.14.linear_attn.dt_bias",
+      "model.language_model.layers.14.linear_attn.in_proj_a.weight": "model.layers.14.linear_attn.in_proj_a.weight",
+      "model.language_model.layers.14.linear_attn.in_proj_b.weight": "model.layers.14.linear_attn.in_proj_b.weight",
+      "model.language_model.layers.14.linear_attn.in_proj_qkv.weight": "model.layers.14.linear_attn.in_proj_qkv.weight",
+      "model.language_model.layers.14.linear_attn.in_proj_z.weight": "model.layers.14.linear_attn.in_proj_z.weight",
+      "model.language_model.layers.14.linear_attn.norm.weight": "model.layers.14.linear_attn.norm.weight",
+      "model.language_model.layers.14.linear_attn.out_proj.weight": "model.layers.14.linear_attn.out_proj.weight",
+      "model.language_model.layers.14.mlp.down_proj.weight": "model.layers.14.mlp.down_proj.weight",
+      "model.language_model.layers.14.mlp.gate_proj.weight": "model.layers.14.mlp.gate_proj.weight",
+      "model.language_model.layers.14.mlp.up_proj.weight": "model.layers.14.mlp.up_proj.weight",
+      "model.language_model.layers.14.post_attention_layernorm.weight": "model.layers.14.post_attention_layernorm.weight",
+      "model.language_model.layers.15.input_layernorm.weight": "model.layers.15.input_layernorm.weight",
+      "model.language_model.layers.15.mlp.down_proj.weight": "model.layers.15.mlp.down_proj.weight",
+      "model.language_model.layers.15.mlp.gate_proj.weight": "model.layers.15.mlp.gate_proj.weight",
+      "model.language_model.layers.15.mlp.up_proj.weight": "model.layers.15.mlp.up_proj.weight",
+      "model.language_model.layers.15.post_attention_layernorm.weight": "model.layers.15.post_attention_layernorm.weight",
+      "model.language_model.layers.15.self_attn.k_norm.weight": "model.layers.15.self_attn.k_norm.weight",
+      "model.language_model.layers.15.self_attn.k_proj.weight": "model.layers.15.self_attn.k_proj.weight",
+      "model.language_model.layers.15.self_attn.o_proj.weight": "model.layers.15.self_attn.o_proj.weight",
+      "model.language_model.layers.15.self_attn.q_norm.weight": "model.layers.15.self_attn.q_norm.weight",
+      "model.language_model.layers.15.self_attn.q_proj.weight": "model.layers.15.self_attn.q_proj.weight",
+      "model.language_model.layers.15.self_attn.v_proj.weight": "model.layers.15.self_attn.v_proj.weight",
+      "model.language_model.layers.16.input_layernorm.weight": "model.layers.16.input_layernorm.weight",
+      "model.language_model.layers.16.linear_attn.A_log": "model.layers.16.linear_attn.A_log",
+      "model.language_model.layers.16.linear_attn.conv1d.weight": "model.layers.16.linear_attn.conv1d.weight",
+      "model.language_model.layers.16.linear_attn.dt_bias": "model.layers.16.linear_attn.dt_bias",
+      "model.language_model.layers.16.linear_attn.in_proj_a.weight": "model.layers.16.linear_attn.in_proj_a.weight",
+      "model.language_model.layers.16.linear_attn.in_proj_b.weight": "model.layers.16.linear_attn.in_proj_b.weight",
+      "model.language_model.layers.16.linear_attn.in_proj_qkv.weight": "model.layers.16.linear_attn.in_proj_qkv.weight",
+      "model.language_model.layers.16.linear_attn.in_proj_z.weight": "model.layers.16.linear_attn.in_proj_z.weight",
+      "model.language_model.layers.16.linear_attn.norm.weight": "model.layers.16.linear_attn.norm.weight",
+      "model.language_model.layers.16.linear_attn.out_proj.weight": "model.layers.16.linear_attn.out_proj.weight",
+      "model.language_model.layers.16.mlp.down_proj.weight": "model.layers.16.mlp.down_proj.weight",
+      "model.language_model.layers.16.mlp.gate_proj.weight": "model.layers.16.mlp.gate_proj.weight",
+      "model.language_model.layers.16.mlp.up_proj.weight": "model.layers.16.mlp.up_proj.weight",
+      "model.language_model.layers.16.post_attention_layernorm.weight": "model.layers.16.post_attention_layernorm.weight",
+      "model.language_model.layers.17.input_layernorm.weight": "model.layers.17.input_layernorm.weight",
+      "model.language_model.layers.17.linear_attn.A_log": "model.layers.17.linear_attn.A_log",
+      "model.language_model.layers.17.linear_attn.conv1d.weight": "model.layers.17.linear_attn.conv1d.weight",
+      "model.language_model.layers.17.linear_attn.dt_bias": "model.layers.17.linear_attn.dt_bias",
+      "model.language_model.layers.17.linear_attn.in_proj_a.weight": "model.layers.17.linear_attn.in_proj_a.weight",
+      "model.language_model.layers.17.linear_attn.in_proj_b.weight": "model.layers.17.linear_attn.in_proj_b.weight",
+      "model.language_model.layers.17.linear_attn.in_proj_qkv.weight": "model.layers.17.linear_attn.in_proj_qkv.weight",
+      "model.language_model.layers.17.linear_attn.in_proj_z.weight": "model.layers.17.linear_attn.in_proj_z.weight",
+      "model.language_model.layers.17.linear_attn.norm.weight": "model.layers.17.linear_attn.norm.weight",
+      "model.language_model.layers.17.linear_attn.out_proj.weight": "model.layers.17.linear_attn.out_proj.weight",
+      "model.language_model.layers.17.mlp.down_proj.weight": "model.layers.17.mlp.down_proj.weight",
+      "model.language_model.layers.17.mlp.gate_proj.weight": "model.layers.17.mlp.gate_proj.weight",
+      "model.language_model.layers.17.mlp.up_proj.weight": "model.layers.17.mlp.up_proj.weight",
+      "model.language_model.layers.17.post_attention_layernorm.weight": "model.layers.17.post_attention_layernorm.weight",
+      "model.language_model.layers.18.input_layernorm.weight": "model.layers.18.input_layernorm.weight",
+      "model.language_model.layers.18.linear_attn.A_log": "model.layers.18.linear_attn.A_log",
+      "model.language_model.layers.18.linear_attn.conv1d.weight": "model.layers.18.linear_attn.conv1d.weight",
+      "model.language_model.layers.18.linear_attn.dt_bias": "model.layers.18.linear_attn.dt_bias",
+      "model.language_model.layers.18.linear_attn.in_proj_a.weight": "model.layers.18.linear_attn.in_proj_a.weight",
+      "model.language_model.layers.18.linear_attn.in_proj_b.weight": "model.layers.18.linear_attn.in_proj_b.weight",
+      "model.language_model.layers.18.linear_attn.in_proj_qkv.weight": "model.layers.18.linear_attn.in_proj_qkv.weight",
+      "model.language_model.layers.18.linear_attn.in_proj_z.weight": "model.layers.18.linear_attn.in_proj_z.weight",
+      "model.language_model.layers.18.linear_attn.norm.weight": "model.layers.18.linear_attn.norm.weight",
+      "model.language_model.layers.18.linear_attn.out_proj.weight": "model.layers.18.linear_attn.out_proj.weight",
+      "model.language_model.layers.18.mlp.down_proj.weight": "model.layers.18.mlp.down_proj.weight",
+      "model.language_model.layers.18.mlp.gate_proj.weight": "model.layers.18.mlp.gate_proj.weight",
+      "model.language_model.layers.18.mlp.up_proj.weight": "model.layers.18.mlp.up_proj.weight",
+      "model.language_model.layers.18.post_attention_layernorm.weight": "model.layers.18.post_attention_layernorm.weight",
+      "model.language_model.layers.19.input_layernorm.weight": "model.layers.19.input_layernorm.weight",
+      "model.language_model.layers.19.mlp.down_proj.weight": "model.layers.19.mlp.down_proj.weight",
+      "model.language_model.layers.19.mlp.gate_proj.weight": "model.layers.19.mlp.gate_proj.weight",
+      "model.language_model.layers.19.mlp.up_proj.weight": "model.layers.19.mlp.up_proj.weight",
+      "model.language_model.layers.19.post_attention_layernorm.weight": "model.layers.19.post_attention_layernorm.weight",
+      "model.language_model.layers.19.self_attn.k_norm.weight": "model.layers.19.self_attn.k_norm.weight",
+      "model.language_model.layers.19.self_attn.k_proj.weight": "model.layers.19.self_attn.k_proj.weight",
+      "model.language_model.layers.19.self_attn.o_proj.weight": "model.layers.19.self_attn.o_proj.weight",
+      "model.language_model.layers.19.self_attn.q_norm.weight": "model.layers.19.self_attn.q_norm.weight",
+      "model.language_model.layers.19.self_attn.q_proj.weight": "model.layers.19.self_attn.q_proj.weight",
+      "model.language_model.layers.19.self_attn.v_proj.weight": "model.layers.19.self_attn.v_proj.weight",
+      "model.language_model.layers.2.input_layernorm.weight": "model.layers.2.input_layernorm.weight",
+      "model.language_model.layers.2.linear_attn.A_log": "model.layers.2.linear_attn.A_log",
+      "model.language_model.layers.2.linear_attn.conv1d.weight": "model.layers.2.linear_attn.conv1d.weight",
+      "model.language_model.layers.2.linear_attn.dt_bias": "model.layers.2.linear_attn.dt_bias",
+      "model.language_model.layers.2.linear_attn.in_proj_a.weight": "model.layers.2.linear_attn.in_proj_a.weight",
+      "model.language_model.layers.2.linear_attn.in_proj_b.weight": "model.layers.2.linear_attn.in_proj_b.weight",
+      "model.language_model.layers.2.linear_attn.in_proj_qkv.weight": "model.layers.2.linear_attn.in_proj_qkv.weight",
+      "model.language_model.layers.2.linear_attn.in_proj_z.weight": "model.layers.2.linear_attn.in_proj_z.weight",
+      "model.language_model.layers.2.linear_attn.norm.weight": "model.layers.2.linear_attn.norm.weight",
+      "model.language_model.layers.2.linear_attn.out_proj.weight": "model.layers.2.linear_attn.out_proj.weight",
+      "model.language_model.layers.2.mlp.down_proj.weight": "model.layers.2.mlp.down_proj.weight",
+      "model.language_model.layers.2.mlp.gate_proj.weight": "model.layers.2.mlp.gate_proj.weight",
+      "model.language_model.layers.2.mlp.up_proj.weight": "model.layers.2.mlp.up_proj.weight",
+      "model.language_model.layers.2.post_attention_layernorm.weight": "model.layers.2.post_attention_layernorm.weight",
+      "model.language_model.layers.20.input_layernorm.weight": "model.layers.20.input_layernorm.weight",
+      "model.language_model.layers.20.linear_attn.A_log": "model.layers.20.linear_attn.A_log",
+      "model.language_model.layers.20.linear_attn.conv1d.weight": "model.layers.20.linear_attn.conv1d.weight",
+      "model.language_model.layers.20.linear_attn.dt_bias": "model.layers.20.linear_attn.dt_bias",
+      "model.language_model.layers.20.linear_attn.in_proj_a.weight": "model.layers.20.linear_attn.in_proj_a.weight",
+      "model.language_model.layers.20.linear_attn.in_proj_b.weight": "model.layers.20.linear_attn.in_proj_b.weight",
+      "model.language_model.layers.20.linear_attn.in_proj_qkv.weight": "model.layers.20.linear_attn.in_proj_qkv.weight",
+      "model.language_model.layers.20.linear_attn.in_proj_z.weight": "model.layers.20.linear_attn.in_proj_z.weight",
+      "model.language_model.layers.20.linear_attn.norm.weight": "model.layers.20.linear_attn.norm.weight",
+      "model.language_model.layers.20.linear_attn.out_proj.weight": "model.layers.20.linear_attn.out_proj.weight",
+      "model.language_model.layers.20.mlp.down_proj.weight": "model.layers.20.mlp.down_proj.weight",
+      "model.language_model.layers.20.mlp.gate_proj.weight": "model.layers.20.mlp.gate_proj.weight",
+      "model.language_model.layers.20.mlp.up_proj.weight": "model.layers.20.mlp.up_proj.weight",
+      "model.language_model.layers.20.post_attention_layernorm.weight": "model.layers.20.post_attention_layernorm.weight",
+      "model.language_model.layers.21.input_layernorm.weight": "model.layers.21.input_layernorm.weight",
+      "model.language_model.layers.21.linear_attn.A_log": "model.layers.21.linear_attn.A_log",
+      "model.language_model.layers.21.linear_attn.conv1d.weight": "model.layers.21.linear_attn.conv1d.weight",
+      "model.language_model.layers.21.linear_attn.dt_bias": "model.layers.21.linear_attn.dt_bias",
+      "model.language_model.layers.21.linear_attn.in_proj_a.weight": "model.layers.21.linear_attn.in_proj_a.weight",
+      "model.language_model.layers.21.linear_attn.in_proj_b.weight": "model.layers.21.linear_attn.in_proj_b.weight",
+      "model.language_model.layers.21.linear_attn.in_proj_qkv.weight": "model.layers.21.linear_attn.in_proj_qkv.weight",
+      "model.language_model.layers.21.linear_attn.in_proj_z.weight": "model.layers.21.linear_attn.in_proj_z.weight",
+      "model.language_model.layers.21.linear_attn.norm.weight": "model.layers.21.linear_attn.norm.weight",
+      "model.language_model.layers.21.linear_attn.out_proj.weight": "model.layers.21.linear_attn.out_proj.weight",
+      "model.language_model.layers.21.mlp.down_proj.weight": "model.layers.21.mlp.down_proj.weight",
+      "model.language_model.layers.21.mlp.gate_proj.weight": "model.layers.21.mlp.gate_proj.weight",
+      "model.language_model.layers.21.mlp.up_proj.weight": "model.layers.21.mlp.up_proj.weight",
+      "model.language_model.layers.21.post_attention_layernorm.weight": "model.layers.21.post_attention_layernorm.weight",
+      "model.language_model.layers.22.input_layernorm.weight": "model.layers.22.input_layernorm.weight",
+      "model.language_model.layers.22.linear_attn.A_log": "model.layers.22.linear_attn.A_log",
+      "model.language_model.layers.22.linear_attn.conv1d.weight": "model.layers.22.linear_attn.conv1d.weight",
+      "model.language_model.layers.22.linear_attn.dt_bias": "model.layers.22.linear_attn.dt_bias",
+      "model.language_model.layers.22.linear_attn.in_proj_a.weight": "model.layers.22.linear_attn.in_proj_a.weight",
+      "model.language_model.layers.22.linear_attn.in_proj_b.weight": "model.layers.22.linear_attn.in_proj_b.weight",
+      "model.language_model.layers.22.linear_attn.in_proj_qkv.weight": "model.layers.22.linear_attn.in_proj_qkv.weight",
+      "model.language_model.layers.22.linear_attn.in_proj_z.weight": "model.layers.22.linear_attn.in_proj_z.weight",
+      "model.language_model.layers.22.linear_attn.norm.weight": "model.layers.22.linear_attn.norm.weight",
+      "model.language_model.layers.22.linear_attn.out_proj.weight": "model.layers.22.linear_attn.out_proj.weight",
+      "model.language_model.layers.22.mlp.down_proj.weight": "model.layers.22.mlp.down_proj.weight",
+      "model.language_model.layers.22.mlp.gate_proj.weight": "model.layers.22.mlp.gate_proj.weight",
+      "model.language_model.layers.22.mlp.up_proj.weight": "model.layers.22.mlp.up_proj.weight",
+      "model.language_model.layers.22.post_attention_layernorm.weight": "model.layers.22.post_attention_layernorm.weight",
+      "model.language_model.layers.23.input_layernorm.weight": "model.layers.23.input_layernorm.weight",
+      "model.language_model.layers.23.mlp.down_proj.weight": "model.layers.23.mlp.down_proj.weight",
+      "model.language_model.layers.23.mlp.gate_proj.weight": "model.layers.23.mlp.gate_proj.weight",
+      "model.language_model.layers.23.mlp.up_proj.weight": "model.layers.23.mlp.up_proj.weight",
+      "model.language_model.layers.23.post_attention_layernorm.weight": "model.layers.23.post_attention_layernorm.weight",
+      "model.language_model.layers.23.self_attn.k_norm.weight": "model.layers.23.self_attn.k_norm.weight",
+      "model.language_model.layers.23.self_attn.k_proj.weight": "model.layers.23.self_attn.k_proj.weight",
+      "model.language_model.layers.23.self_attn.o_proj.weight": "model.layers.23.self_attn.o_proj.weight",
+      "model.language_model.layers.23.self_attn.q_norm.weight": "model.layers.23.self_attn.q_norm.weight",
+      "model.language_model.layers.23.self_attn.q_proj.weight": "model.layers.23.self_attn.q_proj.weight",
+      "model.language_model.layers.23.self_attn.v_proj.weight": "model.layers.23.self_attn.v_proj.weight",
+      "model.language_model.layers.3.input_layernorm.weight": "model.layers.3.input_layernorm.weight",
+      "model.language_model.layers.3.mlp.down_proj.weight": "model.layers.3.mlp.down_proj.weight",
+      "model.language_model.layers.3.mlp.gate_proj.weight": "model.layers.3.mlp.gate_proj.weight",
+      "model.language_model.layers.3.mlp.up_proj.weight": "model.layers.3.mlp.up_proj.weight",
+      "model.language_model.layers.3.post_attention_layernorm.weight": "model.layers.3.post_attention_layernorm.weight",
+      "model.language_model.layers.3.self_attn.k_norm.weight": "model.layers.3.self_attn.k_norm.weight",
+      "model.language_model.layers.3.self_attn.k_proj.weight": "model.layers.3.self_attn.k_proj.weight",
+      "model.language_model.layers.3.self_attn.o_proj.weight": "model.layers.3.self_attn.o_proj.weight",
+      "model.language_model.layers.3.self_attn.q_norm.weight": "model.layers.3.self_attn.q_norm.weight",
+      "model.language_model.layers.3.self_attn.q_proj.weight": "model.layers.3.self_attn.q_proj.weight",
+      "model.language_model.layers.3.self_attn.v_proj.weight": "model.layers.3.self_attn.v_proj.weight",
+      "model.language_model.layers.4.input_layernorm.weight": "model.layers.4.input_layernorm.weight",
+      "model.language_model.layers.4.linear_attn.A_log": "model.layers.4.linear_attn.A_log",
+      "model.language_model.layers.4.linear_attn.conv1d.weight": "model.layers.4.linear_attn.conv1d.weight",
+      "model.language_model.layers.4.linear_attn.dt_bias": "model.layers.4.linear_attn.dt_bias",
+      "model.language_model.layers.4.linear_attn.in_proj_a.weight": "model.layers.4.linear_attn.in_proj_a.weight",
+      "model.language_model.layers.4.linear_attn.in_proj_b.weight": "model.layers.4.linear_attn.in_proj_b.weight",
+      "model.language_model.layers.4.linear_attn.in_proj_qkv.weight": "model.layers.4.linear_attn.in_proj_qkv.weight",
+      "model.language_model.layers.4.linear_attn.in_proj_z.weight": "model.layers.4.linear_attn.in_proj_z.weight",
+      "model.language_model.layers.4.linear_attn.norm.weight": "model.layers.4.linear_attn.norm.weight",
+      "model.language_model.layers.4.linear_attn.out_proj.weight": "model.layers.4.linear_attn.out_proj.weight",
+      "model.language_model.layers.4.mlp.down_proj.weight": "model.layers.4.mlp.down_proj.weight",
+      "model.language_model.layers.4.mlp.gate_proj.weight": "model.layers.4.mlp.gate_proj.weight",
+      "model.language_model.layers.4.mlp.up_proj.weight": "model.layers.4.mlp.up_proj.weight",
+      "model.language_model.layers.4.post_attention_layernorm.weight": "model.layers.4.post_attention_layernorm.weight",
+      "model.language_model.layers.5.input_layernorm.weight": "model.layers.5.input_layernorm.weight",
+      "model.language_model.layers.5.linear_attn.A_log": "model.layers.5.linear_attn.A_log",
+      "model.language_model.layers.5.linear_attn.conv1d.weight": "model.layers.5.linear_attn.conv1d.weight",
+      "model.language_model.layers.5.linear_attn.dt_bias": "model.layers.5.linear_attn.dt_bias",
+      "model.language_model.layers.5.linear_attn.in_proj_a.weight": "model.layers.5.linear_attn.in_proj_a.weight",
+      "model.language_model.layers.5.linear_attn.in_proj_b.weight": "model.layers.5.linear_attn.in_proj_b.weight",
+      "model.language_model.layers.5.linear_attn.in_proj_qkv.weight": "model.layers.5.linear_attn.in_proj_qkv.weight",
+      "model.language_model.layers.5.linear_attn.in_proj_z.weight": "model.layers.5.linear_attn.in_proj_z.weight",
+      "model.language_model.layers.5.linear_attn.norm.weight": "model.layers.5.linear_attn.norm.weight",
+      "model.language_model.layers.5.linear_attn.out_proj.weight": "model.layers.5.linear_attn.out_proj.weight",
+      "model.language_model.layers.5.mlp.down_proj.weight": "model.layers.5.mlp.down_proj.weight",
+      "model.language_model.layers.5.mlp.gate_proj.weight": "model.layers.5.mlp.gate_proj.weight",
+      "model.language_model.layers.5.mlp.up_proj.weight": "model.layers.5.mlp.up_proj.weight",
+      "model.language_model.layers.5.post_attention_layernorm.weight": "model.layers.5.post_attention_layernorm.weight",
+      "model.language_model.layers.6.input_layernorm.weight": "model.layers.6.input_layernorm.weight",
+      "model.language_model.layers.6.linear_attn.A_log": "model.layers.6.linear_attn.A_log",
+      "model.language_model.layers.6.linear_attn.conv1d.weight": "model.layers.6.linear_attn.conv1d.weight",
+      "model.language_model.layers.6.linear_attn.dt_bias": "model.layers.6.linear_attn.dt_bias",
+      "model.language_model.layers.6.linear_attn.in_proj_a.weight": "model.layers.6.linear_attn.in_proj_a.weight",
+      "model.language_model.layers.6.linear_attn.in_proj_b.weight": "model.layers.6.linear_attn.in_proj_b.weight",
+      "model.language_model.layers.6.linear_attn.in_proj_qkv.weight": "model.layers.6.linear_attn.in_proj_qkv.weight",
+      "model.language_model.layers.6.linear_attn.in_proj_z.weight": "model.layers.6.linear_attn.in_proj_z.weight",
+      "model.language_model.layers.6.linear_attn.norm.weight": "model.layers.6.linear_attn.norm.weight",
+      "model.language_model.layers.6.linear_attn.out_proj.weight": "model.layers.6.linear_attn.out_proj.weight",
+      "model.language_model.layers.6.mlp.down_proj.weight": "model.layers.6.mlp.down_proj.weight",
+      "model.language_model.layers.6.mlp.gate_proj.weight": "model.layers.6.mlp.gate_proj.weight",
+      "model.language_model.layers.6.mlp.up_proj.weight": "model.layers.6.mlp.up_proj.weight",
+      "model.language_model.layers.6.post_attention_layernorm.weight": "model.layers.6.post_attention_layernorm.weight",
+      "model.language_model.layers.7.input_layernorm.weight": "model.layers.7.input_layernorm.weight",
+      "model.language_model.layers.7.mlp.down_proj.weight": "model.layers.7.mlp.down_proj.weight",
+      "model.language_model.layers.7.mlp.gate_proj.weight": "model.layers.7.mlp.gate_proj.weight",
+      "model.language_model.layers.7.mlp.up_proj.weight": "model.layers.7.mlp.up_proj.weight",
+      "model.language_model.layers.7.post_attention_layernorm.weight": "model.layers.7.post_attention_layernorm.weight",
+      "model.language_model.layers.7.self_attn.k_norm.weight": "model.layers.7.self_attn.k_norm.weight",
+      "model.language_model.layers.7.self_attn.k_proj.weight": "model.layers.7.self_attn.k_proj.weight",
+      "model.language_model.layers.7.self_attn.o_proj.weight": "model.layers.7.self_attn.o_proj.weight",
+      "model.language_model.layers.7.self_attn.q_norm.weight": "model.layers.7.self_attn.q_norm.weight",
+      "model.language_model.layers.7.self_attn.q_proj.weight": "model.layers.7.self_attn.q_proj.weight",
+      "model.language_model.layers.7.self_attn.v_proj.weight": "model.layers.7.self_attn.v_proj.weight",
+      "model.language_model.layers.8.input_layernorm.weight": "model.layers.8.input_layernorm.weight",
+      "model.language_model.layers.8.linear_attn.A_log": "model.layers.8.linear_attn.A_log",
+      "model.language_model.layers.8.linear_attn.conv1d.weight": "model.layers.8.linear_attn.conv1d.weight",
+      "model.language_model.layers.8.linear_attn.dt_bias": "model.layers.8.linear_attn.dt_bias",
+      "model.language_model.layers.8.linear_attn.in_proj_a.weight": "model.layers.8.linear_attn.in_proj_a.weight",
+      "model.language_model.layers.8.linear_attn.in_proj_b.weight": "model.layers.8.linear_attn.in_proj_b.weight",
+      "model.language_model.layers.8.linear_attn.in_proj_qkv.weight": "model.layers.8.linear_attn.in_proj_qkv.weight",
+      "model.language_model.layers.8.linear_attn.in_proj_z.weight": "model.layers.8.linear_attn.in_proj_z.weight",
+      "model.language_model.layers.8.linear_attn.norm.weight": "model.layers.8.linear_attn.norm.weight",
+      "model.language_model.layers.8.linear_attn.out_proj.weight": "model.layers.8.linear_attn.out_proj.weight",
+      "model.language_model.layers.8.mlp.down_proj.weight": "model.layers.8.mlp.down_proj.weight",
+      "model.language_model.layers.8.mlp.gate_proj.weight": "model.layers.8.mlp.gate_proj.weight",
+      "model.language_model.layers.8.mlp.up_proj.weight": "model.layers.8.mlp.up_proj.weight",
+      "model.language_model.layers.8.post_attention_layernorm.weight": "model.layers.8.post_attention_layernorm.weight",
+      "model.language_model.layers.9.input_layernorm.weight": "model.layers.9.input_layernorm.weight",
+      "model.language_model.layers.9.linear_attn.A_log": "model.layers.9.linear_attn.A_log",
+      "model.language_model.layers.9.linear_attn.conv1d.weight": "model.layers.9.linear_attn.conv1d.weight",
+      "model.language_model.layers.9.linear_attn.dt_bias": "model.layers.9.linear_attn.dt_bias",
+      "model.language_model.layers.9.linear_attn.in_proj_a.weight": "model.layers.9.linear_attn.in_proj_a.weight",
+      "model.language_model.layers.9.linear_attn.in_proj_b.weight": "model.layers.9.linear_attn.in_proj_b.weight",
+      "model.language_model.layers.9.linear_attn.in_proj_qkv.weight": "model.layers.9.linear_attn.in_proj_qkv.weight",
+      "model.language_model.layers.9.linear_attn.in_proj_z.weight": "model.layers.9.linear_attn.in_proj_z.weight",
+      "model.language_model.layers.9.linear_attn.norm.weight": "model.layers.9.linear_attn.norm.weight",
+      "model.language_model.layers.9.linear_attn.out_proj.weight": "model.layers.9.linear_attn.out_proj.weight",
+      "model.language_model.layers.9.mlp.down_proj.weight": "model.layers.9.mlp.down_proj.weight",
+      "model.language_model.layers.9.mlp.gate_proj.weight": "model.layers.9.mlp.gate_proj.weight",
+      "model.language_model.layers.9.mlp.up_proj.weight": "model.layers.9.mlp.up_proj.weight",
+      "model.language_model.layers.9.post_attention_layernorm.weight": "model.layers.9.post_attention_layernorm.weight",
+      "model.language_model.norm.weight": "model.norm.weight"
+    },
+    "skipped_vision_or_mtp": [
+      "model.visual.blocks.0.attn.proj.bias",
+      "model.visual.blocks.0.attn.proj.weight",
+      "model.visual.blocks.0.attn.qkv.bias",
+      "model.visual.blocks.0.attn.qkv.weight",
+      "model.visual.blocks.0.mlp.linear_fc1.bias",
+      "model.visual.blocks.0.mlp.linear_fc1.weight",
+      "model.visual.blocks.0.mlp.linear_fc2.bias",
+      "model.visual.blocks.0.mlp.linear_fc2.weight",
+      "model.visual.blocks.0.norm1.bias",
+      "model.visual.blocks.0.norm1.weight",
+      "model.visual.blocks.0.norm2.bias",
+      "model.visual.blocks.0.norm2.weight",
+      "model.visual.blocks.1.attn.proj.bias",
+      "model.visual.blocks.1.attn.proj.weight",
+      "model.visual.blocks.1.attn.qkv.bias",
+      "model.visual.blocks.1.attn.qkv.weight",
+      "model.visual.blocks.1.mlp.linear_fc1.bias",
+      "model.visual.blocks.1.mlp.linear_fc1.weight",
+      "model.visual.blocks.1.mlp.linear_fc2.bias",
+      "model.visual.blocks.1.mlp.linear_fc2.weight",
+      "model.visual.blocks.1.norm1.bias",
+      "model.visual.blocks.1.norm1.weight",
+      "model.visual.blocks.1.norm2.bias",
+      "model.visual.blocks.1.norm2.weight",
+      "model.visual.blocks.10.attn.proj.bias",
+      "model.visual.blocks.10.attn.proj.weight",
+      "model.visual.blocks.10.attn.qkv.bias",
+      "model.visual.blocks.10.attn.qkv.weight",
+      "model.visual.blocks.10.mlp.linear_fc1.bias",
+      "model.visual.blocks.10.mlp.linear_fc1.weight",
+      "model.visual.blocks.10.mlp.linear_fc2.bias",
+      "model.visual.blocks.10.mlp.linear_fc2.weight",
+      "model.visual.blocks.10.norm1.bias",
+      "model.visual.blocks.10.norm1.weight",
+      "model.visual.blocks.10.norm2.bias",
+      "model.visual.blocks.10.norm2.weight",
+      "model.visual.blocks.11.attn.proj.bias",
+      "model.visual.blocks.11.attn.proj.weight",
+      "model.visual.blocks.11.attn.qkv.bias",
+      "model.visual.blocks.11.attn.qkv.weight",
+      "model.visual.blocks.11.mlp.linear_fc1.bias",
+      "model.visual.blocks.11.mlp.linear_fc1.weight",
+      "model.visual.blocks.11.mlp.linear_fc2.bias",
+      "model.visual.blocks.11.mlp.linear_fc2.weight",
+      "model.visual.blocks.11.norm1.bias",
+      "model.visual.blocks.11.norm1.weight",
+      "model.visual.blocks.11.norm2.bias",
+      "model.visual.blocks.11.norm2.weight",
+      "model.visual.blocks.2.attn.proj.bias",
+      "model.visual.blocks.2.attn.proj.weight",
+      "model.visual.blocks.2.attn.qkv.bias",
+      "model.visual.blocks.2.attn.qkv.weight",
+      "model.visual.blocks.2.mlp.linear_fc1.bias",
+      "model.visual.blocks.2.mlp.linear_fc1.weight",
+      "model.visual.blocks.2.mlp.linear_fc2.bias",
+      "model.visual.blocks.2.mlp.linear_fc2.weight",
+      "model.visual.blocks.2.norm1.bias",
+      "model.visual.blocks.2.norm1.weight",
+      "model.visual.blocks.2.norm2.bias",
+      "model.visual.blocks.2.norm2.weight",
+      "model.visual.blocks.3.attn.proj.bias",
+      "model.visual.blocks.3.attn.proj.weight",
+      "model.visual.blocks.3.attn.qkv.bias",
+      "model.visual.blocks.3.attn.qkv.weight",
+      "model.visual.blocks.3.mlp.linear_fc1.bias",
+      "model.visual.blocks.3.mlp.linear_fc1.weight",
+      "model.visual.blocks.3.mlp.linear_fc2.bias",
+      "model.visual.blocks.3.mlp.linear_fc2.weight",
+      "model.visual.blocks.3.norm1.bias",
+      "model.visual.blocks.3.norm1.weight",
+      "model.visual.blocks.3.norm2.bias",
+      "model.visual.blocks.3.norm2.weight",
+      "model.visual.blocks.4.attn.proj.bias",
+      "model.visual.blocks.4.attn.proj.weight",
+      "model.visual.blocks.4.attn.qkv.bias",
+      "model.visual.blocks.4.attn.qkv.weight",
+      "model.visual.blocks.4.mlp.linear_fc1.bias",
+      "model.visual.blocks.4.mlp.linear_fc1.weight",
+      "model.visual.blocks.4.mlp.linear_fc2.bias",
+      "model.visual.blocks.4.mlp.linear_fc2.weight",
+      "model.visual.blocks.4.norm1.bias",
+      "model.visual.blocks.4.norm1.weight",
+      "model.visual.blocks.4.norm2.bias",
+      "model.visual.blocks.4.norm2.weight",
+      "model.visual.blocks.5.attn.proj.bias",
+      "model.visual.blocks.5.attn.proj.weight",
+      "model.visual.blocks.5.attn.qkv.bias",
+      "model.visual.blocks.5.attn.qkv.weight",
+      "model.visual.blocks.5.mlp.linear_fc1.bias",
+      "model.visual.blocks.5.mlp.linear_fc1.weight",
+      "model.visual.blocks.5.mlp.linear_fc2.bias",
+      "model.visual.blocks.5.mlp.linear_fc2.weight",
+      "model.visual.blocks.5.norm1.bias",
+      "model.visual.blocks.5.norm1.weight",
+      "model.visual.blocks.5.norm2.bias",
+      "model.visual.blocks.5.norm2.weight",
+      "model.visual.blocks.6.attn.proj.bias",
+      "model.visual.blocks.6.attn.proj.weight",
+      "model.visual.blocks.6.attn.qkv.bias",
+      "model.visual.blocks.6.attn.qkv.weight",
+      "model.visual.blocks.6.mlp.linear_fc1.bias",
+      "model.visual.blocks.6.mlp.linear_fc1.weight",
+      "model.visual.blocks.6.mlp.linear_fc2.bias",
+      "model.visual.blocks.6.mlp.linear_fc2.weight",
+      "model.visual.blocks.6.norm1.bias",
+      "model.visual.blocks.6.norm1.weight",
+      "model.visual.blocks.6.norm2.bias",
+      "model.visual.blocks.6.norm2.weight",
+      "model.visual.blocks.7.attn.proj.bias",
+      "model.visual.blocks.7.attn.proj.weight",
+      "model.visual.blocks.7.attn.qkv.bias",
+      "model.visual.blocks.7.attn.qkv.weight",
+      "model.visual.blocks.7.mlp.linear_fc1.bias",
+      "model.visual.blocks.7.mlp.linear_fc1.weight",
+      "model.visual.blocks.7.mlp.linear_fc2.bias",
+      "model.visual.blocks.7.mlp.linear_fc2.weight",
+      "model.visual.blocks.7.norm1.bias",
+      "model.visual.blocks.7.norm1.weight",
+      "model.visual.blocks.7.norm2.bias",
+      "model.visual.blocks.7.norm2.weight",
+      "model.visual.blocks.8.attn.proj.bias",
+      "model.visual.blocks.8.attn.proj.weight",
+      "model.visual.blocks.8.attn.qkv.bias",
+      "model.visual.blocks.8.attn.qkv.weight",
+      "model.visual.blocks.8.mlp.linear_fc1.bias",
+      "model.visual.blocks.8.mlp.linear_fc1.weight",
+      "model.visual.blocks.8.mlp.linear_fc2.bias",
+      "model.visual.blocks.8.mlp.linear_fc2.weight",
+      "model.visual.blocks.8.norm1.bias",
+      "model.visual.blocks.8.norm1.weight",
+      "model.visual.blocks.8.norm2.bias",
+      "model.visual.blocks.8.norm2.weight",
+      "model.visual.blocks.9.attn.proj.bias",
+      "model.visual.blocks.9.attn.proj.weight",
+      "model.visual.blocks.9.attn.qkv.bias",
+      "model.visual.blocks.9.attn.qkv.weight",
+      "model.visual.blocks.9.mlp.linear_fc1.bias",
+      "model.visual.blocks.9.mlp.linear_fc1.weight",
+      "model.visual.blocks.9.mlp.linear_fc2.bias",
+      "model.visual.blocks.9.mlp.linear_fc2.weight",
+      "model.visual.blocks.9.norm1.bias",
+      "model.visual.blocks.9.norm1.weight",
+      "model.visual.blocks.9.norm2.bias",
+      "model.visual.blocks.9.norm2.weight",
+      "model.visual.merger.linear_fc1.bias",
+      "model.visual.merger.linear_fc1.weight",
+      "model.visual.merger.linear_fc2.bias",
+      "model.visual.merger.linear_fc2.weight",
+      "model.visual.merger.norm.bias",
+      "model.visual.merger.norm.weight",
+      "model.visual.patch_embed.proj.bias",
+      "model.visual.patch_embed.proj.weight",
+      "model.visual.pos_embed.weight",
+      "mtp.fc.weight",
+      "mtp.layers.0.input_layernorm.weight",
+      "mtp.layers.0.mlp.down_proj.weight",
+      "mtp.layers.0.mlp.gate_proj.weight",
+      "mtp.layers.0.mlp.up_proj.weight",
+      "mtp.layers.0.post_attention_layernorm.weight",
+      "mtp.layers.0.self_attn.k_norm.weight",
+      "mtp.layers.0.self_attn.k_proj.weight",
+      "mtp.layers.0.self_attn.o_proj.weight",
+      "mtp.layers.0.self_attn.q_norm.weight",
+      "mtp.layers.0.self_attn.q_proj.weight",
+      "mtp.layers.0.self_attn.v_proj.weight",
+      "mtp.norm.weight",
+      "mtp.pre_fc_norm_embedding.weight",
+      "mtp.pre_fc_norm_hidden.weight"
+    ],
+    "tied_keys": [
+      "lm_head.weight"
+    ],
+    "checked_tensors": 320,
+    "layer_types": [
+      "linear_attention",
+      "linear_attention",
+      "linear_attention",
+      "full_attention",
+      "linear_attention",
+      "linear_attention",
+      "linear_attention",
+      "full_attention",
+      "linear_attention",
+      "linear_attention",
+      "linear_attention",
+      "full_attention",
+      "linear_attention",
+      "linear_attention",
+      "linear_attention",
+      "full_attention",
+      "linear_attention",
+      "linear_attention",
+      "linear_attention",
+      "full_attention",
+      "linear_attention",
+      "linear_attention",
+      "linear_attention",
+      "full_attention"
+    ],
+    "input_tokens_sha256": "49e2a94ce0bd89728c81b5840e0ac36632a4b721b483e22003e2c69052f38a60"
+  },
+  "state": "complete",
+  "raw_comparison_sha256": "a1aad68d0486a64560f634b018e35a23ec4eebe2b6269fba629332cc14027338",
+  "job": {
+    "id": 23501083,
+    "state": "COMPLETED",
+    "node": "nid005053",
+    "elapsed_seconds": 257,
+    "partition": "small-g",
+    "gcd": 1,
+    "cpus": 7,
+    "host_memory_gb": 40,
+    "time_limit_minutes": 10
+  },
+  "native_equivalence": "native-expand exact in all six cases; activation/consumer exact at 128/4096 but fail 1024 gradient/update gates",
+  "performance_conclusion": "No robust complete-step speedup for native-expand; consumer gains limited and not native-equivalent at 1024"
+}

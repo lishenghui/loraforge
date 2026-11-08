@@ -1,0 +1,200 @@
+{
+  "torch": "2.11.0+rocm7.2_lumi_aif_20260929120822",
+  "device": "AMD Instinct MI250X",
+  "source_sha256": "0d9c984f23c1a4936f3f03563acd83b29fc77665435b39b594bc8e2ac76f9a7f",
+  "scope": "All finite BF16 gate patterns in [-80,80], seeded BF16 up/upstream gradient; no whole-model claim",
+  "elements": 34114,
+  "cases": [
+    {
+      "policy": 0,
+      "enable_fp_fusion": false,
+      "differences": {
+        "output": {
+          "unequal_elements": 0,
+          "max_abs": 0.0
+        },
+        "dG": {
+          "unequal_elements": 0,
+          "max_abs": 0.0
+        },
+        "dU": {
+          "unequal_elements": 0,
+          "max_abs": 0.0
+        }
+      }
+    },
+    {
+      "policy": 0,
+      "enable_fp_fusion": true,
+      "differences": {
+        "output": {
+          "unequal_elements": 0,
+          "max_abs": 0.0
+        },
+        "dG": {
+          "unequal_elements": 0,
+          "max_abs": 0.0
+        },
+        "dU": {
+          "unequal_elements": 0,
+          "max_abs": 0.0
+        }
+      }
+    },
+    {
+      "policy": 1,
+      "enable_fp_fusion": false,
+      "differences": {
+        "output": {
+          "unequal_elements": 0,
+          "max_abs": 0.0
+        },
+        "dG": {
+          "unequal_elements": 0,
+          "max_abs": 0.0
+        },
+        "dU": {
+          "unequal_elements": 0,
+          "max_abs": 0.0
+        }
+      }
+    },
+    {
+      "policy": 1,
+      "enable_fp_fusion": true,
+      "differences": {
+        "output": {
+          "unequal_elements": 0,
+          "max_abs": 0.0
+        },
+        "dG": {
+          "unequal_elements": 1,
+          "max_abs": 1.1368683772161603e-13
+        },
+        "dU": {
+          "unequal_elements": 0,
+          "max_abs": 0.0
+        }
+      }
+    },
+    {
+      "policy": 2,
+      "enable_fp_fusion": false,
+      "differences": {
+        "output": {
+          "unequal_elements": 0,
+          "max_abs": 0.0
+        },
+        "dG": {
+          "unequal_elements": 0,
+          "max_abs": 0.0
+        },
+        "dU": {
+          "unequal_elements": 0,
+          "max_abs": 0.0
+        }
+      }
+    },
+    {
+      "policy": 2,
+      "enable_fp_fusion": true,
+      "differences": {
+        "output": {
+          "unequal_elements": 0,
+          "max_abs": 0.0
+        },
+        "dG": {
+          "unequal_elements": 0,
+          "max_abs": 0.0
+        },
+        "dU": {
+          "unequal_elements": 0,
+          "max_abs": 0.0
+        }
+      }
+    },
+    {
+      "policy": 3,
+      "enable_fp_fusion": false,
+      "differences": {
+        "output": {
+          "unequal_elements": 0,
+          "max_abs": 0.0
+        },
+        "dG": {
+          "unequal_elements": 0,
+          "max_abs": 0.0
+        },
+        "dU": {
+          "unequal_elements": 0,
+          "max_abs": 0.0
+        }
+      }
+    },
+    {
+      "policy": 3,
+      "enable_fp_fusion": true,
+      "differences": {
+        "output": {
+          "unequal_elements": 0,
+          "max_abs": 0.0
+        },
+        "dG": {
+          "unequal_elements": 1,
+          "max_abs": 1.1368683772161603e-13
+        },
+        "dU": {
+          "unequal_elements": 0,
+          "max_abs": 0.0
+        }
+      }
+    },
+    {
+      "policy": 4,
+      "enable_fp_fusion": false,
+      "differences": {
+        "output": {
+          "unequal_elements": 0,
+          "max_abs": 0.0
+        },
+        "dG": {
+          "unequal_elements": 0,
+          "max_abs": 0.0
+        },
+        "dU": {
+          "unequal_elements": 0,
+          "max_abs": 0.0
+        }
+      }
+    },
+    {
+      "policy": 4,
+      "enable_fp_fusion": true,
+      "differences": {
+        "output": {
+          "unequal_elements": 0,
+          "max_abs": 0.0
+        },
+        "dG": {
+          "unequal_elements": 0,
+          "max_abs": 0.0
+        },
+        "dU": {
+          "unequal_elements": 0,
+          "max_abs": 0.0
+        }
+      }
+    }
+  ],
+  "job": {
+    "id": 23501232,
+    "node": "nid005030",
+    "elapsed_seconds": 17,
+    "partition": "small-g",
+    "gcd": 1,
+    "cpus": 7,
+    "host_memory_gb": 40,
+    "time_limit_minutes": 2
+  },
+  "raw_report_sha256": "c5b6f607f71094fad03c81ae9028f511ad1d8a223bd6d88822cad8125a951051"
+}
