@@ -1,5 +1,11 @@
 # Architecture
 
+Public alpha interfaces use the dependency-free `ExperimentalAPI` annotation.
+Selected NF4 operators and Qwen3.5 integrations ship in the installed package;
+their explicit opt-ins and compatibility boundaries are documented in
+[experimental APIs](experimental.md). Benchmarks consume those implementations
+and retain fixture preparation, measurements and rejected candidates.
+
 LoRAForge will provide LoRA compression, adapter formats, and efficient execution
 components. The current API exposes `loraforge.ops.qr_factor` and
 `loraforge.compression.refactor_lora` / `truncate_lora`.

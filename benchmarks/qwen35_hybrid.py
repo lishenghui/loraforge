@@ -33,8 +33,8 @@ def read(path):
 
 
 def prepare(root, model, rank=None):
-    if rank not in (None, 4, 8):
-        raise ValueError("fixed synthetic rank must be 4 or 8")
+    if rank not in (None, 4, 8, 32):
+        raise ValueError("fixed synthetic rank must be 4, 8 or 32")
     import torch
     from safetensors.torch import save_file
     from transformers import AutoTokenizer
@@ -85,7 +85,7 @@ def prepare(root, model, rank=None):
                     if rank is not None
                     else [8, 16, 32, 64][(layer + pos + index) % 4]
                 )
-                if name.endswith(("in_proj_a", "in_proj_b")):
+                if rank != 32 and name.endswith(("in_proj_a", "in_proj_b")):
                     k = min(k, 8)
                 prefix = f"base_model.model.model.language_model.layers.{layer}.{name}"
                 a = torch.zeros(physical_rank, nin, dtype=torch.bfloat16)
@@ -235,6 +235,31 @@ def observe(root):
     ModelRunner._forward_raw = forward
 
 
+def install_packed_experiment():
+    if os.environ.get("LORAFORGE_BENCH_QWEN35_PACKED") == "1":
+        from qwen35_packed_loader import install
+
+        install()
+        if os.environ.get("LF_GDN_STORAGE") == "1":
+            from qwen35_gdn_storage import install as install_storage
+
+            install_storage()
+
+
+def install_nf4_experiment():
+    if os.environ.get("LORAFORGE_BENCH_QWEN35_NF4") == "1":
+        from loraforge.integrations.sglang_experimental import install_qwen35_nf4
+
+        mode = "stock"
+        if os.environ.get("LORAFORGE_BENCH_QWEN35_NF4_LINEAR") == "1":
+            mode = (
+                "byte-pairs"
+                if os.environ.get("LORAFORGE_BENCH_QWEN35_NF4_PAIRS") == "1"
+                else "cached-scales"
+            )
+        install_qwen35_nf4(mode=mode)
+
+
 def install_cold_prefill_experiment():
     if os.environ.get("LORAFORGE_BENCH_QWEN35_COLD_PREFILL") == "1":
         from qwen35_cold_prefill_graph import install
@@ -243,6 +268,14 @@ def install_cold_prefill_experiment():
 
 
 def serve(root, mode, attempt, port):
+    model_path = Path(read(root / "manifest.json")["model"])
+    if any(
+        (model_path / name).is_file()
+        for name in ("packed-receipt.json", "quantization-receipt.json")
+    ):
+        os.environ["LORAFORGE_BENCH_QWEN35_PACKED"] = "1"
+    install_packed_experiment()
+    install_nf4_experiment()
     from sglang.srt.entrypoints.http_server import launch_server
     from sglang.srt.server_args import ServerArgs
 
@@ -268,6 +301,7 @@ def server_options(m, mode, port):
         host="127.0.0.1",
         port=port,
         dtype="bfloat16",
+        enable_multimodal=False,
         tp_size=1,
         random_seed=0,
         context_length=2048,
@@ -300,8 +334,15 @@ def server_options(m, mode, port):
                 for a in m["adapters"]
             ],
         )
+    if os.environ.get("LORAFORGE_BENCH_QWEN35_NF4") == "1":
+        assert m["max_lora_rank"] in (4, 32), "NF4 pilot requires compact rank4/32"
+        options.update(
+            quantization="bitsandbytes",
+            load_format="bitsandbytes",
+            enable_multimodal=False,
+        )
     if os.environ.get("LORAFORGE_BENCH_QWEN35_COLD_PREFILL") == "1":
-        assert m["max_lora_rank"] == 4, "cold-prefill pilot is scoped to cap4"
+        assert m["max_lora_rank"] in (4, 32), "cold-prefill pilot requires cap4/32"
         options["disable_prefill_cuda_graph"] = False
         options["cuda_graph_config"]["prefill"] = dict(
             backend="full", bs=[1024], full_prefill_max_req=8, max_seq_len=2048
@@ -347,9 +388,12 @@ def numerical_check(reference, candidate):
         if key in reference or key in candidate:
             assert key in reference and key in candidate, "validation cases differ"
             pairs += list(zip(reference[key], candidate[key], strict=True))
-    assert all(math.isfinite(x[0]) for a, b in pairs for seq in (a, b) for x in seq), (
-        "nonfinite logprob"
-    )
+    assert all(
+        isinstance(x[0], (int, float)) and math.isfinite(x[0])
+        for a, b in pairs
+        for seq in (a, b)
+        for x in seq
+    ), "nonfinite logprob"
     same_tokens = all([x[1] for x in a] == [x[1] for x in b] for a, b in pairs)
     differences = []
     for a, b in pairs:
@@ -470,6 +514,9 @@ def run(
                     ], "mixed batch was not repeatable"
                     correctness[key] = values
                 dump(attempt / "correctness.json", correctness)
+                numerical_check(
+                    correctness, correctness
+                )  # Reject missing/nonfinite values before timing.
                 if reference is not None and mode == "fleet":
                     check = numerical_check(
                         read(reference), read(attempt / "correctness.json")
@@ -632,6 +679,8 @@ def compare(root, modes=("native", "fleet", "base")):
 
 if __name__ == "__mp_main__" and os.environ.get("HYBRID_AUDIT_DIR"):
     # SGLang workers spawn by re-importing this executable.
+    install_packed_experiment()
+    install_nf4_experiment()
     from loraforge.integrations.sglang import install
 
     install()
@@ -646,7 +695,7 @@ if __name__ == "__main__":
     parser.add_argument(
         "--rank",
         type=int,
-        choices=[4, 8],
+        choices=[4, 8, 32],
         help="Prepare compact fixed-rank synthetic adapters (default: mixed rank-64 fixture)",
     )
     parser.add_argument("--mode", choices=["native", "fleet", "base"])
@@ -665,14 +714,40 @@ if __name__ == "__main__":
     parser.add_argument(
         "--cold-prefill-graph",
         action="store_true",
-        help="Experimental SGLang0.5.22 cold8x128 graph; requires compact rank4 fixture",
+        help="Experimental SGLang0.5.22 cold8x128 graph; requires compact rank4/32 fixture",
     )
     parser.add_argument(
         "--extended-validation",
         action="store_true",
         help="Add 128-token prefill and 32-way 64-output checks in every reference/candidate",
     )
+    parser.add_argument(
+        "--nf4-experiment",
+        action="store_true",
+        help="Experimental gfx90a NF4 fixture + BF16 LoRA; model must be prepacked",
+    )
+    parser.add_argument(
+        "--nf4-cached-scales",
+        action="store_true",
+        help="Experimental NF4 large-batch path; cache FP32 scales, not BF16 weights",
+    )
+    parser.add_argument(
+        "--nf4-byte-pairs",
+        action="store_true",
+        help="Experimental exact byte-pair dequantization; requires --nf4-cached-scales",
+    )
     args = parser.parse_args()
+    if args.nf4_byte_pairs:
+        if not args.nf4_cached_scales:
+            parser.error("--nf4-byte-pairs requires --nf4-cached-scales")
+        os.environ["LORAFORGE_BENCH_QWEN35_NF4_PAIRS"] = "1"
+    if args.nf4_cached_scales:
+        if not args.nf4_experiment:
+            parser.error("--nf4-cached-scales requires --nf4-experiment")
+        os.environ["LORAFORGE_BENCH_QWEN35_NF4_LINEAR"] = "1"
+    if args.nf4_experiment:
+        os.environ["LORAFORGE_BENCH_QWEN35_NF4"] = "1"
+        os.environ["LORAFORGE_BENCH_QWEN35_EXTENDED"] = "1"
     if args.cold_prefill_graph:
         os.environ["LORAFORGE_BENCH_QWEN35_COLD_PREFILL"] = "1"
         os.environ["LORAFORGE_BENCH_QWEN35_EXTENDED"] = "1"

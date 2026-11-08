@@ -1,5 +1,11 @@
 # Migration from probe
 
+Selected Qwen3.5 NF4 and GDN implementations now have installed alpha entrypoints
+and a unified `ExperimentalAPI` marker. Their explicit worker opt-ins and
+remaining support/numerical limits are in [experimental APIs](experimental.md).
+This packages the selected implementations; it does not certify the other
+benchmark-only fast fusion policies or resolve the prior compression failures.
+
 Move capabilities in small, reviewable PRs from a pinned source revision. Keep
 research runs and paper reproduction in probe. Once a module is maintained here,
 future fixes originate here and probe consumes a pinned LoRAForge revision.

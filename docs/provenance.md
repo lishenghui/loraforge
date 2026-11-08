@@ -333,3 +333,135 @@ attention, KV writes and LoRA computations retain their order. The capture
 fixture must also be 8x128, because the default 1024+empty-requests fixture
 captures different convolution/chunk grids. These helpers are explicit
 benchmark opt-ins, not an installed-library runtime change.
+
+
+### NF4 base with BF16 LoRA benchmark
+
+`prepare_qwen35_packed.py` and `prepare_qwen35_nf4.py` generate a canonical
+Qwen3.5-0.8B fixture using native BF16 row concatenation and bitsandbytes0.50.2
+NF4 block64/double-quantization operations. No quantization kernel is copied. The direct `check_qwen35_nf4.py` program
+uses those same library operations with the measured projection geometries.
+`qwen35_nf4_compat.py` is version-scoped process-local compatibility glue: it
+extends one SGLang0.5.22 ROCm method list while preserving the remaining
+verification, supplies the already-fused name map and separates the BF16
+adapter file loader configuration from the quantized base loader. It changes
+no installed library default or shared SGLang file.
+
+`qwen35_packed_loader.py` handles canonical fused checkpoint names directly
+through native full-weight loading and verifies114 actual projection tensors
+against their checkpoint values. This avoids upstream substring matching of
+`qkv_proj` as `v_proj` and `gate_up_proj` as `up_proj`, which silently skipped
+those parameters in rejected attempts. Other weights retain upstream loading.
+Numerical validation rejects null/nonfinite logprobs before any timing.
+See `docs/qwen35-nf4.md` for scope, rejected evidence and measured results.
+
+### NF4 scale reuse and projection screening
+
+`benchmarks/qwen35_nf4_ops.py` and `check_qwen35_nf4_ops.py` are new LoRAForge
+benchmark implementations. They interpret bitsandbytes 0.50.2's canonical NF4
+nibble order, codebook and block-64 scale format; no upstream GPU kernel is
+copied. The block-scale reconstruction calls the installed bitsandbytes API.
+The Triton MFMA candidate follows the documented `tl.dot` operation contract;
+it is screened separately and is not the selected serving path.
+
+`qwen35_nf4_linear.py` is a process-local SGLang 0.5.22 benchmark adapter for the
+prepared 114-projection fixture. It retains NF4 parameter bytes, caches only
+FP32 block scales, and uses temporary BF16 dequantization followed by the native
+linear operation at larger batches. Small batches and unsupported layouts use
+the original method. Versioned tensor/state changes invalidate eager scale
+reuse; captured graphs require immutable base weights. The experiment changes
+neither installed dependencies nor BF16 LoRA factors. See the NF4 guide for the
+explicit opt-in, exact-output checks, rejected kernels and same-card results.
+
+### NF4 rank-32 to rank-4 fixture comparison
+
+`benchmarks/compress_qwen35_fixture.py` applies the maintained
+`loraforge.compression.truncate_lora` API to deterministic rank-32 synthetic
+adapter files, then exports physical BF16 rank-4 factors with unchanged unit
+scaling. It uses the actual reported FlashTSQR/Jacobi backend; no QR or SVD
+implementation is substituted. For the 16-output GDN b/a branches, temporary
+zero output rows satisfy the rank-32 API dimension contract and are removed
+before export. Small-Gram norm identities check the BF16 export against the
+reported discarded spectrum without materializing dense weight updates.
+The source and destination files, dimensions, scaling and hashes are recorded.
+The comparison is an inference throughput experiment, not trained compression
+quality; random spectra and changed outputs remain explicit in its results.
+
+### Qwen3.5 memory and phase accounting
+
+`qwen35_resource_audit.py`, `run_qwen35_resources.py` and
+`analyze_qwen35_resources.py` are new LoRAForge benchmark observers and CPU
+accounting tools. They use SGLang 0.5.22's model-load/pool/graph lifecycle and
+native profiling endpoint, PyTorch allocator counters and Chrome trace events.
+No upstream GPU kernel is copied or replaced by these observers. Runtime
+peak resets/snapshots use untimed sentinels; profiler windows run after
+throughput and memory measurements. Phase attribution uses enclosing GPU
+annotations or explicit CPU runtime correlation links, retaining unknowns.
+Generic attention names require a source-verified allowlist; fused LoRA
+consumers remain separate from pure A/B costs. GPU sums, activity unions and
+inclusive CPU ranges are reported separately. Component storage accounting
+counts unique storages within each component; categories can share backing
+storage and are not automatically additive. Initial logprob-enabled traces are
+retained as diagnostic evidence, and the corrected requests disable logprob
+returns to match throughput. A NumPy scalar byte-count serialization failure
+in the first corrected-profile attempt is retained separately from accepted
+measurements; explicit integer conversion is regression-tested.
+
+### GDN storage sharing and NF4 byte-pair reconstruction
+
+`qwen35_gdn_storage.py` is new benchmark ownership code for the existing
+BF16 packed GDN prototype. It validates immutable TP1 weights before making
+the original parameter objects contiguous views into the packed owner. It
+preserves parameter metadata and covers explicit and closure-based lazy
+initialization before graph capture; no framework source is copied. Initial
+class-method-only interception failed to reach the prototype's lazy closure.
+That no-op attempt is retained separately; regression coverage exercises the
+actual closure-based pattern. Storage accounting now measures the union of
+parameters and packed owners, making aliases and duplicate bytes explicit.
+
+The byte-pair and split-K candidates extend the project's NF4 Triton benchmark
+code above; no vendor implementation is copied. The selected byte-pair path
+loads each NF4 byte once, decodes its two values through the canonical FP32
+codebook and interleaves exact BF16 reconstruction. It retains native linear
+accumulation and does not cache BF16 weights. Split-K candidates use FP32
+partials with a separate reduction, were slower, and remain isolated screening
+code rather than serving dispatch. `check_qwen35_nf4_candidates.py` exposes the
+screen as a portable fixture-based program. Its numerical/timing-loop AST
+matches the GPU screen after equivalent function/output-path normalization.
+Opt-ins, paired controls, source hashes, failures and limits are recorded in
+[the follow-up](qwen35-storage-nf4.md).
+
+### Installed experimental interfaces — 2026-11-05
+
+The selected implementations above are promoted from this repository's
+`6b2e36a98406f43adf469de35d7835a4e2f93ce3` snapshot into the installed package.
+No new probe or third-party implementation is copied. The four selected
+reconstruction kernel ASTs are unchanged; rejected MFMA/split-K candidates
+remain benchmark-only. Source checksums are recorded with the API validation.
+
+| Previous benchmark implementation | Installed implementation |
+| --- | --- |
+| `qwen35_nf4_ops.py` selected reconstruction kernels | `ops/_nf4_kernels.py`, `ops/nf4.py` |
+| `qwen35_nf4_linear.py` | `integrations/_sglang_nf4_linear.py` |
+| `qwen35_nf4_compat.py` | `integrations/_sglang_nf4_compat.py` |
+| `qwen35_packed_loader.py` | `integrations/_sglang_qwen35_loader.py` |
+| `qwen35_gdn_storage.py` | `integrations/_sglang_gdn_storage.py` |
+
+Legacy benchmark imports now delegate to those implementations. Intentional
+changes add a validated, graph-compatible tensor entrypoint, explicit mode
+selection and conflicts, runtime/hardware/checkpoint guards and worker-plugin
+propagation. Admission source structure is still checked before rewriting the
+single allowed quantization list; other upstream checks remain intact. Public
+validation uses explicit exceptions rather than removable local assertions.
+
+`annotations.py` is new dependency-free code, inspired by public alpha API
+annotation conventions. It copies no Ray code and adds no Ray dependency.
+It attaches immutable metadata and documentation, preserves object identity
+by default, and optionally warns once per process at synchronous entrypoints.
+The new `sglang_experimental.py` publishes actual installed NF4 and GDN APIs.
+`_sglang_gdn.py` independently wires one packed BF16 base projection to the
+original Linear adapter calls during decode, with unchanged prefill fallback.
+It covers native csgmv metadata preparation and does not require the private
+consumer/tiny-rank research hooks. Storage sharing reuses the attributed
+project-owned implementation above. Numerical/shape and package-validation
+boundaries are in [experimental APIs](experimental.md).
