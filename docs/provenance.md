@@ -648,3 +648,67 @@ It covers native csgmv metadata preparation and does not require the private
 consumer/tiny-rank research hooks. Storage sharing reuses the attributed
 project-owned implementation above. Numerical/shape and package-validation
 boundaries are in [experimental APIs](experimental.md).
+
+### vLLM linear decode extraction
+
+Source: Shenghui Li's `lishenghui/probe` commit
+`5fd6ae060d106066b306959f9a34b726a281ef4c`, files
+`tools/llm_fleet/gemv_lora.py` and `tools/llm_fleet/vllm_gemv_patch.py`.
+Original content hashes are recorded in [vllm-source-hashes.json](vllm-source-hashes.json).
+The project-owned implementation is migrated under Apache-2.0 with source and
+authorship notices. No upstream vLLM code, experiment artifacts or launchers
+are copied. The inspected vLLM tag is 0.26.0, upstream commit
+`568afb3a13806beb53bb2e6bd518269357b237c0`.
+
+Destinations: `ops/_vllm_gemv_kernels.py` retains the shrink/expand mathematical
+kernels; `ops/vllm_gemv.py` provides lazy validated launchers; `integrations/vllm.py`
+adapts the reference linear-method replacement. Native slot layouts, FP32
+intermediates, split-K atomic accumulation and the tokens/active-count heuristic
+are retained. Wrappers add device guarding, input validation and lazy imports.
+Registration is explicit, version-gated, repeatable and conflict-aware. An
+opaque `torch.library.custom_op` declares the output mutation and fake behavior.
+Prefill and unspecialized execution retain the original framework method.
+
+This code intentionally lives separately from SGLang's packed-slice operators;
+the two layouts and intermediate rounding contracts differ. No code on the
+concurrently developed SGLang branch is modified. See [vllm.md](vllm.md) for
+activation, validation scope and numerical limitations.
+
+### Retained-rank row operators
+
+Source: Shenghui Li's `lishenghui/probe` commit
+`5fd6ae060d106066b306959f9a34b726a281ef4c`,
+`tools/llm_fleet/sglang_plugin/probe_sglang_gemv/fast_decode.cu`.
+The original SHA256 is in [row-source-hashes.json](row-source-hashes.json).
+The project-owned kernels are extracted under Apache-2.0 with source/authorship
+notices into `ops/csrc/lora_rows.cu`; `ops/lora_rows.py` and
+`ops/_row_extension.py` are new framework-independent validation/build wrappers.
+No SGLang/vLLM implementation, tuning table or experiment tree is imported.
+
+The selected source already includes the CUDA/HIP warp-width split, current-stream
+launches, base-route guards and launch error checks. It differs from the frozen
+2026-10-28 MI250X experiment snapshot; it is not represented as byte-identical
+Figure 12 code. The extraction preserves the packed effective-rank layout,
+vector B loads, shared Z staging, BF16 rounding and segmented persistent work
+schedule. Kernels are formatted/renamed; host wrappers add same-device checks.
+The Python interface additionally checks structures, alignment, inference-only
+use and output aliasing. Device metadata values remain a documented caller
+contract, without per-call host synchronization. The launch default uses twice
+the detected SM/CU count rather than the source's AMD-specific 880-block default.
+No environment-variable compiler mutations, global workspaces, pointer registries
+or framework hooks are retained. L40S tests and hardware limits are documented in
+[row-operators.md](row-operators.md).
+
+
+### Current-main integration — 2026-11-08
+
+The existing NVIDIA compatibility patch is retained from main. The new vLLM
+and row implementations are taken from their extraction branches without
+numerical edits. `ExperimentalAPI` imports/decorators are the only changes to
+the three Python API modules; full module AST comparisons, after removing only
+those additions, match the source branches. The native row builder/kernel and
+Triton vLLM kernel sources are byte-identical. Baseline commit IDs and both
+source hashes are in [row-validation-l40s.json](row-validation-l40s.json).
+The record also checks the three row source hashes stored in both raw L40S XML
+receipts. These provenance checks do not turn synthetic operator tests into
+full-model or performance validation.

@@ -387,3 +387,48 @@ own eager arithmetic. The expanded suite also reveals that the pre-existing
 fast research policy matches only 28/32 long native outputs (92/96 overall).
 This native parity failure is retained; graph adds no new difference. These
 remain synthetic benchmark prototypes, not a production/default runtime change.
+
+## vLLM linear decode migration — 2026-11-03
+
+The independent `migrate/vllm-decode` branch adds an opt-in vLLM 0.26.0 backend
+from the pinned probe GEMV reference. Padded-slot shrink/expand kernels and a
+mutating opaque custom op implement the small-decode path; native prefill and
+unspecialized execution are retained. Version/conflict checks and a lazy general
+plugin entrypoint replace import-time patching. SGLang work is not included.
+
+Validation: 27 GPU tests passed on an allocated H100 with PyTorch 2.11.0+cu130
+and Triton 3.6.0, including actual vLLM dispatch, slot/route updates during graph
+replay and full-graph torch.compile. CPU suites passed 86 tests. Native plugin
+discovery, lint/format, builds and isolated wheel/source-archive checks passed.
+See [the vLLM contract](vllm.md) for numeric tolerances and provenance. Full-model
+serving acceptance, native loader eviction, other GPUs and throughput remain
+separate validation tasks; no performance or token/logprob parity claim is made.
+
+## Figure 12 retained-rank operator extraction — 2026-11-03
+
+Branch `migrate/row-expand`, based on the vLLM decode extraction, adds standalone
+BF16 `row_shrink` and `row_expand` tensor operators from probe's CUDA/HIP
+`fast_decode.cu`. Source identity and intentional wrapper/launch changes are
+recorded in provenance. The library contains no copied experiment tree.
+
+CPU and packaging checks pass. The H100 allocation did not run; recovered
+2026-11-03 L40S receipts pass all 13 row tests on each of PyTorch 2.7.1+cu126
+and 2.11.0+cu130. Receipt source hashes match the extraction. See
+[row operators](row-operators.md) and [the validation record](row-validation-l40s.json)
+for contracts, commands, source comparisons and hardware scope. Compact B
+ownership, vLLM rank-aware loading/eviction, framework custom-op registration,
+four-decode-step scheduling and the full Figure 12 benchmark remain pending.
+The existing padded vLLM integration is unchanged.
+
+
+### Integration with the current library — 2026-11-08
+
+The vLLM and retained-rank operators are integrated alongside the existing
+SGLang/NF4 and training work. Existing NVIDIA support is already present in
+main and is not reapplied. Both new operator families use metadata-only alpha
+annotations; the explicit vLLM installer warns once per process. Plugin imports
+remain dependency-free and the vLLM extra remains optional. User guides and
+API reference pages now include both families. Numerical function bodies and
+kernel sources are unchanged from their extracted, GPU-validated versions;
+source comparisons are recorded with the L40S validation. No full-model vLLM,
+RowExpand serving-throughput or untested-device claim is added.

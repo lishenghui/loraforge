@@ -29,6 +29,7 @@ def test_distribution_metadata_and_package_data():
         "tsqr_wide.cu",
         "jacobi_eigh.cu",
         "rowexpand.cu",
+        "lora_rows.cu",
     ):
         assert native.joinpath(name).is_file()
 
@@ -66,6 +67,10 @@ import loraforge.integrations._sglang_gdn
 import loraforge.integrations._sglang_nf4_linear
 import loraforge.integrations._sglang_nf4_compat
 import loraforge.integrations._sglang_qwen35_loader
+import loraforge.integrations.vllm
+import loraforge.ops.vllm_gemv
+import loraforge.ops.lora_rows
+import loraforge.ops._row_extension
 print(json.dumps({'version': loraforge.__version__}))
 """
     result = subprocess.run(
