@@ -82,3 +82,27 @@ copies. See [documentation development](docs/development/documentation.md).
 
 Use short-lived branches and ordinary PRs. Include the problem, resulting
 behavior, validation, and any remaining hardware limitations in the PR body.
+
+
+## CI turnaround
+
+Feature branches run CI through pull requests, not a second push workflow.
+Pushes to main retain full post-merge CPU/package checks and documentation
+publication. Both workflows also support manual runs on a selected branch.
+New revisions cancel superseded PR runs; main documentation runs are not
+cancelled mid-deployment. The Pages deployment job remains serialized.
+
+For documentation-only PRs (files under `docs/` or Markdown files), a lightweight
+scope job compares the complete three-dot PR diff and skips CPU/package matrices.
+Strict Sphinx still builds on every PR. Any other changed file, including CI,
+packaging, tests, examples or benchmarks, runs the full Python matrix. Main and
+manual CPU runs always run the full matrix. Skipped jobs retain their check names.
+Pip caches are keyed to `pyproject.toml`; fresh installed-wheel and rebuilt-sdist
+checks remain isolated. GPU validation is required for changed numerical code;
+unchanged implementations can use recorded validation with matching provenance.
+
+For local iteration, reuse a task-specific environment when dependency metadata
+has not changed. Refresh editable metadata after changing extras or entrypoints.
+Run affected checks while editing, then the required checks once on the final
+candidate. Use the resulting CI for installed-package isolation instead of
+recreating identical environments at every intermediate commit.

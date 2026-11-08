@@ -2,13 +2,56 @@ name: CPU checks
 
 on:
   push:
+    branches: [main]
   pull_request:
+  workflow_dispatch:
 
 permissions:
   contents: read
 
+concurrency:
+  group: cpu-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: true
+
 jobs:
+  scope:
+    runs-on: ubuntu-latest
+    outputs:
+      code: ${{ steps.scope.outputs.code }}
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          fetch-depth: 0
+      - name: Classify the complete PR diff
+        id: scope
+        run: |
+          python - <<'PYTHON'
+          import json
+          import os
+          import subprocess
+          from pathlib import Path
+
+          event = json.loads(Path(os.environ["GITHUB_EVENT_PATH"]).read_text())
+          code = True  # Main and manual runs always check the full matrix.
+          if os.environ["GITHUB_EVENT_NAME"] == "pull_request":
+              pr = event["pull_request"]
+              paths = subprocess.check_output([
+                  "git", "diff", "--no-renames", "--name-only", "-z",
+                  pr["base"]["sha"] + "..." + pr["head"]["sha"],
+              ]).decode().split("\0")
+              paths = [p for p in paths if p]
+              code = not paths or any(
+                  not (p.startswith("docs/") or p.endswith(".md"))
+                  for p in paths
+              )
+          with open(os.environ["GITHUB_OUTPUT"], "a") as output:
+              output.write(f"code={str(code).lower()}\n")
+          print(f"Run CPU/package matrices: {code}")
+          PYTHON
+
   package:
+    needs: scope
+    if: needs.scope.outputs.code == 'true'
     runs-on: ubuntu-latest
     strategy:
       fail-fast: false
@@ -20,6 +63,7 @@ jobs:
         with:
           python-version: ${{ matrix.python }}
           cache: pip
+          cache-dependency-path: pyproject.toml
       - name: Install development tools
         run: python -m pip install ".[dev]"
       - name: Lint and format
@@ -42,6 +86,8 @@ jobs:
           /tmp/loraforge-source/bin/python -m pytest
 
   adapters:
+    needs: scope
+    if: needs.scope.outputs.code == 'true'
     runs-on: ubuntu-latest
     strategy:
       fail-fast: false
@@ -56,6 +102,7 @@ jobs:
         with:
           python-version: ${{ matrix.python }}
           cache: pip
+          cache-dependency-path: pyproject.toml
       - name: Install CPU tensor and PEFT dependencies
         run: |
           python -m pip install torch==2.7.1 --index-url https://download.pytorch.org/whl/cpu
