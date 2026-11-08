@@ -1,0 +1,108 @@
+{
+  "state": "passed",
+  "scope": "Synthetic row-operator numerical, graph and lifecycle tests on L40S; not a serving/throughput or full-model acceptance result.",
+  "runs": [
+    {
+      "receipt": "l40s-cu126.xml",
+      "receipt_sha256": "e64ec798ac340589f45c508f3b296c5c27b6c03c1a2e7f159815e94b13f2e514",
+      "timestamp": "2026-11-03T20:33:18.288197+01:00",
+      "tests": 13,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "seconds": 106.528,
+      "test_groups": {
+        "tests.test_row_operators_gpu": 13
+      },
+      "properties": {
+        "python": "3.12.3",
+        "torch": "2.7.1+cu126",
+        "cuda": "12.6",
+        "hip": "None",
+        "device": "NVIDIA L40S",
+        "capability": "(8, 9)",
+        "lora_rows.py.sha256": "7f21ea866d34d62de498d232676b34974df8b6919c3a0e98d3de10557718b318",
+        "_row_extension.py.sha256": "56b7c1c7b2f2bc983d6201330a34c339692edf730b8eff5a0fb84f43efdebf99",
+        "csrc/lora_rows.cu.sha256": "c6f57a435172e03ee47ec14a1b65db34a2f615a79ac7c1cb3f9ccaae51a8563d"
+      },
+      "row_source_hashes_verified": true
+    },
+    {
+      "receipt": "l40s-cu130.xml",
+      "receipt_sha256": "7fc4db2fa139b54cf348f7de33bcd7bf6eb4247dbc6d962b83e1ebf312379e5e",
+      "timestamp": "2026-11-03T20:35:08.849788+01:00",
+      "tests": 40,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "seconds": 139.359,
+      "test_groups": {
+        "tests.test_row_operators_gpu": 13,
+        "tests.test_vllm_gpu": 27
+      },
+      "properties": {
+        "python": "3.12.3",
+        "torch": "2.11.0+cu130",
+        "cuda": "13.0",
+        "hip": "None",
+        "device": "NVIDIA L40S",
+        "capability": "(8, 9)",
+        "lora_rows.py.sha256": "7f21ea866d34d62de498d232676b34974df8b6919c3a0e98d3de10557718b318",
+        "_row_extension.py.sha256": "56b7c1c7b2f2bc983d6201330a34c339692edf730b8eff5a0fb84f43efdebf99",
+        "csrc/lora_rows.cu.sha256": "c6f57a435172e03ee47ec14a1b65db34a2f615a79ac7c1cb3f9ccaae51a8563d"
+      },
+      "row_source_hashes_verified": true
+    }
+  ],
+  "integration_source_checks": {
+    "src/loraforge/ops/lora_rows.py": {
+      "baseline_ref": "github/migrate/row-expand",
+      "baseline_commit": "c37f0992f137194e0a1bd69f82028b8d034370c4",
+      "baseline_sha256": "7f21ea866d34d62de498d232676b34974df8b6919c3a0e98d3de10557718b318",
+      "integration_sha256": "cf1043e196218699496d02964b54a56e5fdc09ba35b12681573eec9c67bf1a0b",
+      "check": "AST-identical after removing only ExperimentalAPI import/decorators"
+    },
+    "src/loraforge/ops/_row_extension.py": {
+      "baseline_ref": "github/migrate/row-expand",
+      "baseline_commit": "c37f0992f137194e0a1bd69f82028b8d034370c4",
+      "baseline_sha256": "56b7c1c7b2f2bc983d6201330a34c339692edf730b8eff5a0fb84f43efdebf99",
+      "integration_sha256": "56b7c1c7b2f2bc983d6201330a34c339692edf730b8eff5a0fb84f43efdebf99",
+      "check": "byte-identical"
+    },
+    "src/loraforge/ops/csrc/lora_rows.cu": {
+      "baseline_ref": "github/migrate/row-expand",
+      "baseline_commit": "c37f0992f137194e0a1bd69f82028b8d034370c4",
+      "baseline_sha256": "c6f57a435172e03ee47ec14a1b65db34a2f615a79ac7c1cb3f9ccaae51a8563d",
+      "integration_sha256": "c6f57a435172e03ee47ec14a1b65db34a2f615a79ac7c1cb3f9ccaae51a8563d",
+      "check": "byte-identical"
+    },
+    "src/loraforge/integrations/vllm.py": {
+      "baseline_ref": "github/migrate/vllm-decode",
+      "baseline_commit": "8c939aec17b78e138444183dbdc09c23ca637156",
+      "baseline_sha256": "fe1a0e4f922815932bdf94f83298874adc59d2336b72427b28fee089a2f6c6b3",
+      "integration_sha256": "53ba70c14ec69d1125b43b9de562dc532446a8e62bd9929e2584589fb502482c",
+      "check": "AST-identical after removing only ExperimentalAPI import/decorators"
+    },
+    "src/loraforge/ops/vllm_gemv.py": {
+      "baseline_ref": "github/migrate/vllm-decode",
+      "baseline_commit": "8c939aec17b78e138444183dbdc09c23ca637156",
+      "baseline_sha256": "c2bb4827757bca72a7fd122891563b246f288aa187894c27c890d20778892850",
+      "integration_sha256": "cd53cb6a79bcba02fbfe1a3cdba3a603921161b0b37ad52ed5bdf39ae0cafc44",
+      "check": "AST-identical after removing only ExperimentalAPI import/decorators"
+    },
+    "src/loraforge/ops/_vllm_gemv_kernels.py": {
+      "baseline_ref": "github/migrate/vllm-decode",
+      "baseline_commit": "8c939aec17b78e138444183dbdc09c23ca637156",
+      "baseline_sha256": "d2adcf5ba15e0b714296282cd604c0d9f20a47316f2332a6b5390b6349179bb9",
+      "integration_sha256": "d2adcf5ba15e0b714296282cd604c0d9f20a47316f2332a6b5390b6349179bb9",
+      "check": "byte-identical"
+    }
+  },
+  "limits": [
+    "The H100 row-validation allocation was cancelled without executing; it is not a passing H100 run.",
+    "The cu130 receipt also has 27 passing vLLM tests, but records source hashes only for the three row implementation files.",
+    "The vLLM numerical implementation is unchanged from the separately documented H100-validated vLLM extraction.",
+    "Python changes add alpha metadata; only install_vllm_backend adds a once-per-process warning wrapper. Numerical function bodies and kernel sources are unchanged.",
+    "HIP/MI250 row-operator execution and full-model vLLM acceptance have not been established by these runs."
+  ]
+}

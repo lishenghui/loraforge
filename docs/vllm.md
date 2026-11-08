@@ -102,3 +102,20 @@ After reinstalling the editable distribution to refresh entrypoint metadata,
 a fresh interpreter confirmed native `vllm.plugins.load_general_plugins()`
 discovers and activates this plugin. No model weights were downloaded or
 full-model token/logprob acceptance results produced in this migration.
+
+
+### Current-main integration — 2026-11-08
+
+The installer, plugin entrypoint and raw GEMV operators now expose alpha API
+metadata. Only explicit installation emits a once-per-process warning;
+metadata-only numerical annotations preserve the original function identity.
+The optional plugin is registered alongside SGLang, with neither framework
+imported by discovery of a disabled plugin. Numerical function bodies and Triton
+kernel sources match the H100-validated extraction; only alpha annotation
+imports/decorators were added to the implementation modules.
+
+A recovered L40S CUDA 13.0 receipt also contains 27 passing vLLM GPU cases
+alongside 13 row tests. Its source-hash properties cover only the row files, so
+it is not an independent hash-attested vLLM implementation record. See
+[row-validation-l40s.json](row-validation-l40s.json) for the receipt and source
+comparison details. Full-model acceptance and throughput remain unmeasured.

@@ -15,3 +15,12 @@ serving integration. Consult each feature's validation section for tested scope.
 ../nvidia
 ../experimental
 ```
+
+## Opt-in CUDA serving and row operators
+
+```{toctree}
+:maxdepth: 1
+
+../vllm
+../row-operators
+```

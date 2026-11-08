@@ -152,3 +152,13 @@ Earlier compression/native numerical failures remain unchanged. Passing an
 incremental migration comparison does not establish trained-adapter quality,
 equal-quality compression or general upstream ROCm support. Historical
 performance reports remain separate from this API migration validation.
+
+
+## Optional vLLM and retained-rank operators
+
+The [vLLM installer and raw GEMV APIs](vllm.md) and the independent
+[retained-rank row operators](row-operators.md) also expose alpha metadata.
+`install_vllm_backend` warns once per process on explicit installation;
+the plugin entrypoint and numerical operators use metadata-only annotations.
+Their pinned versions, numerical conventions and hardware validation differ
+from the SGLang APIs above. Row operators do not install a serving bridge.

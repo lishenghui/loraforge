@@ -112,9 +112,23 @@ CPU-side native compilation and extension loading succeeded with GCC 13.3.0 and
 CUDA 12.6.20 for both `sm_89` and `sm_90` (`TORCH_CUDA_ARCH_LIST="8.9;9.0"`,
 `MAX_JOBS=2`). No GPU kernel was executed by this build check.
 
-Pelle H100 job `7545404` is queued for the command above and the example, using
-one H100, four CPU cores, 16 GiB host RAM and a 15-minute limit. The environment
-is Python 3.12.3, PyTorch 2.7.1+cu126 and CUDA toolkit 12.6.20. Immediate H100
-and L40S allocation attempts found no free GPUs; neither ran numerical tests.
-GPU validation remains pending. No serving or token/logprob parity claim follows
-from these operator tests, even after they pass.
+The H100 row-validation allocation was cancelled without running. Later Pelle
+L40S receipts from 2026-11-03 establish the actual GPU result:
+
+| Environment | Row tests | Other tests in the same receipt | Result |
+| --- | --- | --- | --- |
+| Python 3.12.3, PyTorch 2.7.1+cu126, CUDA 12.6, L40S sm89 | 13 | 0 | All passed; 106.528 s |
+| Python 3.12.3, PyTorch 2.11.0+cu130, CUDA 13.0, L40S sm89 | 13 | 27 vLLM | All 40 passed; 139.359 s |
+
+Both receipts record SHA256 values for all three row implementation files.
+They match the extracted source. The integration adds alpha metadata to the
+Python entrypoints; their signatures and complete function bodies are unchanged.
+The extension builder and native kernel remain byte-identical. Exact receipt
+hashes, environment properties and source comparisons are preserved in
+[row-validation-l40s.json](row-validation-l40s.json). The receipts do not record
+vLLM implementation hashes; the additional vLLM cases do not supply that proof.
+
+These public entrypoints are alpha APIs. The annotations are metadata-only,
+without an extra numerical call wrapper. This establishes the synthetic L40S
+operator contract, not H100 or HIP/MI250 support, full-model token/logprob
+parity, a vLLM loading bridge, or an end-to-end speedup.

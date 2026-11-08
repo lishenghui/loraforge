@@ -9,6 +9,8 @@ from functools import lru_cache
 from importlib.metadata import version
 from threading import RLock
 
+from loraforge.annotations import ExperimentalAPI
+
 _lock = RLock()
 _installed = None
 
@@ -64,6 +66,10 @@ def _operator():
     return linear
 
 
+@ExperimentalAPI(
+    reason="Opt-in vLLM 0.26.0 specialized linear decode; synthetic CUDA validation, no model-quality claim.",
+    warn=True,
+)
 def install_vllm_backend(*, tokens_per_lora: int = 4) -> None:
     """Install in each worker before model construction; repeatable/conflict-aware.
 
@@ -139,6 +145,9 @@ def install_vllm_backend(*, tokens_per_lora: int = 4) -> None:
         _installed = add_lora_linear, tokens_per_lora
 
 
+@ExperimentalAPI(
+    reason="Environment-gated vLLM 0.26.0 plugin entrypoint; explicit per-worker activation."
+)
 def register() -> None:
     """vllm.general_plugins entrypoint; inert unless explicitly enabled."""
     if os.environ.get("LORAFORGE_VLLM") == "1":

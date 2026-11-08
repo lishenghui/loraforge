@@ -8,6 +8,8 @@ Routing values must be -1 or valid slot indices. Callers own device metadata
 validation, input ordering, and fixed-address lifetimes during graph replay.
 """
 
+from loraforge.annotations import ExperimentalAPI
+
 
 def _check(x, weights, routes):
     import torch
@@ -41,6 +43,9 @@ def _check(x, weights, routes):
         raise ValueError("GEMV is inference-only")
 
 
+@ExperimentalAPI(
+    reason="Inference-only padded-slot GEMV; vLLM 0.26.0 layouts, FP32 intermediates, CUDA validation only."
+)
 def shrink(x, weights, out, routes, *, scale=1.0):
     """Write FP32 out[slices, tokens, rank] = scale * A[route] @ x.
 
@@ -96,6 +101,9 @@ def shrink(x, weights, out, routes, *, scale=1.0):
             )
 
 
+@ExperimentalAPI(
+    reason="Inference-only padded-slot GEMV; tolerance-based native parity, not full-model acceptance."
+)
 def expand(v, weights, y, routes, *, offset=0, add=True):
     """Apply B[route] @ v to output slices in place, with FP32 accumulation.
 

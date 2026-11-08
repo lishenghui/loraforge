@@ -11,6 +11,8 @@ from __future__ import annotations
 
 from typing import TYPE_CHECKING
 
+from loraforge.annotations import ExperimentalAPI
+
 if TYPE_CHECKING:
     from torch import Tensor
 
@@ -46,6 +48,9 @@ def _distinct_output(output, inputs):
         raise ValueError("output must not share storage with an input")
 
 
+@ExperimentalAPI(
+    reason="BF16 retained-rank inference operator; L40S CUDA validated, caller-owned device metadata."
+)
 def row_shrink(
     x: Tensor,
     a: Tensor,
@@ -104,6 +109,9 @@ def row_shrink(
         extension().shrink(x, a, output, slots, ranks, num_slices, max_rank)
 
 
+@ExperimentalAPI(
+    reason="Compact-B RowExpand; L40S CUDA validated, fixed-address metadata/lifetime contract."
+)
 def row_expand(
     z: Tensor,
     b: Tensor,

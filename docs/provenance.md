@@ -696,5 +696,19 @@ use and output aliasing. Device metadata values remain a documented caller
 contract, without per-call host synchronization. The launch default uses twice
 the detected SM/CU count rather than the source's AMD-specific 880-block default.
 No environment-variable compiler mutations, global workspaces, pointer registries
-or framework hooks are retained. H100 tests and limits are documented in
+or framework hooks are retained. L40S tests and hardware limits are documented in
 [row-operators.md](row-operators.md).
+
+
+### Current-main integration — 2026-11-08
+
+The existing NVIDIA compatibility patch is retained from main. The new vLLM
+and row implementations are taken from their extraction branches without
+numerical edits. `ExperimentalAPI` imports/decorators are the only changes to
+the three Python API modules; full module AST comparisons, after removing only
+those additions, match the source branches. The native row builder/kernel and
+Triton vLLM kernel sources are byte-identical. Baseline commit IDs and both
+source hashes are in [row-validation-l40s.json](row-validation-l40s.json).
+The record also checks the three row source hashes stored in both raw L40S XML
+receipts. These provenance checks do not turn synthetic operator tests into
+full-model or performance validation.

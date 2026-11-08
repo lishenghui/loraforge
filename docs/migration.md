@@ -411,9 +411,24 @@ BF16 `row_shrink` and `row_expand` tensor operators from probe's CUDA/HIP
 `fast_decode.cu`. Source identity and intentional wrapper/launch changes are
 recorded in provenance. The library contains no copied experiment tree.
 
-CPU and packaging checks pass. H100 validation job `7545404` is queued; numerical
-GPU support is not yet established. See [row operators](row-operators.md) for
-contracts, commands, references and the pending hardware gate. Compact B
+CPU and packaging checks pass. The H100 allocation did not run; recovered
+2026-11-03 L40S receipts pass all 13 row tests on each of PyTorch 2.7.1+cu126
+and 2.11.0+cu130. Receipt source hashes match the extraction. See
+[row operators](row-operators.md) and [the validation record](row-validation-l40s.json)
+for contracts, commands, source comparisons and hardware scope. Compact B
 ownership, vLLM rank-aware loading/eviction, framework custom-op registration,
 four-decode-step scheduling and the full Figure 12 benchmark remain pending.
 The existing padded vLLM integration is unchanged.
+
+
+### Integration with the current library — 2026-11-08
+
+The vLLM and retained-rank operators are integrated alongside the existing
+SGLang/NF4 and training work. Existing NVIDIA support is already present in
+main and is not reapplied. Both new operator families use metadata-only alpha
+annotations; the explicit vLLM installer warns once per process. Plugin imports
+remain dependency-free and the vLLM extra remains optional. User guides and
+API reference pages now include both families. Numerical function bodies and
+kernel sources are unchanged from their extracted, GPU-validated versions;
+source comparisons are recorded with the L40S validation. No full-model vLLM,
+RowExpand serving-throughput or untested-device claim is added.

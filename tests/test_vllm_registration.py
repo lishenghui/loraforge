@@ -3,11 +3,35 @@
 
 import subprocess
 import sys
+from importlib import metadata
 from types import ModuleType
 
 import pytest
 
 from loraforge.integrations import vllm as integration
+
+
+def test_installed_plugin_entrypoint_and_alpha_metadata():
+    from loraforge.ops import row_expand, row_shrink
+    from loraforge.ops.vllm_gemv import expand, shrink
+
+    entries = [
+        e
+        for e in metadata.entry_points(group="vllm.general_plugins")
+        if e.name == "loraforge"
+    ]
+    assert (
+        len(entries) == 1 and entries[0].value == "loraforge.integrations.vllm:register"
+    )
+    for fn in (
+        integration.install_vllm_backend,
+        integration.register,
+        shrink,
+        expand,
+        row_shrink,
+        row_expand,
+    ):
+        assert fn.__experimental_api__.stability == "alpha"
 
 
 def test_disabled_plugin_is_dependency_free(monkeypatch):
