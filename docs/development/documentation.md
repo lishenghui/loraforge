@@ -36,9 +36,10 @@ Run the strict build after changing documentation or public docstrings.
 ## Publication
 
 GitHub Pages serves the built static site. The documentation workflow builds on
-pushes and pull requests. Only the repository's `main` and `docs/site` branches
+pushes to `main`, pull requests and manual requests. Only the repository's `main` and `docs/site` branches
 can deploy: `main` is the normal publication channel; `docs/site` is an explicit
-development snapshot used before a feature branch merges. Footer links identify
+development snapshot available through a manual workflow run before a feature
+branch merges. Footer links identify
 the exact published source revision. Neither publication path merges a code PR.
 
 ## Tooling references
