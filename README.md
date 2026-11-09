@@ -1,5 +1,7 @@
 # LoRAForge
 
+[![arXiv](https://img.shields.io/badge/arXiv-2611.01256-b31b1b.svg)](https://arxiv.org/abs/2611.01256)
+
 Building blocks for LoRA compression and efficient execution.
 
 LoRAForge is being developed as a reusable library from the
