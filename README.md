@@ -100,3 +100,23 @@ See [CONTRIBUTING.md](CONTRIBUTING.md) for setup and checks,
 
 The new foundation is licensed under [Apache-2.0](LICENSE).
 Future code imports must retain their applicable licenses and attribution.
+
+## Citation
+
+If you use LoRAForge in your research, please cite our paper:
+
+Shenghui Li and Thiemo Voigt. **LoRAForge: Co-Designing Post-Hoc Compression and
+Execution for Efficient Multi-LoRA Serving.** arXiv preprint, 2026.
+[Paper](https://arxiv.org/abs/2611.01256)
+
+```bibtex
+@misc{li2026loraforge,
+  title = {{LoRAForge}: Co-Designing Post-Hoc Compression and Execution for Efficient Multi-{LoRA} Serving},
+  author = {Shenghui Li and Thiemo Voigt},
+  year = {2026},
+  eprint = {2611.01256},
+  archivePrefix = {arXiv},
+  primaryClass = {cs.LG},
+  url = {https://arxiv.org/abs/2611.01256}
+}
+```
