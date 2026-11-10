@@ -2,6 +2,10 @@
 html_theme.sidebar_secondary.remove: true
 ---
 
+<div class="lf-hero">
+
+<div class="lf-hero-copy">
+
 <div class="lf-kicker">LoRA compression &amp; execution</div>
 
 # Smaller adapters. Explicit control.
@@ -31,6 +35,13 @@ Quickstart
 
 API reference
 :::
+
+</div>
+
+</div>
+
+<div class="lf-hero-art"><img class="lf-hero-logo dark-light" src="_static/forge-mark.png"
+     width="1254" height="1254" alt="LoRAForge hammer and forge emblem"></div>
 
 </div>
 
