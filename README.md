@@ -1,7 +1,5 @@
 ![LoRAForge](docs/_static/loraforge-banner.png)
 
-# LoRAForge
-
 [![arXiv](https://img.shields.io/badge/arXiv-2611.01256-b31b1b.svg)](https://arxiv.org/abs/2611.01256)
 
 **LoRA compression and efficient multi-LoRA execution.**
