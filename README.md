@@ -1,6 +1,7 @@
 ![LoRAForge](docs/_static/loraforge-banner.png)
 
 [![arXiv](https://img.shields.io/badge/arXiv-2611.01256-b31b1b.svg)](https://arxiv.org/abs/2611.01256)
+[![Hugging Face](https://img.shields.io/badge/%F0%9F%A4%97%20Hugging%20Face-LoRAForge-FFD21E)](https://huggingface.co/loraforge)
 
 **LoRA compression and efficient multi-LoRA execution.**
 
