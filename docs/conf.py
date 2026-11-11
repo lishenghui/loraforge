@@ -30,7 +30,7 @@ extensions = [
     "experimental_api",
 ]
 source_suffix = {".md": "markdown", ".rst": "restructuredtext"}
-exclude_patterns = ["_build", "_ext", "_templates", "README.md"]
+exclude_patterns = ["_build", "_ext", "_templates", "README.md", "migration.md"]
 myst_enable_extensions = ["colon_fence", "dollarmath", "amsmath", "deflist"]
 myst_heading_anchors = 4
 autodoc_member_order = "bysource"

@@ -47,8 +47,8 @@ API reference
 
 <div class="lf-status"><strong>Development release.</strong> Experimental APIs
 are explicitly marked alpha. Installation is from this repository; hardware
-coverage and numerical results are documented per feature. The footer identifies
-the documented source snapshot, including APIs not yet on the default branch.</div>
+coverage and numerical results are documented per feature. The footer links
+the published source revision.</div>
 
 ::::{grid} 1 1 3 3
 :gutter: 3

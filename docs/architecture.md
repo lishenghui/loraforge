@@ -6,13 +6,11 @@ their explicit opt-ins and compatibility boundaries are documented in
 [experimental APIs](experimental.md). Benchmarks consume those implementations
 and retain fixture preparation, measurements and rejected candidates.
 
-LoRAForge will provide LoRA compression, adapter formats, and efficient execution
+LoRAForge provides LoRA compression, adapter formats, and efficient execution
 components. The current API exposes `loraforge.ops.qr_factor` and
 `loraforge.compression.refactor_lora` / `truncate_lora`.
 `loraforge.adapters` provides local PEFT I/O, compact export and the file
 compression workflow; its configuration rules live in an internal module.
-The following boundaries guide implementation; empty placeholder modules
-are omitted until they contain a working capability.
 
 The optional `integrations.vllm` module activates a pinned vLLM 0.26.0 linear
 decode replacement. Framework-independent padded-slot kernels live in
@@ -33,7 +31,6 @@ for the packed layout, device metadata and graph-lifetime contract.
 | `src/loraforge/ops/` | Tensor-level operator contracts and dispatch; Triton implementations |
 | `src/loraforge/runtime/` | Compact layouts, slot ownership, loading and execution metadata |
 | `src/loraforge/integrations/` | Thin, optional SGLang and vLLM adapters |
-| `src/loraforge/cli/` | User commands built on public library interfaces |
 | `src/loraforge/ops/csrc/` | Native CUDA/HIP implementations and bindings, shipped for lazy compilation |
 | `tests/` | Public behavior, numerics, lifecycle, and compatibility checks |
 | `benchmarks/` | Reproducible performance programs with documented protocols |
@@ -41,9 +38,7 @@ for the packed layout, device metadata and graph-lifetime contract.
 
 Entrypoints and integrations depend on the library; tensor operations never
 import a serving framework. Compression and runtime share operator and adapter
-contracts rather than reaching into each other's internals. Start with one
-Python distribution. Split native packages only when build and release needs
-justify the additional maintenance.
+contracts rather than reaching into each other's internals.
 
 ## Execution contracts
 
@@ -64,12 +59,3 @@ Core configuration belongs in typed arguments or configuration objects.
 Framework registration must be repeatable within each worker process and must
 validate the supported framework version. Plugin discovery does not by itself
 provide a stable hook for arbitrary operator replacement.
-
-## Project organization references
-
-The [vLLM repository](https://github.com/vllm-project/vllm) separates the Python
-package, native code, tests, benchmarks, examples, and documentation.
-[SGLang](https://github.com/sgl-project/sglang) similarly separates its Python
-runtime from examples, documentation, and benchmarks. These boundaries inform
-this smaller layout; their complete build systems are not required here.
-See also [vLLM's plugin contracts](https://docs.vllm.ai/en/latest/design/plugin_system/).

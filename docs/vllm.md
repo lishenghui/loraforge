@@ -1,9 +1,8 @@
 # vLLM linear decode integration
 
 This experimental opt-in backend targets **vLLM 0.26.0** and its padded
-`PunicaWrapperGPU` slot layout. It extracts the project-owned GEMV path from
-`probe` at `5fd6ae060d106066b306959f9a34b726a281ef4c`. It is independent of the
-SGLang integration and does not import its kernels or pending BF16 corrections.
+`PunicaWrapperGPU` slot layout. It is independent of the SGLang integration.
+Source attribution is recorded in [provenance](provenance.md#vllm-linear-decode-extraction).
 
 ## Activation and dispatch
 

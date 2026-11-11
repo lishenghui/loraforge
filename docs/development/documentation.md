@@ -35,20 +35,11 @@ Run the strict build after changing documentation or public docstrings.
 
 ## Publication
 
-GitHub Pages serves the built static site. The documentation workflow builds on
-pushes to `main`, pull requests and manual requests. Only the repository's `main` and `docs/site` branches
-can deploy: `main` is the normal publication channel; `docs/site` is an explicit
-development snapshot available through a manual workflow run before a feature
-branch merges. Footer links identify
-the exact published source revision. Neither publication path merges a code PR.
+GitHub Pages publishes documentation from `main`. Pull requests build a
+reviewable HTML artifact without deploying. Manual workflow runs can build any
+branch; deployment is restricted to `main`. Footer links identify the exact
+published source revision.
 
-## Tooling references
-
-Ray uses Sphinx with MyST and the PyData theme in its
-[documentation configuration](https://github.com/ray-project/ray/blob/master/doc/source/conf.py).
-PyTorch uses Sphinx with its own `pytorch_sphinx_theme2` in its
-[configuration](https://github.com/pytorch/pytorch/blob/main/docs/source/conf.py).
-Unsloth uses GitBook, as described in the
-[GitBook customer story](https://www.gitbook.com/customers/unsloth-ai).
-LoRAForge uses Sphinx so narrative Markdown and API docstrings can be built and
-reviewed together in this repository.
+The historical migration log remains in `docs/migration.md` for repository
+maintenance; it is excluded from the published site and search index. Feature
+contracts and validation reports are the current user-facing documentation.
