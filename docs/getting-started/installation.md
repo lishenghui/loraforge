@@ -39,20 +39,6 @@ See [FlashTSQR contracts](../flashtsqr.md) and the
 
 ## Serving integrations
 
-:::{note}
-This development site can include alpha APIs that have not merged into `main`.
-The footer links the exact documented source revision. For those APIs, check
-out that revision in your new clone before installing; the default branch alone
-may not contain the interface shown here.
-:::
-
-```bash
-# Replace SOURCE_REVISION with the commit linked in the documentation footer.
-git fetch origin
-git checkout --detach SOURCE_REVISION
-python -m pip install ".[adapters,gpu]"
-```
-
 Install a compatible serving environment separately. The current SGLang bridge
 requires exactly SGLang 0.5.22; optional integrations do not become base-package
 dependencies. Start with the [SGLang guide](../sglang.md). Packaged Qwen3.5
